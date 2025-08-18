@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   backend:
-    build: ./backend
+    build: /home/sportnews-user/SportNewsAI/sportnews/backend
     container_name: sportnews-backend
     restart: always
     ports:
@@ -11,7 +11,7 @@ services:
       - sportnews-net
 
   frontend:
-    build: ./frontend
+    build: /home/sportnews-user/SportNewsAI/sportnews/frontend
     container_name: sportnews-frontend
     restart: always
     ports:
