@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  backend:
+    build: ./backend
+    container_name: sportnews-backend
+    restart: always
+    ports:
+      - "5000:5000"
+    networks:
+      - sportnews-net
+
+  frontend:
+    build: ./frontend
+    container_name: sportnews-frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - sportnews-net
+
+networks:
+  sportnews-net:
+    driver: bridge

@@ -1,0 +1,317 @@
+<div class="container">
+
+  <div class="search-section" *ngIf="!showGeneratedArticle && !showSavedArticle">
+    <!-- Barra di ricerca -->
+    <div class="search-bar">
+      <button  class="search-button" (click)="goToAddNews()">
+        ➕ Aggiungi Nuova Notizia
+      </button>
+     <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        placeholder="Cerca notizie o sportivi..."
+        class="search-input"
+        (keypress.enter)="searchArticles()"
+      />
+      <button
+        class="search-button"
+        (click)="searchArticles()"
+        [disabled]="isLoading || !searchTerm.trim()"
+      >
+        <span *ngIf="!isLoading">🔍 Cerca</span>
+        <span *ngIf="isLoading">⏳ Cercando...</span>
+      </button>
+    </div>
+
+    <!-- Controlli di selezione -->
+    <div class="selection-controls" *ngIf="searchResults.length > 0">
+      <div class="select-all-container">
+        <label class="checkbox-label">
+          <input
+            type="checkbox"
+            [(ngModel)]="selectAll"
+            (change)="toggleSelectAll()"
+            class="checkbox"
+          />
+          <span>Seleziona tutti ({{searchResults.length}} articoli)</span>
+        </label>
+      </div>
+
+      <div class="action-buttons">
+        <button
+          class="action-button primary"
+          (click)="processSelectedArticles()"
+          [disabled]="getSelectedArticles().length === 0 || isGenerating"
+        >
+          <span *ngIf="!isGenerating">Processa selezionati ({{getSelectedArticles().length}})</span>
+          <span *ngIf="isGenerating">⏳ Generando articolo...</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Risultati della ricerca -->
+    <div class="results-container" *ngIf="searchResults.length > 0 && !isGenerating">
+      <div class="results-grid">
+        <div
+          class="article-card"
+          *ngFor="let article of searchResults; let i = index"
+          [class.selected]="article.selected"
+          (click)="toggleArticleSelection(i)"
+        >
+          <div class="card-header">
+            <div class="checkbox-container">
+
+            </div>
+            <div class="article-date">
+              {{formatDate(article.data)}}
+            </div>
+          </div>
+
+          <div class="card-content">
+            <h3 class="article-title">{{article.titolo}}</h3>
+            <p class="article-subtitle" *ngIf="article.sottotitolo">
+              {{article.sottotitolo}}
+            </p>
+          </div>
+
+          <div class="card-footer">
+            <button
+              class="read-more-button"
+              (click)="openArticle(article.link); $event.stopPropagation()"
+            >
+              Leggi articolo →
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading durante la generazione -->
+    <div class="generation-loading" *ngIf="isGenerating">
+      <div class="spinner-large"></div>
+      <h3>Generazione articolo in corso...</h3>
+      <p>Sto elaborando gli articoli selezionati per creare un nuovo contenuto</p>
+    </div>
+
+    <!-- Stato vuoto -->
+    <div class="empty-state" *ngIf="searchResults.length === 0 && !isLoading && !isGenerating">
+      <div class="empty-icon">📰</div>
+      <h3>Nessun risultato</h3>
+      <p>Effettua una ricerca per vedere gli articoli</p>
+    </div>
+
+    <!-- Loading state -->
+    <div class="loading-state" *ngIf="isLoading">
+      <div class="spinner"></div>
+      <p>Ricerca in corso...</p>
+    </div>
+  </div>
+
+  <!-- Sezione articolo generato (mostra solo questa quando l'articolo è pronto) -->
+  <div class="generated-article-container" *ngIf="showGeneratedArticle && generatedArticle">
+    <!-- Header con pulsante per tornare indietro -->
+    <div class="article-header">
+      <button class="back-button" (click)="backToSearch()">
+        ← Torna alla ricerca
+      </button>
+      <div class="article-meta">
+        <span class="generated-badge">Articolo Generato</span>
+        <span class="save-status" *ngIf="articleSaved" title="Articolo salvato">✅ Salvato</span>
+        <!--<span class="generation-date">{{ new Date() | date:'dd/MM/yyyy HH:mm' }}</span>-->
+      </div>
+    </div>
+
+    <!-- Messaggi di stato per il salvataggio -->
+    <div class="save-messages" *ngIf="saveSuccessMessage || saveErrorMessage">
+      <div class="success-message" *ngIf="saveSuccessMessage">
+        <div class="message-icon">✅</div>
+        <div class="message-content">
+          <h3>Articolo salvato con successo!</h3>
+          <p>L'articolo è stato salvato nel database e puoi trovarlo nella sezione "I Miei Articoli".</p>
+        </div>
+      </div>
+
+      <div class="error-message" *ngIf="saveErrorMessage">
+        <div class="message-icon">❌</div>
+        <div class="message-content">
+          <h3>Errore nel salvataggio</h3>
+          <p>{{ saveErrorMessage }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contenuto dell'articolo -->
+    <article class="generated-article">
+      <header class="article-title-section">
+        <h1 class="article-main-title">{{ generatedArticle.title }}</h1>
+        <h2 class="article-subtitle" *ngIf="generatedArticle.subtitle">
+          {{ generatedArticle.subtitle }}
+        </h2>
+      </header>
+
+      <div class="article-content">
+        <div class="article-text" [innerHTML]="generatedArticle.text | nl2br">
+        </div>
+      </div>
+    </article>
+
+    <!-- Footer dell'articolo -->
+    <div class="article-footer">
+      <div class="action-buttons-footer">
+        <button
+          class="action-button primary"
+          (click)="saveGeneratedArticle()"
+          [disabled]="isSavingArticle || articleSaved"
+        >
+          <span *ngIf="!isSavingArticle && !articleSaved">💾 Salva Articolo</span>
+          <span *ngIf="isSavingArticle">⏳ Salvando...</span>
+          <span *ngIf="articleSaved">✅ Già Salvato</span>
+        </button>
+        <button class="action-button secondary" (click)="backToSearch()">
+          Genera un nuovo articolo
+        </button>
+      </div>
+    </div>
+  </div>
+
+<!-- Articolo salvato dal blob -->
+<div class="saved-article-container" *ngIf="showSavedArticle && savedArticle">
+  <!-- Header -->
+  <div class="article-header">
+    <button class="back-button" (click)="backToSearch()">
+      ← Torna alla ricerca
+    </button>
+  </div>
+
+  <!-- Contenuto -->
+  <article class="generated-article">
+    <header class="article-title-section">
+      <h1 class="article-main-title">{{ savedArticle.title }}</h1>
+      <h2 class="article-subtitle" *ngIf="savedArticle.subtitle">
+        {{ savedArticle.subtitle }}
+      </h2>
+    </header>
+
+    <div class="article-content">
+      <div class="article-text" [innerHTML]="savedArticle.text | nl2br"></div>
+    </div>
+  </article>
+</div>
+</div>
+
+<style>
+/* Stili per i messaggi di salvataggio */
+.save-messages {
+  margin-bottom: 20px;
+}
+
+.success-message,
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px 20px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+
+.success-message {
+  background: #d1edff;
+  border: 1px solid #9fdbff;
+  color: #0056b3;
+}
+
+.error-message {
+  background: #ffe6e6;
+  border: 1px solid #ffb3b3;
+  color: #d63384;
+}
+
+.message-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.message-content h3 {
+  margin: 0 0 5px 0;
+  font-size: 1.1rem;
+}
+
+.message-content p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* Stili per il badge di salvataggio */
+.save-status {
+  background: #28a745;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+/* Stili per i pulsanti del footer */
+.action-buttons-footer {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.action-button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 160px;
+  justify-content: center;
+}
+
+.action-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.action-button.primary {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+}
+
+.action-button.primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.action-button.secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.action-button.secondary:hover:not(:disabled) {
+  background: #5a6268;
+  transform: translateY(-1px);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .action-buttons-footer {
+    flex-direction: column;
+  }
+
+  .action-button {
+    width: 100%;
+  }
+
+  .save-messages {
+    margin: 15px;
+  }
+}
+</style>
