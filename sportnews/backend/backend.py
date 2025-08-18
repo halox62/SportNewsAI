@@ -88,7 +88,7 @@ class User(Base):
     email = Column(String(200))
 
 
-@app.route("/register", methods=["POST"])
+@app.route("/api/v1/register", methods=["POST"])
 def register_user():
     try:
         data = request.get_json()
@@ -196,7 +196,7 @@ def query_database_articles(keyword: str):
     finally:
         session.close()
 
-@app.route('/search', methods=['POST'])
+@app.route('/api/v1/search', methods=['POST'])
 @requires_auth
 def search_news(user_payload):
     try:
@@ -285,7 +285,7 @@ def get_text_from_blob_url(blob_url):
     response.raise_for_status()
     return response.text
 
-@app.route('/genArticle', methods=['POST'])
+@app.route('/api/v1/genArticle', methods=['POST'])
 @requires_auth
 def genera_notizia_da_url(user_payload):
     data = request.get_json()
@@ -333,7 +333,7 @@ def genera_notizia_da_url(user_payload):
     return jsonify({"article": article})
 
 
-@app.route("/addNews", methods=["POST"])
+@app.route("/api/v1/addNews", methods=["POST"])
 @requires_auth
 def add_news(user_payload):
     try:
@@ -387,7 +387,7 @@ def upload_article_to_blob(article_text: str, filename: str) -> str:
     return blob_url
 
 
-@app.route("/my-articles", methods=["GET"])
+@app.route("/api/v1/my-articles", methods=["GET"])
 @requires_auth
 def get_my_articles(user_payload):
     try:
@@ -416,7 +416,7 @@ def get_my_articles(user_payload):
         session.close()
         return jsonify({"success": False, "error": str(e)}), 500
 
-@app.route("/update-article/<int:article_id>", methods=["PUT"])
+@app.route("/api/v1/update-article/<int:article_id>", methods=["PUT"])
 @requires_auth
 def update_article(article_id, user_payload):
     try:
@@ -463,7 +463,7 @@ def update_article(article_id, user_payload):
         session.close()
         return jsonify({"success": False, "error": str(e)}), 500
 
-@app.route("/delete-article/<int:article_id>", methods=["DELETE"])
+@app.route("/api/v1/delete-article/<int:article_id>", methods=["DELETE"])
 @requires_auth
 def delete_article(article_id, user_payload):
     session = SessionLocal()
@@ -493,7 +493,7 @@ def delete_article(article_id, user_payload):
         return jsonify({"success": False, "error": str(e)}), 500
 
 
-@app.route("/update-blob-content", methods=["POST"])
+@app.route("/api/v1/update-blob-content", methods=["POST"])
 @requires_auth
 def update_blob_content(user_payload):
     """
