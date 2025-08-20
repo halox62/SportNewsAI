@@ -197,7 +197,7 @@ def query_database_articles(keyword: str):
         session.close()
 
 @app.route('/api/v1/search', methods=['POST'])
-def search_news(user_payload):
+def search_news():
     try:
         data = request.get_json()
         keyword = data.get("query", "").strip()
