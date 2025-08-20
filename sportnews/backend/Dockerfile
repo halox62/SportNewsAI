@@ -9,6 +9,7 @@ COPY requirements.txt .
 # Installa dipendenze
 RUN pip install --no-cache-dir -r requirements.txt
 
+
 # Copia il codice
 COPY . .
 

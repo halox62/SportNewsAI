@@ -7,6 +7,8 @@ services:
     restart: always
     ports:
       - "5000:5000"
+    env_file:
+      - /home/sportnews-user/SportNewsAI/.env
     networks:
       - sportnews-net
 
