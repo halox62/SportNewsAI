@@ -197,7 +197,8 @@ def query_database_articles(keyword: str):
         session.close()
 
 @app.route('/api/v1/search', methods=['POST'])
-def search_news():
+@requires_auth
+def search_news(user_payload):
     try:
         data = request.get_json()
         keyword = data.get("query", "").strip()
