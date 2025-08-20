@@ -29,7 +29,7 @@ DB_FILE = "news.db"
 
 app = Flask(__name__)
 
-CORS(app)
+CORS(app, origins="https://sport.event-fit.it")
 
 load_dotenv()
 
