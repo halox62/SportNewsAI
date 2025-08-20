@@ -10,4 +10,5 @@ newspaper3k
 mysql-connector-python
 python-dateutil
 azure-storage-blob
+lxml[html_clean]
 python-jose
