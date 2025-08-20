@@ -31,7 +31,7 @@ import { Nl2brPipe } from './nl2br.pipe';
         clientId: 'E9IhhgUvzfmrNVMndW2rlcwGthV8Ke0o',
         cacheLocation: 'localstorage',
         authorizationParams: {
-            redirect_uri:https://sport.event-fit.it,
+            redirect_uri:'https://sport.event-fit.it',
             audience: 'https://backend'
         }
     })
