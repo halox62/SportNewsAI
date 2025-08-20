@@ -343,7 +343,7 @@ export class AppComponent implements OnInit {
 
     this.auth.user$.subscribe(user => {
       if (user) {
-        this.http.post('http://localhost:8080/api/v1/register', {
+        this.http.post('https://sport.event-fit.it/api/v1/register', {
           auth0Id: user.sub,
           name: user.name,
           email: user.email
