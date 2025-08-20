@@ -5,3 +5,4 @@ SQLAlchemy
 requests
 python-dotenv
 langchain-openai
+feedparser
