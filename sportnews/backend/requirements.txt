@@ -4,3 +4,4 @@ gunicorn
 SQLAlchemy
 requests
 python-dotenv
+langchain-openai
