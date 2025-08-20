@@ -16,14 +16,15 @@ services:
     build: /home/sportnews-user/SportNewsAI/sportnews/frontend
     container_name: sportnews-frontend
     restart: always
-    volumes:
-      - /etc/letsencrypt/live/sport.event-fit.it:/etc/letsencrypt/live/sport.event-fit.it:ro
     ports:
       - "8080:80"
     depends_on:
       - backend
     networks:
       - sportnews-net
+    volumes:
+      - /etc/letsencrypt/live/sport.event-fit.it/fullchain.pem:/etc/letsencrypt/live/sport.event-fit.it/fullchain.pem:ro
+      - /etc/letsencrypt/live/sport.event-fit.it/privkey.pem:/etc/letsencrypt/live/sport.event-fit.it/privkey.pem:ro
 
 networks:
   sportnews-net:
