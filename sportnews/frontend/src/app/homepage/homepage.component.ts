@@ -23,8 +23,8 @@ interface SearchResponse {
   styleUrls: ['./homepage.component.css']
 })
 export class HomepageComponent implements OnInit {
-  private apiUrl = 'http://localhost:8080/api/v1/search';
-  private baseUrl='http://localhost:8080/api/v1';
+  private apiUrl = 'https://sport.event-fit.it/api/v1/search';
+  private baseUrl='https://sport.event-fit.it/api/v1';
   searchTerm: string = '';
 
   ngOnInit() {
@@ -117,7 +117,7 @@ export class HomepageComponent implements OnInit {
     this.isGenerating = true;
     const token = await this.auth.getAccessTokenSilently().toPromise();
 
-    fetch('http://localhost:8080/genArticle', {
+    fetch('https://sport.event-fit.it/api/v1/genArticle', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
