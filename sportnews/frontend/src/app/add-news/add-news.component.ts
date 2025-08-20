@@ -1110,11 +1110,11 @@ interface SavedArticle {
 
 
 export class AddNewsComponent implements OnInit {
-  private readonly addNewsUrl = 'http://localhost:8080/addNews';
-  private readonly myArticlesUrl = 'http://localhost:8080/my-articles';
-  private readonly updateArticleUrl = 'http://localhost:8080/update-article';
-  private readonly deleteArticleUrl = 'http://localhost:8080/delete-article';
-  private readonly updateBlob = 'http://localhost:8080/update-blob-content';
+  private readonly addNewsUrl = 'http://localhost:8080/api/v1/addNews';
+  private readonly myArticlesUrl = 'http://localhost:8080/api/v1/my-articles';
+  private readonly updateArticleUrl = 'http://localhost:8080/api/v1/update-article';
+  private readonly deleteArticleUrl = 'http://localhost:8080/api/v1/delete-article';
+  private readonly updateBlob = 'http://localhost:8080/api/v1/update-blob-content';
 
   // Tab management
   activeTab: 'add' | 'manage' = 'add';

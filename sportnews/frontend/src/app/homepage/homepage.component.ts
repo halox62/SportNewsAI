@@ -23,8 +23,8 @@ interface SearchResponse {
   styleUrls: ['./homepage.component.css']
 })
 export class HomepageComponent implements OnInit {
-  private apiUrl = 'http://localhost:8080/search';
-  private baseUrl='http://localhost:8080';
+  private apiUrl = 'http://localhost:8080/api/v1/search';
+  private baseUrl='http://localhost:8080/api/v1';
   searchTerm: string = '';
 
   ngOnInit() {

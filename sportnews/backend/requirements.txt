@@ -6,3 +6,8 @@ requests
 python-dotenv
 langchain-openai
 feedparser
+newspaper3k
+mysql-connector-python
+python-dateutil
+azure-storage-blob
+python-jose
