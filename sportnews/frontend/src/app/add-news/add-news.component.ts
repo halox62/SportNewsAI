@@ -1517,6 +1517,7 @@ export class AddNewsComponent implements OnInit {
       // Parsing formato Title/Subtitle/Text
       const titleMatch = text.match(/Title:\s*(.+?)(?:\n|$)/);
       const subtitleMatch = text.match(/Subtitle:\s*(.+?)(?:\n|$)/);
+      const textMatch = text.match(/Text:\s*(.+?)(?:\n|$)/);
 
 
       // Aggiorna l'articolo con il contenuto completo dal blob
@@ -1526,8 +1527,8 @@ export class AddNewsComponent implements OnInit {
       if (subtitleMatch) {
         article.sottotitolo = subtitleMatch[1].trim();
       }
-      if (text) {
-        article.contenuto = text;
+      if (textMatch) {
+        article.contenuto = textMatch[1].trim();
       }
 
     } catch (error) {
