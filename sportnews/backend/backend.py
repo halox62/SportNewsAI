@@ -1,3 +1,4 @@
+import json
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
@@ -23,6 +24,7 @@ from flask import request, jsonify
 from jose import jwt
 import requests
 import time
+from functools import wraps
 
 
 DB_FILE = "news.db"
@@ -124,8 +126,6 @@ def register_user():
         session.close()
         return jsonify({"success": False, "error": str(e)}), 500
 
-# Decorator
-from functools import wraps
 
 def requires_auth(f):
     @wraps(f)
@@ -209,7 +209,7 @@ def search_news(user_payload):
         results = []
 
         # --- NewsAPI ---
-        try:
+        '''try:
             url = 'https://newsapi.org/v2/everything'
             params = {
                 'q': f'"{keyword}"',
@@ -233,7 +233,32 @@ def search_news(user_payload):
                 for art in news_data.get('articles', [])
             ])
         except Exception as e:
-            print(f"[WARN] Errore NewsAPI: {e}")
+            print(f"[WARN] Errore NewsAPI: {e}")'''
+        try:
+          prompt = f"""
+          Sei un assistente che trova articoli di notizie italiane sul tema "{keyword}".
+          Cerca le 5 notizie più rilevanti e recenti da fonti affidabili (es. ANSA, La Gazzetta dello Sport, Sky Sport).
+          Rispondi SOLO in JSON con il formato:
+          [
+            {{
+              "titolo": "...",
+              "sottotitolo": "...",
+              "link": "...",
+              "data": "YYYY-MM-DD"
+            }}
+          ]
+          """
+
+          response = llm.invoke(prompt)
+          content = response.choices[0].message.content.strip()
+
+          results = json.loads(content)
+
+          return results
+
+        except Exception as e:
+            print(f"[WARN] Errore OpenAI API: {e}")
+            return []
 
         # --- Database ---
         try:
