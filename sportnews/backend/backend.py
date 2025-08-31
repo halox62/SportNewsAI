@@ -44,12 +44,11 @@ DB_CONFIG = {
     "host": os.getenv("AZURE_DB_HOST"),
     "user": os.getenv("DBUSER"),
     "password": os.getenv("AZURE_DB_PASSWORD"),
-    "database": os.getenv("DATABASE"),
-    #"ssl_ca": "DigiCertGlobalRootCA.crt.pem"
+    "database": os.getenv("DATABASE")
 }
 
-AUTH0_DOMAIN = os.getenv("AUTH0_DOMAIN")  # es: "dev-crydqe7sub8m26h7.us.auth0.com"
-API_AUDIENCE = os.getenv("API_AUDIENCE")  # es: "https://myapi/"
+AUTH0_DOMAIN = os.getenv("AUTH0_DOMAIN")
+API_AUDIENCE = os.getenv("API_AUDIENCE")
 ALGORITHMS = ["RS256"]
 
 
@@ -226,19 +225,16 @@ def search_news(user_payload):
             response.raise_for_status()
             news_data = response.json()
 
-            api_results = []
             for art in news_data.get('articles', []):
-                # Filtra solo articoli con titolo e URL validi e pertinenti alla query
                 if (art.get("title") and art.get("url") and art["url"] not in seen_urls and
                         keyword in (art["title"].lower() or art["description"].lower() or "")):
-                    api_results.append({
-                        "titolo": art["title"][:200],  # Limita lunghezza
+                    results.append({
+                        "titolo": art["title"][:200],
                         "sottotitolo": art["description"] or "N/A",
                         "link": art["url"],
                         "data": art["publishedAt"]
                     })
                     seen_urls.add(art["url"])
-            return api_results
         except Exception as e:
             return []
 
