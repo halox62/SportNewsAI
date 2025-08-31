@@ -251,7 +251,7 @@ def search_news(user_payload):
           print(response)
 
           response = llm.invoke(prompt)
-          content = response.choices[0].message.content.strip()
+          content = response.content.strip()
 
           results = json.loads(content)
 
