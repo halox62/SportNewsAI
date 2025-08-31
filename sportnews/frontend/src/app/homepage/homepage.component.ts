@@ -268,7 +268,7 @@ export class HomepageComponent implements OnInit {
         contenuto: blobContent // Contenuto formattato per il blob
       };
 
-      const response = await fetch(`${this.baseUrl}/addNews`, {
+      const response = await fetch(`${this.baseUrl}/save`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

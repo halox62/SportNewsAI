@@ -1,9 +1,7 @@
-import { Component, OnInit, Inject, PLATFORM_ID} from '@angular/core';
+import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from '@auth0/auth0-angular';
-import { isPlatformBrowser } from '@angular/common';
-import { Observable } from 'rxjs';
 
 interface NewsArticle {
   titolo: string;
@@ -25,6 +23,7 @@ interface SavedArticle {
   originalTitolo?: string;
   originalSottotitolo?: string;
   originalContenuto?: string;
+  originalData?: Partial<SavedArticle>;
 }
 
 @Component({
@@ -58,6 +57,13 @@ interface SavedArticle {
             (click)="setActiveTab('manage')"
           >
             📚 I Miei Articoli ({{ savedArticles.length }})
+          </button>
+          <button
+            class="tab-button"
+            [class.active]="activeTab === 'save'"
+            (click)="setActiveTab('save')"
+          >
+            💾 Articoli Salvati ({{ savedNews.length }})
           </button>
         </div>
 
@@ -388,56 +394,194 @@ interface SavedArticle {
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Lista notizie aggiunte -->
-      <div class="recent-news-section" *ngIf="addedNews.length > 0 && activeTab === 'add'">
-        <div class="section-header">
-          <h2 class="section-title">📚 Notizie Aggiunte ({{ addedNews.length }})</h2>
-          <button class="toggle-button" (click)="toggleAddedNews()">
-            {{ showAddedNews ? '▲ Nascondi' : '▼ Mostra' }}
-          </button>
-        </div>
+        <!-- Tab Content: Notizie Salvate -->
+        <div class="tab-content" *ngIf="activeTab === 'save'">
+          <!-- Loading state -->
+          <div class="loading-container" *ngIf="loadingSavedNews">
+            <div class="loading-spinner">⏳</div>
+            <p>Caricamento notizie salvate...</p>
+          </div>
 
-        <div class="recent-news-list" *ngIf="showAddedNews">
-          <div class="recent-news-item" *ngFor="let news of addedNews; let i = index">
-            <div class="news-item-header">
-              <span class="news-number">#{{ i + 1 }}</span>
-              <span class="news-date">{{ formatDate(news.dataCreazione!) }}</span>
+          <!-- Empty state -->
+          <div class="empty-state" *ngIf="!loadingSavedNews && savedNews.length === 0">
+            <div class="empty-icon">📰</div>
+            <h3>Nessuna notizia salvata</h3>
+            <p>Non hai ancora salvato nessuna notizia. Vai alla sezione "Aggiungi Notizia" per iniziare!</p>
+            <button class="btn btn-primary" (click)="setActiveTab('add')">
+              ➕ Aggiungi una notizia
+            </button>
+          </div>
+
+          <!-- Saved News list -->
+          <div class="articles-container" *ngIf="!loadingSavedNews && savedNews.length > 0">
+            <div class="articles-header">
+              <h2>💾 Le Tue Notizie Salvate</h2>
+              <button class="btn btn-secondary" (click)="loadSavedNews()">
+                🔄 Ricarica
+              </button>
             </div>
-            <h3 class="news-title">{{ news.titolo }}</h3>
-            <p class="news-subtitle">{{ news.contenuto }}</p>
+
+            <div class="articles-list">
+              <div class="article-item" *ngFor="let news of savedNews; let i = index">
+                <div class="article-content">
+                  <div class="article-header">
+                    <div class="article-info">
+                      <span class="article-number">#{{ i + 1 }}</span>
+                      <span class="article-date">{{ formatArticleDate(news.data) }}</span>
+                    </div>
+                    <div class="article-actions">
+                      <button class="btn-icon" (click)="openArticleContent(news)" title="Visualizza">
+                        👁️
+                      </button>
+                      <button
+                        class="btn-icon"
+                        (click)="toggleArticleExpansion(news)"
+                        title="Espandi/Comprimi"
+                        *ngIf="news.contenuto && news.contenuto.length > 150"
+                      >
+                        {{ news.expanded ? '📖' : '📑' }}
+                      </button>
+                      <button
+                        class="btn-icon"
+                        (click)="downloadArticle(news)"
+                        title="Scarica"
+                        [disabled]="downloadingArticle === news.id"
+                      >
+                        <span *ngIf="downloadingArticle !== news.id">💾</span>
+                        <span *ngIf="downloadingArticle === news.id">⏳</span>
+                      </button>
+                      <button
+                        class="btn-icon btn-delete"
+                        (click)="confirmDeleteSavedNews(news)"
+                        title="Rimuovi dai salvati"
+                        [disabled]="deletingSavedNews === news.id"
+                      >
+                        <span *ngIf="deletingSavedNews !== news.id">🗑️</span>
+                        <span *ngIf="deletingSavedNews === news.id">⏳</span>
+                      </button>
+                    </div>
+                  </div>
+                  <h3 class="article-title">{{ news.titolo }}</h3>
+                  <p class="article-subtitle" *ngIf="news.sottotitolo">{{ news.sottotitolo }}</p>
+
+                  <!-- Contenuto dell'articolo -->
+                  <div class="article-content-section" *ngIf="news.contenuto">
+                    <div class="article-content-display" [class.article-content-preview]="!news.expanded">
+                      {{ news.contenuto }}
+                    </div>
+                    <button
+                      class="expand-content-btn"
+                      (click)="toggleArticleExpansion(news)"
+                      *ngIf="news.contenuto.length > 150"
+                    >
+                      {{ news.expanded ? '▲ Mostra meno' : '▼ Mostra tutto' }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Delete status messages -->
+          <div class="status-messages" *ngIf="deleteSavedNewsSuccessMessage || deleteSavedNewsErrorMessage">
+            <div class="success-message" *ngIf="deleteSavedNewsSuccessMessage">
+              <div class="message-icon">✅</div>
+              <div class="message-content">
+                <h3>Notizia rimossa dai salvati!</h3>
+                <p>La notizia è stata rimossa con successo dai tuoi salvati.</p>
+              </div>
+            </div>
+
+            <div class="error-message" *ngIf="deleteSavedNewsErrorMessage">
+              <div class="message-icon">❌</div>
+              <div class="message-content">
+                <h3>Errore nella rimozione</h3>
+                <p>{{ deleteSavedNewsErrorMessage }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lista notizie aggiunte -->
+        <div class="recent-news-section" *ngIf="addedNews.length > 0 && activeTab === 'add'">
+          <div class="section-header">
+            <h2 class="section-title">📚 Notizie Aggiunte ({{ addedNews.length }})</h2>
+            <button class="toggle-button" (click)="toggleAddedNews()">
+              {{ showAddedNews ? '▲ Nascondi' : '▼ Mostra' }}
+            </button>
+          </div>
+
+          <div class="recent-news-list" *ngIf="showAddedNews">
+            <div class="recent-news-item" *ngFor="let news of addedNews; let i = index">
+              <div class="news-item-header">
+                <span class="news-number">#{{ i + 1 }}</span>
+                <span class="news-date">{{ formatDate(news.dataCreazione!) }}</span>
+              </div>
+              <h3 class="news-title">{{ news.titolo }}</h3>
+              <p class="news-subtitle">{{ news.contenuto }}</p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Modal di conferma eliminazione -->
-    <div class="modal-overlay" *ngIf="showDeleteModal" (click)="cancelDelete()">
-      <div class="modal-content" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <h3>🗑️ Conferma Eliminazione</h3>
-        </div>
-        <div class="modal-body">
-          <p>Sei sicuro di voler eliminare questo articolo?</p>
-          <div class="article-to-delete" *ngIf="articleToDelete">
-            <strong>{{ articleToDelete.titolo }}</strong>
-            <small class="text-muted">{{ formatArticleDate(articleToDelete.data) }}</small>
+      <!-- Modal di conferma eliminazione articolo -->
+      <div class="modal-overlay" *ngIf="showDeleteModal" (click)="cancelDelete()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h3>🗑️ Conferma Eliminazione</h3>
           </div>
-          <p class="warning-text">⚠️ Questa azione non può essere annullata.</p>
+          <div class="modal-body">
+            <p>Sei sicuro di voler eliminare questo articolo?</p>
+            <div class="article-to-delete" *ngIf="articleToDelete">
+              <strong>{{ articleToDelete.titolo }}</strong>
+              <small class="text-muted">{{ formatArticleDate(articleToDelete.data) }}</small>
+            </div>
+            <p class="warning-text">⚠️ Questa azione non può essere annullata.</p>
+          </div>
+          <div class="modal-actions">
+            <button class="btn btn-secondary" (click)="cancelDelete()" [disabled]="deletingArticle">
+              ❌ Annulla
+            </button>
+            <button
+              class="btn btn-danger"
+              (click)="deleteArticle()"
+              [disabled]="deletingArticle"
+            >
+              <span *ngIf="!deletingArticle">🗑️ Elimina</span>
+              <span *ngIf="deletingArticle">⏳ Eliminando...</span>
+            </button>
+          </div>
         </div>
-        <div class="modal-actions">
-          <button class="btn btn-secondary" (click)="cancelDelete()" [disabled]="deletingArticle">
-            ❌ Annulla
-          </button>
-          <button
-            class="btn btn-danger"
-            (click)="deleteArticle()"
-            [disabled]="deletingArticle"
-          >
-            <span *ngIf="!deletingArticle">🗑️ Elimina</span>
-            <span *ngIf="deletingArticle">⏳ Eliminando...</span>
-          </button>
+      </div>
+
+      <!-- Modal di conferma eliminazione notizia salvata -->
+      <div class="modal-overlay" *ngIf="showDeleteSavedNewsModal" (click)="cancelDeleteSavedNews()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h3>🗑️ Conferma Rimozione</h3>
+          </div>
+          <div class="modal-body">
+            <p>Sei sicuro di voler rimuovere questa notizia dai salvati?</p>
+            <div class="article-to-delete" *ngIf="savedNewsToDelete">
+              <strong>{{ savedNewsToDelete.titolo }}</strong>
+              <small class="text-muted">{{ formatArticleDate(savedNewsToDelete.data) }}</small>
+            </div>
+            <p class="warning-text">⚠️ Questa azione non può essere annullata.</p>
+          </div>
+          <div class="modal-actions">
+            <button class="btn btn-secondary" (click)="cancelDeleteSavedNews()" [disabled]="deletingSavedNews">
+              ❌ Annulla
+            </button>
+            <button
+              class="btn btn-danger"
+              (click)="deleteSavedNews()"
+              [disabled]="deletingSavedNews"
+            >
+              <span *ngIf="!deletingSavedNews">🗑️ Rimuovi</span>
+              <span *ngIf="deletingSavedNews">⏳ Rimuovendo...</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -1107,17 +1251,16 @@ interface SavedArticle {
     }
   `]
 })
-
-
 export class AddNewsComponent implements OnInit {
   private readonly addNewsUrl = 'https://sport.event-fit.it/api/v1/addNews';
   private readonly myArticlesUrl = 'https://sport.event-fit.it/api/v1/my-articles';
   private readonly updateArticleUrl = 'https://sport.event-fit.it/api/v1/update-article';
   private readonly deleteArticleUrl = 'https://sport.event-fit.it/api/v1/delete-article';
   private readonly updateBlob = 'https://sport.event-fit.it/api/v1/update-blob-content';
+  private readonly savedNewsUrl = 'https://sport.event-fit.it/api/v1/save';
 
   // Tab management
-  activeTab: 'add' | 'manage' = 'add';
+  activeTab: 'add' | 'save' | 'manage' = 'add';
 
   // Model per il form
   newsArticle: NewsArticle = {
@@ -1131,6 +1274,7 @@ export class AddNewsComponent implements OnInit {
   showSuccessMessage: boolean = false;
   errorMessage: string = '';
 
+  // Stati per eliminazione articoli
   showDeleteModal: boolean = false;
   articleToDelete: any = null;
   deletingArticle: number | null = null;
@@ -1141,39 +1285,52 @@ export class AddNewsComponent implements OnInit {
   addedNews: (NewsArticle & { dataCreazione: Date })[] = [];
   showAddedNews: boolean = false;
 
-  // Gestione articoli salvati
+  // Gestione articoli salvati (tab "manage")
   savedArticles: SavedArticle[] = [];
   loadingArticles: boolean = false;
   updatingArticle: boolean = false;
   updateSuccessMessage: boolean = false;
   updateErrorMessage: string = '';
 
+  // Gestione notizie salvate (tab "save")
+  savedNews: SavedArticle[] = [];
+  loadingSavedNews: boolean = false;
+  showDeleteSavedNewsModal: boolean = false;
+  savedNewsToDelete: any = null;
+  deletingSavedNews: number | null = null;
+  deleteSavedNewsSuccessMessage: boolean = false;
+  deleteSavedNewsErrorMessage: string = '';
 
-
-  // Nuove proprietà per la funzionalità di download
+  // Proprietà per il download
   downloadingArticle: number | null = null;
   downloadSuccessMessage: boolean = false;
   downloadErrorMessage: string = '';
 
-  constructor(private http: HttpClient, private router: Router, public auth: AuthService,          // <-- inietti AuthService
-    @Inject(PLATFORM_ID) private platformId: Object) {
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    public auth: AuthService,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {
     console.log('AddNewsComponent constructor called');
   }
 
   ngOnInit(): void {
-    // Carica gli articoli all'avvio se siamo nella tab manage
     if (this.activeTab === 'manage') {
       this.loadMyArticles();
+    } else if (this.activeTab === 'save') {
+      this.loadSavedNews();
     }
   }
 
   // Tab Management
-  setActiveTab(tab: 'add' | 'manage'): void {
+  setActiveTab(tab: 'add' | 'manage' | 'save'): void {
     this.activeTab = tab;
     if (tab === 'manage' && this.savedArticles.length === 0) {
       this.loadMyArticles();
+    } else if (tab === 'save' && this.savedNews.length === 0) {
+      this.loadSavedNews();
     }
-    // Reset messages when switching tabs
     this.clearMessages();
   }
 
@@ -1183,9 +1340,15 @@ export class AddNewsComponent implements OnInit {
     this.showSuccessMessage = false;
     this.updateSuccessMessage = false;
     this.updateErrorMessage = '';
+    this.deleteSuccessMessage = false;
+    this.deleteErrorMessage = '';
+    this.deleteSavedNewsSuccessMessage = false;
+    this.deleteSavedNewsErrorMessage = '';
+    this.downloadSuccessMessage = false;
+    this.downloadErrorMessage = '';
   }
 
-  // Load user's articles
+  // Load user's articles (tab "manage")
   async loadMyArticles(): Promise<void> {
     this.loadingArticles = true;
     this.clearMessages();
@@ -1193,44 +1356,68 @@ export class AddNewsComponent implements OnInit {
     const token = await this.auth.getAccessTokenSilently().toPromise();
     const headers = { Authorization: `Bearer ${token}` };
 
-    this.http.get<{success: boolean, results: SavedArticle[]}>(this.myArticlesUrl, { headers }).subscribe({
+    this.http.get<{ success: boolean; results: SavedArticle[] }>(this.myArticlesUrl, { headers }).subscribe({
       next: (response) => {
         console.log('✅ Articoli caricati:', response);
         if (response.success) {
           this.savedArticles = response.results.map(article => ({
             ...article,
-            editing: false
+            editing: false,
+            expanded: false
           }));
         }
         this.loadingArticles = false;
       },
       error: (error) => {
-        console.error('❌ Errore nell\'aggiornamento articolo:', error);
-        this.updateErrorMessage = 'Errore nell\'aggiornamento: ' + (error.error?.error || error.message || 'Errore sconosciuto');
-        this.updatingArticle = false;
+        console.error('❌ Errore nel caricamento degli articoli:', error);
+        this.updateErrorMessage = 'Errore nel caricamento: ' + (error.error?.error || error.message || 'Errore sconosciuto');
+        this.loadingArticles = false;
       }
     });
   }
 
+  // Load saved news (tab "save")
+  async loadSavedNews(): Promise<void> {
+    this.loadingSavedNews = true;
+    this.clearMessages();
+
+    const token = await this.auth.getAccessTokenSilently().toPromise();
+    const headers = { Authorization: `Bearer ${token}` };
+
+    this.http.get<{ success: boolean; results: SavedArticle[] }>(this.savedNewsUrl, { headers }).subscribe({
+      next: (response) => {
+        console.log('✅ Notizie salvate caricate:', response);
+        if (response.success) {
+          this.savedNews = response.results.map(news => ({
+            ...news,
+            expanded: false
+          }));
+        }
+        this.loadingSavedNews = false;
+      },
+      error: (error) => {
+        console.error('❌ Errore nel caricamento delle notizie salvate:', error);
+        this.deleteSavedNewsErrorMessage = 'Errore nel caricamento: ' + (error.error?.error || error.message || 'Errore sconosciuto');
+        this.loadingSavedNews = false;
+      }
+    });
+  }
+
+  // Confirm delete article
   confirmDeleteArticle(article: any): void {
     this.articleToDelete = article;
     this.showDeleteModal = true;
-    // Reset dei messaggi precedenti
     this.deleteSuccessMessage = false;
     this.deleteErrorMessage = '';
   }
 
-  /**
-   * Annulla l'eliminazione e chiude il modal
-   */
+  // Cancel delete article
   cancelDelete(): void {
     this.showDeleteModal = false;
     this.articleToDelete = null;
   }
 
-  /**
-   * Elimina l'articolo chiamando l'API
-   */
+  // Delete article
   async deleteArticle(): Promise<void> {
     if (!this.articleToDelete) return;
 
@@ -1239,8 +1426,8 @@ export class AddNewsComponent implements OnInit {
     try {
       const token = await this.auth.getAccessTokenSilently().toPromise();
       if (!token) {
-        this.errorMessage = 'Token di autenticazione mancante. Effettua il login.';
-        this.isSubmitting = false;
+        this.deleteErrorMessage = 'Token di autenticazione mancante. Effettua il login.';
+        this.deletingArticle = null;
         return;
       }
 
@@ -1255,20 +1442,14 @@ export class AddNewsComponent implements OnInit {
       const result = await response.json();
 
       if (response.ok && result.success) {
-        // Rimuovi l'articolo dalla lista locale
         this.savedArticles = this.savedArticles.filter(
           article => article.id !== this.articleToDelete.id
         );
-
-        // Mostra messaggio di successo
         this.deleteSuccessMessage = true;
         this.deleteErrorMessage = '';
-
-        // Chiudi il modal
         this.showDeleteModal = false;
         this.articleToDelete = null;
 
-        // Nascondi il messaggio di successo dopo 3 secondi
         setTimeout(() => {
           this.deleteSuccessMessage = false;
         }, 3000);
@@ -1282,7 +1463,6 @@ export class AddNewsComponent implements OnInit {
       this.deleteErrorMessage = error instanceof Error ? error.message : 'Errore sconosciuto durante l\'eliminazione';
       this.deleteSuccessMessage = false;
 
-      // Nascondi il messaggio di errore dopo 5 secondi
       setTimeout(() => {
         this.deleteErrorMessage = '';
       }, 5000);
@@ -1291,84 +1471,85 @@ export class AddNewsComponent implements OnInit {
     }
   }
 
+  // Confirm delete saved news
+  confirmDeleteSavedNews(news: any): void {
+    this.savedNewsToDelete = news;
+    this.showDeleteSavedNewsModal = true;
+    this.deleteSavedNewsSuccessMessage = false;
+    this.deleteSavedNewsErrorMessage = '';
+  }
+
+  // Cancel delete saved news
+  cancelDeleteSavedNews(): void {
+    this.showDeleteSavedNewsModal = false;
+    this.savedNewsToDelete = null;
+  }
+
+  // Delete saved news
+  async deleteSavedNews(): Promise<void> {
+    if (!this.savedNewsToDelete) return;
+
+    this.deletingSavedNews = this.savedNewsToDelete.id;
+
+    try {
+      const token = await this.auth.getAccessTokenSilently().toPromise();
+      if (!token) {
+        this.deleteSavedNewsErrorMessage = 'Token di autenticazione mancante. Effettua il login.';
+        this.deletingSavedNews = null;
+        return;
+      }
+
+      const response = await fetch(`${this.savedNewsUrl}/${this.savedNewsToDelete.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        this.savedNews = this.savedNews.filter(news => news.id !== this.savedNewsToDelete.id);
+        this.deleteSavedNewsSuccessMessage = true;
+        this.deleteSavedNewsErrorMessage = '';
+        this.showDeleteSavedNewsModal = false;
+        this.savedNewsToDelete = null;
+
+        setTimeout(() => {
+          this.deleteSavedNewsSuccessMessage = false;
+        }, 3000);
+
+        console.log('Notizia salvata eliminata con successo');
+      } else {
+        throw new Error(result.error || 'Errore durante l\'eliminazione della notizia salvata');
+      }
+    } catch (error) {
+      console.error('Errore durante l\'eliminazione:', error);
+      this.deleteSavedNewsErrorMessage = error instanceof Error ? error.message : 'Errore sconosciuto durante l\'eliminazione';
+      this.deleteSavedNewsSuccessMessage = false;
+
+      setTimeout(() => {
+        this.deleteSavedNewsErrorMessage = '';
+      }, 5000);
+    } finally {
+      this.deletingSavedNews = null;
+    }
+  }
+
+  // Toggle article expansion
   toggleArticleExpansion(article: SavedArticle): void {
     article.expanded = !article.expanded;
   }
 
-
-
-
-  private handleSuccess(): void {
-    this.showSuccessMessage = true;
-    this.addToAddedNewsList();
-    this.resetForm();
-    this.isSubmitting = false;
-
-    // Reload articles if we're in manage tab
-    if (this.activeTab === 'manage') {
-      setTimeout(() => {
-        this.loadMyArticles();
-      }, 1000);
-    }
-
-    // Hide success message after 3 seconds
-    setTimeout(() => {
-      this.showSuccessMessage = false;
-    }, 3000);
-  }
-
-
-  addToAddedNewsList(): void {
-    const newsWithDate = {
-      ...this.newsArticle,
-      dataCreazione: new Date(),
-      expanded: false
-    };
-
-    this.addedNews.unshift(newsWithDate);
-
-    // Keep only last 5 news
-    if (this.addedNews.length > 5) {
-      this.addedNews = this.addedNews.slice(0, 5);
-    }
-
-    console.log('📰 Notizia aggiunta alla lista:', newsWithDate);
-    console.log('📚 Lista completa notizie:', this.addedNews);
-  }
-
-
-
-  openArticleLink(link: string): void {
-    if (link) {
-      window.open(link, '_blank');
-    }
-  }
-
-  // Format article date
-  formatArticleDate(dateString: string): string {
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('it-IT', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    } catch (error) {
-      return dateString;
-    }
-  }
-
-
-
   // Add News Form Methods
   onInputChange(): void {
-    // Reset error messages when user starts typing
     if (this.errorMessage) {
       this.errorMessage = '';
     }
   }
+
+
 
   getTitoloLength(): number {
     return this.newsArticle.titolo?.length || 0;
@@ -1412,48 +1593,36 @@ export class AddNewsComponent implements OnInit {
       'Content-Type': 'application/json'
     };
 
-    // Prepare the news data
     const newsData = {
       titolo: this.newsArticle.titolo.trim(),
       paragrafo: this.newsArticle.paragrafo?.trim() || '',
       contenuto: this.newsArticle.contenuto.trim()
     };
 
-    this.http.post<{success: boolean, message: string}>(this.addNewsUrl, newsData, { headers }).subscribe({
+    this.http.post<{ success: boolean; message: string }>(this.addNewsUrl, newsData, { headers }).subscribe({
       next: (response) => {
         console.log('✅ Notizia aggiunta con successo:', response);
-
         if (response.success) {
-          // Show success message
           this.showSuccessMessage = true;
-
-          // Add to recent news list
-          this.addedNews.unshift({
-            ...this.newsArticle,
-            dataCreazione: new Date()
-          });
-
-          // Reset form
+          this.addToAddedNewsList();
           this.resetForm();
-
-          // Hide success message after 5 seconds
+          if (this.activeTab === 'manage') {
+            setTimeout(() => {
+              this.loadMyArticles();
+            }, 1000);
+          }
           setTimeout(() => {
             this.showSuccessMessage = false;
           }, 5000);
-
         } else {
           this.errorMessage = response.message || 'Errore durante il salvataggio della notizia';
         }
-
         this.isSubmitting = false;
       },
       error: (error) => {
         console.error('❌ Errore nell\'aggiunta della notizia:', error);
-
         if (error.status === 401) {
           this.errorMessage = 'Sessione scaduta. Effettua nuovamente il login.';
-          // Optionally redirect to login
-          // this.router.navigate(['/login']);
         } else if (error.status === 403) {
           this.errorMessage = 'Non hai i permessi per aggiungere notizie.';
         } else if (error.status === 400) {
@@ -1461,10 +1630,23 @@ export class AddNewsComponent implements OnInit {
         } else {
           this.errorMessage = 'Errore durante il salvataggio: ' + (error.error?.message || error.message || 'Errore sconosciuto');
         }
-
         this.isSubmitting = false;
       }
     });
+  }
+
+  addToAddedNewsList(): void {
+    const newsWithDate = {
+      ...this.newsArticle,
+      dataCreazione: new Date(),
+      expanded: false
+    };
+    this.addedNews.unshift(newsWithDate);
+    if (this.addedNews.length > 5) {
+      this.addedNews = this.addedNews.slice(0, 5);
+    }
+    console.log('📰 Notizia aggiunta alla lista:', newsWithDate);
+    console.log('📚 Lista completa notizie:', this.addedNews);
   }
 
   // Recent News Management
@@ -1487,20 +1669,20 @@ export class AddNewsComponent implements OnInit {
     this.router.navigate(['/']);
   }
 
-
-
-  async startEditing(article: any): Promise<void> {
-    // Prima carica il contenuto completo dal blob se disponibile
+  async startEditing(article: SavedArticle): Promise<void> {
     await this.loadArticleContentFromBlob(article);
-
-    // Poi avvia la modalità modifica
     article.editing = true;
-    article.originalData = { ...article }; // Backup per il cancel
+    article.originalData = { ...article }; // Memorizza una copia dei dati originali
   }
 
-  /**
-   * Carica il contenuto dell'articolo dal blob storage
-   */
+  cancelEditing(article: SavedArticle): void {
+    if (article.originalData) {
+      Object.assign(article, article.originalData); // Ripristina i dati originali
+      delete article.originalData; // Rimuove la proprietà dopo il ripristino
+    }
+    article.editing = false;
+  }
+
   async loadArticleContentFromBlob(article: any): Promise<void> {
     if (!article.link || !article.link.includes("blob.core.windows.net") || !article.link.endsWith(".txt")) {
       return;
@@ -1513,14 +1695,10 @@ export class AddNewsComponent implements OnInit {
       }
 
       const text = await response.text();
-
-      // Parsing formato Title/Subtitle/Text
       const titleMatch = text.match(/Title:\s*(.+?)(?:\n|$)/);
       const subtitleMatch = text.match(/Subtitle:\s*(.+?)(?:\n|$)/);
-      const textMatch = text.match(/Text:\s*(.+?)(?:\n|$)/);
+      const textMatch = text.match(/Text:\s*([\s\S]+)/);
 
-
-      // Aggiorna l'articolo con il contenuto completo dal blob
       if (titleMatch) {
         article.titolo = titleMatch[1].trim();
       }
@@ -1530,13 +1708,10 @@ export class AddNewsComponent implements OnInit {
       if (textMatch) {
         article.contenuto = textMatch[1].trim();
       }
-
     } catch (error) {
       console.error("Errore nel caricamento dal blob:", error);
-      // In caso di errore, usa il contenuto esistente
     }
   }
-
 
   openArticleContent(article: any): void {
     const link = article.link;
@@ -1548,7 +1723,6 @@ export class AddNewsComponent implements OnInit {
           return res.text();
         })
         .then(text => {
-          // Parsing formato Title/Subtitle/Text
           const titleMatch = text.match(/Title:\s*(.+?)(?:\n|$)/);
           const subtitleMatch = text.match(/Subtitle:\s*(.+?)(?:\n|$)/);
           const textMatch = text.match(/Text:\s*([\s\S]+)/);
@@ -1559,7 +1733,6 @@ export class AddNewsComponent implements OnInit {
             text: textMatch ? textMatch[1].trim() : article.contenuto || text
           };
 
-          // Crea una nuova finestra/tab per mostrare l'articolo
           this.displayArticleInNewWindow(articleContent);
         })
         .catch(err => {
@@ -1567,10 +1740,8 @@ export class AddNewsComponent implements OnInit {
           alert("Impossibile caricare l'articolo dal blob.");
         });
     } else if (link) {
-      // Se non è un blob, apri il link direttamente
       window.open(link, '_blank');
     } else {
-      // Se non c'è link, mostra il contenuto locale
       const articleContent = {
         title: article.titolo || "Articolo",
         subtitle: article.sottotitolo || "",
@@ -1580,9 +1751,6 @@ export class AddNewsComponent implements OnInit {
     }
   }
 
-  /**
-   * Mostra l'articolo in una nuova finestra
-   */
   private displayArticleInNewWindow(articleContent: any): void {
     const newWindow = window.open('', '_blank');
     if (newWindow) {
@@ -1628,9 +1796,6 @@ export class AddNewsComponent implements OnInit {
     }
   }
 
-  /**
-   * Scarica l'articolo come file di testo
-   */
   async downloadArticle(article: any): Promise<void> {
     this.downloadingArticle = article.id;
     this.downloadSuccessMessage = false;
@@ -1639,7 +1804,6 @@ export class AddNewsComponent implements OnInit {
     try {
       let contentToDownload = '';
 
-      // Se l'articolo ha un link blob, scarica il contenuto completo
       if (article.link && article.link.includes("blob.core.windows.net") && article.link.endsWith(".txt")) {
         try {
           const response = await fetch(article.link);
@@ -1650,22 +1814,16 @@ export class AddNewsComponent implements OnInit {
           }
         } catch (blobError) {
           console.warn("Errore nel caricamento dal blob, uso contenuto locale:", blobError);
-          // Fallback al contenuto locale
           contentToDownload = this.formatArticleForDownload(article);
         }
       } else {
-        // Usa il contenuto locale
         contentToDownload = this.formatArticleForDownload(article);
       }
 
-      // Crea il file e avvia il download
       const blob = new Blob([contentToDownload], { type: 'text/plain;charset=utf-8' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
-
-      // Nome file sicuro
       const fileName = this.sanitizeFileName(article.titolo || 'articolo') + '.txt';
-
       link.href = url;
       link.download = fileName;
       document.body.appendChild(link);
@@ -1673,12 +1831,10 @@ export class AddNewsComponent implements OnInit {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
-      // Mostra messaggio di successo
       this.downloadSuccessMessage = true;
       setTimeout(() => {
         this.downloadSuccessMessage = false;
       }, 3000);
-
     } catch (error) {
       console.error('Errore durante il download:', error);
       this.downloadErrorMessage = error instanceof Error ? error.message : 'Errore sconosciuto durante il download';
@@ -1690,35 +1846,25 @@ export class AddNewsComponent implements OnInit {
     }
   }
 
-  /**
-   * Formatta l'articolo per il download usando il contenuto locale
-   */
   private formatArticleForDownload(article: any): string {
     let content = '';
-
     if (article.titolo) {
       content += `Title: ${article.titolo}\n\n`;
     }
-
     if (article.sottotitolo) {
       content += `Subtitle: ${article.sottotitolo}\n\n`;
     }
-
     if (article.contenuto) {
       content += `Text: ${article.contenuto}`;
     }
-
     return content || 'Contenuto non disponibile';
   }
 
-  /**
-   * Sanifica il nome del file per il download
-   */
   private sanitizeFileName(fileName: string): string {
     return fileName
-      .replace(/[<>:"/\\|?*]/g, '') // Rimuove caratteri non validi per i nomi file
-      .replace(/\s+/g, '_') // Sostituisce spazi con underscore
-      .substring(0, 100); // Limita la lunghezza
+      .replace(/[<>:"/\\|?*]/g, '')
+      .replace(/\s+/g, '_')
+      .substring(0, 100);
   }
 
   async saveArticle(article: any): Promise<void> {
@@ -1734,19 +1880,17 @@ export class AddNewsComponent implements OnInit {
       const token = await this.auth.getAccessTokenSilently().toPromise();
       if (!token) {
         this.errorMessage = 'Token di autenticazione mancante. Effettua il login.';
-        this.isSubmitting = false;
+        this.updatingArticle = false;
         return;
       }
 
-      // Prepara i dati per l'aggiornamento
       const updateData = {
         titolo: article.titolo?.trim(),
         sottotitolo: article.sottotitolo?.trim() || null,
         contenuto: article.contenuto?.trim(),
-        link: article.link // Mantieni il link esistente inizialmente
+        link: article.link
       };
 
-      // Se l'articolo ha un blob, aggiorna il contenuto del blob
       if (article.link && article.link.includes("blob.core.windows.net") && article.link.endsWith(".txt")) {
         try {
           const updatedBlobUrl = await this.updateBlobContent(article, token);
@@ -1755,11 +1899,9 @@ export class AddNewsComponent implements OnInit {
           }
         } catch (blobError) {
           console.warn('Errore nell\'aggiornamento del blob, continuo con l\'aggiornamento del database:', blobError);
-          // Continua comunque con l'aggiornamento del database anche se il blob fallisce
         }
       }
 
-      // Aggiorna l'articolo nel database
       const response = await fetch(`${this.updateArticleUrl}/${article.id}`, {
         method: 'PUT',
         headers: {
@@ -1772,7 +1914,6 @@ export class AddNewsComponent implements OnInit {
       const result = await response.json();
 
       if (response.ok && result.success) {
-        // Aggiorna l'articolo nella lista locale
         const index = this.savedArticles.findIndex(a => a.id === article.id);
         if (index !== -1) {
           this.savedArticles[index] = {
@@ -1780,7 +1921,7 @@ export class AddNewsComponent implements OnInit {
             ...updateData,
             editing: false
           };
-          delete this.savedArticles[index];
+          delete this.savedArticles[index].originalData;
         }
 
         this.updateSuccessMessage = true;
@@ -1803,28 +1944,20 @@ export class AddNewsComponent implements OnInit {
     }
   }
 
-  /**
-   * Aggiorna il contenuto del blob con i nuovi dati dell'articolo
-   */
-  private async updateBlobContent(article: any, token:string): Promise<string | null> {
+  private async updateBlobContent(article: any, token: string): Promise<string | null> {
     try {
-      // Prepara il contenuto nel formato corretto per il blob
       let blobContent = '';
-
       if (article.titolo) {
         blobContent += `Title: ${article.titolo}\n`;
       }
-
       if (article.sottotitolo) {
         blobContent += `Subtitle: ${article.sottotitolo}\n`;
       }
-
       if (article.contenuto) {
         blobContent += `Text: ${article.contenuto}`;
       }
 
-      // Chiamata API per aggiornare il blob
-      const response = await fetch(`${this.updateBlob}`, {
+      const response = await fetch(this.updateBlob, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -1840,36 +1973,35 @@ export class AddNewsComponent implements OnInit {
       const result = await response.json();
 
       if (response.ok && result.success) {
-        return result.blob_url || article.link; // Ritorna il nuovo URL o quello esistente
+        return result.blob_url || article.link;
       } else {
         throw new Error(result.error || 'Errore durante l\'aggiornamento del blob');
       }
     } catch (error) {
       console.error('Errore nell\'aggiornamento del blob:', error);
-      throw error; // Rilancia l'errore per essere gestito dal chiamante
+      throw error;
     }
   }
 
-  /**
-   * Annulla le modifiche e ripristina i dati originali
-   */
-  cancelEditing(article: any): void {
-    if (article.originalData) {
-      // Ripristina i dati originali
-      Object.assign(article, article.originalData);
-      delete article.originalData;
-    }
-    article.editing = false;
-  }
 
-  /**
-   * Verifica se l'articolo è valido per il salvataggio
-   */
+
   isArticleValid(article: any): boolean {
     return article.titolo && article.titolo.trim().length > 0;
   }
 
-
-
-
+  // Format article date
+  formatArticleDate(dateString: string): string {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('it-IT', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      return dateString;
+    }
+  }
 }

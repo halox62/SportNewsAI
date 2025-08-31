@@ -82,6 +82,7 @@ class Articolo(Base):
     blob_url = Column(Text, nullable=False)
     idUser=Column(String(200), nullable=False)
     data = Column(DateTime, nullable=False, server_default=func.now())
+    saved=Column(String(200), nullable=False)
 
 class User(Base):
     __tablename__ = 'users'
@@ -183,7 +184,8 @@ def query_database_articles(keyword: str):
     session = SessionLocal()
     try:
         results = session.query(Articolo).filter(
-            Articolo.titolo.ilike(f'%{keyword}%')
+            Articolo.titolo.ilike(f'%{keyword}%'),
+            Articolo.save == "false"
         ).all()
         return [
             {
@@ -360,7 +362,50 @@ def add_news(user_payload):
             titolo=titolo,
             paragrafo=paragrafo,
             blob_url=blob_url,
-            idUser=str(user.idUser)
+            idUser=str(user.idUser),
+            saved="false"
+        )
+        session.add(articolo)
+        session.commit()
+        session.close()
+
+        return jsonify({"success": True, "message": "Articolo salvato con successo", "blob_url": blob_url}), 201
+
+    except Exception as e:
+        session.close()
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+
+@app.route("/api/v1/save", methods=["POST"])
+@requires_auth
+def add_news(user_payload):
+    try:
+        auth0_id = user_payload.get("sub")
+        session = SessionLocal()
+        user = session.query(User).filter_by(auth0Id=auth0_id).first()
+        if not user:
+            session.close()
+            return jsonify({"success": False, "error": "Utente non registrato"}), 401
+
+        data = request.get_json()
+        titolo = data.get("titolo")
+        paragrafo = data.get("paragrafo")
+        contenuto = data.get("contenuto")
+
+        if not titolo or not contenuto:
+            session.close()
+            return jsonify({"success": False, "error": "Titolo e contenuto sono obbligatori"}), 400
+
+        filename = f"{int(time.time())}_{titolo[:30].replace(' ', '_')}.txt"
+        blob_url = upload_article_to_blob(contenuto, filename)
+
+        articolo = Articolo(
+            titolo=titolo,
+            paragrafo=paragrafo,
+            blob_url=blob_url,
+            idUser=str(user.idUser),
+            saved="true"
         )
         session.add(articolo)
         session.commit()
@@ -398,7 +443,37 @@ def get_my_articles(user_payload):
             session.close()
             return jsonify({"success": False, "error": "Utente non trovato"}), 404
 
-        articles = session.query(Articolo).filter_by(idUser=str(user.idUser)).all()
+        articles = session.query(Articolo).filter_by(idUser=str(user.idUser),saved="false").all()
+        results = [
+            {
+                "id": art.id,
+                "titolo": art.titolo,
+                "sottotitolo": art.paragrafo,
+                "link": art.blob_url,
+                "data": art.data.isoformat() if art.data else None
+            }
+            for art in articles
+        ]
+        session.close()
+        return jsonify({"success": True, "results": results}), 200
+
+    except Exception as e:
+        session.close()
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/v1/my-articles-save", methods=["GET"])
+@requires_auth
+def get_my_articles(user_payload):
+    try:
+        auth0_id = user_payload.get("sub")
+        session = SessionLocal()
+        user = session.query(User).filter_by(auth0Id=auth0_id).first()
+        if not user:
+            session.close()
+            return jsonify({"success": False, "error": "Utente non trovato"}), 404
+
+        articles = session.query(Articolo).filter_by(idUser=str(user.idUser),saved="true").all()
         results = [
             {
                 "id": art.id,
@@ -434,7 +509,7 @@ def update_article(article_id, user_payload):
         articolo = session.query(Articolo).filter_by(id=article_id, idUser=str(user.idUser)).first()
         if not articolo:
             session.close()
-            return jsonify({"success": False, "error": "Articolo non trovato o accesso negato"}), 404
+            return jsonify({"success": False, "error": "Articolo non trovato"}), 404
 
         # Prende i dati dal body
         data = request.get_json()
