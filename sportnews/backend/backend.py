@@ -248,13 +248,12 @@ def search_news(user_payload):
             }}
           ]
           """
+          print(response)
 
           response = llm.invoke(prompt)
           content = response.choices[0].message.content.strip()
 
           results = json.loads(content)
-
-          return results
 
         except Exception as e:
             print(f"[WARN] Errore OpenAI API: {e}")
