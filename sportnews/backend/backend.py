@@ -261,8 +261,8 @@ def search_news(user_payload):
             try:
                 url = 'https://api.x.com/2/tweets/search/recent'
                 params = {
-                    'query': f'{keyword} lang:it from:verified',
-                    'max_results': 10,
+                    'query': f'{keyword} lang:it #SerieA from:Gazzetta_it,SkySport',
+                    'max_results': 3,
                     'tweet.fields': 'created_at'
                 }
                 headers = {'Authorization': f'Bearer {X_API_TOKEN}'}
