@@ -212,7 +212,7 @@ def search_news(user_payload):
         try:
           url = 'https://newsapi.org/v2/everything'
           params = {
-              'q': f'intitle:"{keyword}"',
+              'q': f'"{keyword}"',
               'language': 'it',
               'sources': 'ansa,it,la-gazzetta-dello-sport,it-sky-sport',
               'sortBy': 'publishedAt',
