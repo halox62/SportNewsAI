@@ -22,15 +22,9 @@ from sqlalchemy.exc import IntegrityError
 from functools import wraps
 from flask import request, jsonify
 from jose import jwt
+import requests
 import time
-from markupsafe import escape
-from concurrent.futures import ThreadPoolExecutor
-from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
-import logging
-from datetime import datetime
-import re
-
+from functools import wraps
 
 
 DB_FILE = "news.db"
@@ -53,12 +47,6 @@ DB_CONFIG = {
     #"ssl_ca": "DigiCertGlobalRootCA.crt.pem"
 }
 
-# Configura logging
-logging.basicConfig(level=logging.WARNING)
-logger = logging.getLogger(__name__)
-
-
-
 AUTH0_DOMAIN = os.getenv("AUTH0_DOMAIN")  # es: "dev-crydqe7sub8m26h7.us.auth0.com"
 API_AUDIENCE = os.getenv("API_AUDIENCE")  # es: "https://myapi/"
 ALGORITHMS = ["RS256"]
@@ -71,14 +59,6 @@ container_name = "articles"
 
 Base = declarative_base()
 
-# Configura sessione requests con retry
-session = requests.Session()
-retry = Retry(total=3, backoff_factor=0.3, status_forcelist=[500, 502, 503, 504])
-adapter = HTTPAdapter(max_retries=retry)
-session.mount('http://', adapter)
-session.mount('https://', adapter)
-
-
 # Configura la stringa di connessione SQLAlchemy per MySQL Azure
 username = os.getenv("DBUSER")
 password =os.getenv("AZURE_DB_PASSWORD")
@@ -90,8 +70,6 @@ connection_string = f"mysql+mysqlconnector://{username}:{password}@{host}/{datab
 # Crea engine e session
 engine = create_engine(connection_string)
 SessionLocal = sessionmaker(bind=engine)
-
-X_API_TOKEN=os.getenv("X_API_TOKEN")
 
 def get_connection():
     return mysql.connector.connect(**DB_CONFIG)
@@ -218,124 +196,58 @@ def query_database_articles(keyword: str):
     finally:
         session.close()
 
-def normalize_text(text):
-    """Normalizza il testo per il confronto."""
-    if not text:
-        return ""
-    text = re.sub(r'[^\w\s]', '', text.lower()).strip()
-    return text
-
 @app.route('/api/v1/search', methods=['POST'])
 @requires_auth
 def search_news(user_payload):
     try:
         data = request.get_json()
-        keyword = str(escape(data.get("query", "").strip().lower()))
+        keyword = data.get("query", "").strip()
 
-        if not keyword or len(keyword) < 3:
-            return jsonify({"success": False, "error": "Query non valida, minimo 3 caratteri"}), 400
+        if not keyword:
+            return jsonify({"success": False, "error": "Query mancante"}), 400
 
         results = []
-        seen_urls = set()
 
-        def fetch_news_api(keyword, page=1):
-            try:
-                url = 'https://newsapi.org/v2/everything'
-                params = {
-                    'q': f'"{keyword}" +sport',
-                    'language': 'it',
-                    'sources': 'ansa,la-gazzetta-dello-sport,sky-sport-it,corriere-dello-sport',
-                    'sortBy': 'relevancy',
-                    'pageSize': 10,
-                    'page': page,
-                    'apiKey': API_KEY
+        # --- NewsAPI ---
+        try:
+            url = 'https://newsapi.org/v2/everything'
+            params = {
+                'q': f'"{keyword}"',
+                'language': 'it',
+                'sources': 'ansa,it,la-gazzetta-dello-sport,it-sky-sport',
+                'sortBy': 'publishedAt',
+                'pageSize': 5,
+                'apiKey': API_KEY
+            }
+            response = requests.get(url, params=params, timeout=5)
+            response.raise_for_status()
+            news_data = response.json()
+
+            results.extend([
+                {
+                    "titolo": art.get("title"),
+                    "sottotitolo": art.get("description"),
+                    "link": art.get("url"),
+                    "data": art.get("publishedAt")
                 }
-                response = session.get(url, params=params, timeout=(3, 7))
-                response.raise_for_status()
-                return response.json().get('articles', [])
-            except Exception as e:
-                logger.warning(f"Errore NewsAPI: {e}")
-                return []
+                for art in news_data.get('articles', [])
+            ])
+        except Exception as e:
+            print(f"[WARN] Errore NewsAPI: {e}")
 
-        def fetch_x_posts(keyword):
-            try:
-                url = 'https://api.x.com/2/tweets/search/recent'
-                params = {
-                    'query': f'{keyword} lang:it #SerieA from:Gazzetta_it,SkySport',
-                    'max_results': 3,
-                    'tweet.fields': 'created_at'
-                }
-                headers = {'Authorization': f'Bearer {X_API_TOKEN}'}
-                response = session.get(url, params=params, headers=headers, timeout=(3, 7))
-                response.raise_for_status()
-                tweets = response.json().get('data', [])
-                return [{
-                    'titolo': tweet['text'][:200],
-                    'sottotitolo': 'Post su X',
-                    'link': f"https://x.com/i/status/{tweet['id']}",
-                    'data': tweet.get('created_at', ''),
-                    'source': 'X'
-                } for tweet in tweets if keyword in normalize_text(tweet['text'])]
-            except Exception as e:
-                logger.warning(f"Errore X API: {e}")
-                return []
+        # --- Database ---
+        try:
+            results.extend(query_database_articles(keyword))
+        except Exception as e:
+            print(f"[WARN] Errore DB: {e}")
 
-        def fetch_database_articles(keyword):
-            try:
-                return query_database_articles(keyword)
-            except Exception as e:
-                logger.warning(f"Errore DB: {e}")
-                return []
+        results.sort(key=lambda x: x["data"] or "", reverse=True)
 
-        def filter_articles(articles, keyword):
-            """Filtra articoli pertinenti e normalizza i risultati."""
-            filtered = []
-            normalized_keyword = normalize_text(keyword)
-            for art in articles:
-                title = normalize_text(art.get("titolo", art.get("title", "")))
-                description = normalize_text(art.get("sottotitolo", art.get("description", "")))
-                if (art.get("titolo", art.get("title")) and art.get("link", art.get("url")) and
-                        art.get("link", art.get("url")) not in seen_urls and
-                        (normalized_keyword in title or normalized_keyword in description)):
-                    filtered.append({
-                        "titolo": art.get("titolo", art.get("title", ""))[:200],
-                        "sottotitolo": art.get("sottotitolo", art.get("description", "N/A")),
-                        "link": art.get("link", art.get("url")),
-                        "data": art.get("data", art.get("publishedAt", "")),
-                        "source": art.get("source", "N/A")
-                    })
-                    seen_urls.add(art.get("link", art.get("url")))
-            return filtered
-
-        # Esecuzione parallela
-        with ThreadPoolExecutor(max_workers=3) as executor:
-            future_api = executor.submit(fetch_news_api, keyword)
-            future_x = executor.submit(fetch_x_posts, keyword)
-            future_db = executor.submit(fetch_database_articles, keyword)
-            api_articles = future_api.result()
-            x_posts = future_x.result()
-            db_articles = future_db.result()
-
-        print(x_posts)
-        print(api_articles)
-        # Filtra articoli
-        results.extend(filter_articles(api_articles, keyword))
-        results.extend(filter_articles(x_posts, keyword))
-        results.extend(filter_articles(db_articles, keyword))
-
-        # Ordinamento per data e rilevanza
-        results.sort(key=lambda x: (x["data"] or "", keyword in normalize_text(x["titolo"])), reverse=True)
-
-        return jsonify({
-            "success": True,
-            "results": results[:20],
-            "total_results": len(results),
-            "timestamp": datetime.now().isoformat()
-        }), 200
+        return jsonify({"success": True, "results": results}), 200
 
     except Exception as e:
-        logger.error(f"Errore generale: {e}")
-        return jsonify({"success": False, "error": "Errore interno del server"}), 500
+        print(f"[ERROR] {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
 @app.route('/download_articles', methods=['POST'])
