@@ -209,55 +209,34 @@ def search_news(user_payload):
         results = []
 
         # --- NewsAPI ---
-        '''try:
-            url = 'https://newsapi.org/v2/everything'
-            params = {
-                'q': f'"{keyword}"',
-                'language': 'it',
-                'sources': 'ansa,it,la-gazzetta-dello-sport,it-sky-sport',
-                'sortBy': 'publishedAt',
-                'pageSize': 5,
-                'apiKey': API_KEY
-            }
-            response = requests.get(url, params=params, timeout=5)
-            response.raise_for_status()
-            news_data = response.json()
-
-            results.extend([
-                {
-                    "titolo": art.get("title"),
-                    "sottotitolo": art.get("description"),
-                    "link": art.get("url"),
-                    "data": art.get("publishedAt")
-                }
-                for art in news_data.get('articles', [])
-            ])
-        except Exception as e:
-            print(f"[WARN] Errore NewsAPI: {e}")'''
         try:
-          prompt = f"""
-          Sei un assistente che trova articoli di notizie italiane sul tema "{keyword}".
-          Cerca le 5 notizie più rilevanti e recenti da fonti affidabili (es. ANSA, La Gazzetta dello Sport, Sky Sport).
-          Rispondi SOLO in JSON con il formato:
-          [
-            {{
-              "titolo": "...",
-              "sottotitolo": "...",
-              "link": "...",
-              "data": "YYYY-MM-DD"
-            }}
-          ]
-          """
+          url = 'https://newsapi.org/v2/everything'
+          params = {
+              'q': f'intitle:"{keyword}"',
+              'language': 'it',
+              'sources': 'ansa,it,la-gazzetta-dello-sport,it-sky-sport',
+              'sortBy': 'publishedAt',
+              'pageSize': 5,
+              'apiKey': API_KEY
+          }
 
-          response = llm.invoke(prompt)
-          print(response)
-          content = response.content.strip()
+          response = requests.get(url, params=params, timeout=5)
+          response.raise_for_status()
+          news_data = response.json()
 
-          results = json.loads(content)
+          results.extend([
+              {
+                  "titolo": art.get("title"),
+                  "sottotitolo": art.get("description"),
+                  "link": art.get("url"),
+                  "data": art.get("publishedAt")
+              }
+              for art in news_data.get('articles', [])
+              if art.get("title") and art.get("url")
+          ])
 
         except Exception as e:
-            print(f"[WARN] Errore OpenAI API: {e}")
-            return []
+            print(f"[WARN] Errore NewsAPI: {e}")
 
         # --- Database ---
         try:
