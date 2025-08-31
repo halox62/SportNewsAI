@@ -25,7 +25,6 @@ from jose import jwt
 import requests
 import time
 from functools import wraps
-from markupsafe import escape
 
 
 DB_FILE = "news.db"
@@ -44,11 +43,12 @@ DB_CONFIG = {
     "host": os.getenv("AZURE_DB_HOST"),
     "user": os.getenv("DBUSER"),
     "password": os.getenv("AZURE_DB_PASSWORD"),
-    "database": os.getenv("DATABASE")
+    "database": os.getenv("DATABASE"),
+    #"ssl_ca": "DigiCertGlobalRootCA.crt.pem"
 }
 
-AUTH0_DOMAIN = os.getenv("AUTH0_DOMAIN")
-API_AUDIENCE = os.getenv("API_AUDIENCE")
+AUTH0_DOMAIN = os.getenv("AUTH0_DOMAIN")  # es: "dev-crydqe7sub8m26h7.us.auth0.com"
+API_AUDIENCE = os.getenv("API_AUDIENCE")  # es: "https://myapi/"
 ALGORITHMS = ["RS256"]
 
 
@@ -201,42 +201,42 @@ def query_database_articles(keyword: str):
 def search_news(user_payload):
     try:
         data = request.get_json()
-        keyword = str(escape(data.get("query", "").strip().lower()))
+        keyword = data.get("query", "").strip()
 
-        # Validazione input
-        if not keyword or len(keyword) < 3:
-            return jsonify({"success": False, "error": "Query non valida, minimo 3 caratteri"}), 400
+        if not keyword:
+            return jsonify({"success": False, "error": "Query mancante"}), 400
 
         results = []
-        seen_urls = set()
 
         # --- NewsAPI ---
         try:
-            url = 'https://newsapi.org/v2/everything'
-            params = {
-                'q': f'"{keyword}" +sport',  # Rafforza la pertinenza con il contesto sportivo
-                'language': 'it',
-                'sources': 'ansa,la-gazzetta-dello-sport,sky-sport-it,corriere-dello-sport',
-                'sortBy': 'relevancy',  # Priorità alla pertinenza
-                'pageSize': 10,
-                'apiKey': API_KEY
-            }
-            response = requests.get(url, params=params, timeout=(3, 7))  # Timeout: connect 3s, read 7s
-            response.raise_for_status()
-            news_data = response.json()
+          url = 'https://newsapi.org/v2/everything'
+          params = {
+                    'q': f'"{keyword}" +sport',
+                    'language': 'it',
+                    'sources': 'ansa,la-gazzetta-dello-sport,sky-sport-it,corriere-dello-sport',
+                    'sortBy': 'relevancy',
+                    'pageSize': 10,
+                    'apiKey': API_KEY
+                }
 
-            for art in news_data.get('articles', []):
-                if (art.get("title") and art.get("url") and art["url"] not in seen_urls and
-                        keyword in (art["title"].lower() or art["description"].lower() or "")):
-                    results.append({
-                        "titolo": art["title"][:200],
-                        "sottotitolo": art["description"] or "N/A",
-                        "link": art["url"],
-                        "data": art["publishedAt"]
-                    })
-                    seen_urls.add(art["url"])
+          response = requests.get(url, params=params, timeout=5)
+          response.raise_for_status()
+          news_data = response.json()
+
+          results.extend([
+              {
+                  "titolo": art.get("title"),
+                  "sottotitolo": art.get("description"),
+                  "link": art.get("url"),
+                  "data": art.get("publishedAt")
+              }
+              for art in news_data.get('articles', [])
+              if art.get("title") and art.get("url")
+          ])
+
         except Exception as e:
-            return []
+            print(f"[WARN] Errore NewsAPI: {e}")
 
         # --- Database ---
         try:
