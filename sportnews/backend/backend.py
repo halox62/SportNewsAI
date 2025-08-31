@@ -248,9 +248,9 @@ def search_news(user_payload):
             }}
           ]
           """
-          print(response)
 
           response = llm.invoke(prompt)
+          print(response)
           content = response.content.strip()
 
           results = json.loads(content)
