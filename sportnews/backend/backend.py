@@ -316,6 +316,8 @@ def search_news(user_payload):
             x_posts = future_x.result()
             db_articles = future_db.result()
 
+        print(x_posts)
+        print(api_articles)
         # Filtra articoli
         results.extend(filter_articles(api_articles, keyword))
         results.extend(filter_articles(x_posts, keyword))
