@@ -128,7 +128,7 @@ export class HomepageComponent implements OnInit {
     const selectedUrls = selected.map(a => a.link);
     this.isGenerating = true;
     try {
-      const token = await this.auth.getAccessTokenSilently().toPromise();
+      const token = await this.auth.getAccessTokenSilently();
       if (!token) {
         throw new Error('Login required');
       }
@@ -258,12 +258,21 @@ export class HomepageComponent implements OnInit {
     this.isSavingArticle = true;
     this.saveSuccessMessage = false;
     this.saveErrorMessage = '';
+    const token="";
+    try {
+      const token = await this.auth.getAccessTokenSilently();
+      if (!token) {
+        throw new Error('Login required');
+      }
+    } catch (err) {
+      console.error('Token error:', err);
+      alert('⚠️ Devi fare login per continuare')
+
+      return;
+    }
 
     try {
-      const token = await this.auth.getAccessTokenSilently().toPromise();
-      if (!token) {
-        return;
-      }
+
 
       const cleanTitle = this.generatedArticle.title.trim();
       const cleanSubtitle = this.generatedArticle.subtitle?.trim() || '';
