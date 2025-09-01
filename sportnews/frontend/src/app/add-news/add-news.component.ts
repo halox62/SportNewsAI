@@ -250,6 +250,7 @@ interface SavedArticle {
                     class="btn-icon"
                     (click)="toggleArticleExpansion(article)"
                     title="Espandi/Comprimi"
+
                   >
                     {{ article.expanded ? '📖' : '📑' }}
                   </button>
@@ -446,6 +447,7 @@ interface SavedArticle {
                     class="btn-icon"
                     (click)="toggleArticleExpansion(article)"
                     title="Espandi/Comprimi"
+
                   >
                     {{ article.expanded ? '📖' : '📑' }}
                   </button>
