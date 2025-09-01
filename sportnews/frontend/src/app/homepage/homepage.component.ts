@@ -223,9 +223,6 @@ export class HomepageComponent implements OnInit {
   }
 
 
-   /**
-   * Salva l'articolo generato nel database utilizzando l'endpoint /addNews
-   */
    async saveGeneratedArticle(): Promise<void> {
     if (!this.generatedArticle || this.isSavingArticle || this.articleSaved) {
       return;
@@ -248,24 +245,21 @@ export class HomepageComponent implements OnInit {
         return;
       }
 
-
-      // Prepara il contenuto nel formato per il blob (Title/Subtitle/Text)
       const cleanTitle = this.generatedArticle.title.trim();
       const cleanSubtitle = this.generatedArticle.subtitle?.trim() || '';
       const cleanText = this.stripHtmlTags(this.generatedArticle.text);
 
-      // Costruisce il contenuto formattato per il blob
+
       let blobContent = `Title: ${cleanTitle}\n`;
       if (cleanSubtitle) {
         blobContent += `Subtitle: ${cleanSubtitle}\n`;
       }
       blobContent += `Text: ${cleanText}`;
 
-      // Prepara i dati dell'articolo per l'API /addNews
       const articleData = {
         titolo: cleanTitle,
-        paragrafo: cleanSubtitle || null, // Usa sottotitolo come paragrafo
-        contenuto: blobContent // Contenuto formattato per il blob
+        paragrafo: cleanSubtitle || null,
+        contenuto: blobContent
       };
 
       const response = await fetch(`${this.baseUrl}/save`, {
@@ -280,12 +274,8 @@ export class HomepageComponent implements OnInit {
       const result = await response.json();
 
       if (response.ok && result.success) {
-        // Salvataggio riuscito
         this.articleSaved = true;
         this.saveSuccessMessage = true;
-
-
-        // Nascondi il messaggio di successo dopo 4 secondi
         setTimeout(() => {
           this.saveSuccessMessage = false;
         }, 4000);
@@ -302,7 +292,6 @@ export class HomepageComponent implements OnInit {
       console.error('Errore durante il salvataggio dell\'articolo generato:', error);
       this.saveErrorMessage = error instanceof Error ? error.message : 'Errore sconosciuto durante il salvataggio';
 
-      // Nascondi il messaggio di errore dopo 6 secondi
       setTimeout(() => {
         this.saveErrorMessage = '';
       }, 6000);

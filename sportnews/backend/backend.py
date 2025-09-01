@@ -381,6 +381,7 @@ def add_news(user_payload):
 @requires_auth
 def save(user_payload):
     try:
+        print("save")
         auth0_id = user_payload.get("sub")
         session = SessionLocal()
         user = session.query(User).filter_by(auth0Id=auth0_id).first()
@@ -407,9 +408,11 @@ def save(user_payload):
             idUser=str(user.idUser),
             saved="true"
         )
+        print(articolo)
         session.add(articolo)
         session.commit()
         session.close()
+        print("ok")
 
         return jsonify({"success": True, "message": "Articolo salvato con successo", "blob_url": blob_url}), 201
 
