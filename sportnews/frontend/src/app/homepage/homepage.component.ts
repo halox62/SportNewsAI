@@ -2,7 +2,6 @@ import { Component, OnInit ,Inject, PLATFORM_ID} from '@angular/core';
 import { HttpClient, HttpHeaders} from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from '@auth0/auth0-angular';
-import { MatSnackBar } from '@angular/material/snack-bar';
 
 interface ArticleResult {
   data: string;
@@ -48,7 +47,7 @@ export class HomepageComponent implements OnInit {
   saveSuccessMessage: boolean = false;
   saveErrorMessage: string = '';
 
-  constructor(private snackBar: MatSnackBar,private http: HttpClient, private router: Router, public auth: AuthService,
+  constructor(private http: HttpClient, private router: Router, public auth: AuthService,
     @Inject(PLATFORM_ID) private platformId: Object) {}
 
   goToAddNews(): void{
@@ -60,7 +59,7 @@ export class HomepageComponent implements OnInit {
   async searchArticles(): Promise<void> {
   if (!this.searchTerm.trim()) return;
   try {
-    const token = await this.auth.getAccessTokenSilently().toPromise();
+    const token = await this.auth.getAccessTokenSilently();
     if (!token) {
       throw new Error('Login required');
     }
@@ -88,9 +87,8 @@ export class HomepageComponent implements OnInit {
     });
   } catch (err) {
     console.error('Token error:', err);
-    this.snackBar.open('⚠️ Devi fare login per continuare', 'Login', { duration: 5000 })
-      .onAction()
-      .subscribe(() => this.auth.loginWithRedirect());
+    alert('⚠️ Devi fare login per continuare')
+
     return;
   }
 

@@ -12,7 +12,7 @@ import { Nl2brPipe } from './nl2br.pipe';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AuthInterceptor } from './auth.interceptor';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+
 
 
 @NgModule({
@@ -27,7 +27,6 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
     HttpClientModule,
     FormsModule,
     BrowserAnimationsModule,
-    MatSnackBarModule,
     CommonModule,
     RouterModule.forRoot([
         { path: '', component: HomepageComponent },
