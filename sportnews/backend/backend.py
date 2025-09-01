@@ -339,6 +339,7 @@ def genera_notizia_da_url(user_payload):
 @requires_auth
 def add_news(user_payload):
     try:
+        print("add")
         auth0_id = user_payload.get("sub")
         session = SessionLocal()
         user = session.query(User).filter_by(auth0Id=auth0_id).first()
