@@ -82,21 +82,14 @@ export class HomepageComponent implements OnInit {
           error: (error) => {
             console.error('Errore nella ricerca:', error);
             this.isLoading = false;
-            if (error.status === 401) {
-             // alert('⚠️ Devi fare login per continuare');
-             // this.auth.loginWithRedirect(); // reindirizza al login
-            } else {
-              alert('Errore durante la ricerca: ' + (error.message || 'Sconosciuto'));
-            }
+
           }
         });
 
     }catch(err){
       alert('⚠️ Devi fare login per continuare');
+      this.auth.loginWithRedirect();
     }
-
-
-
   }
 
 
@@ -151,46 +144,51 @@ export class HomepageComponent implements OnInit {
   generatedArticle: { title: string; subtitle: string; text: string } | null = null;
 
   async processSelectedArticles(): Promise<void> {
-    this.resetSaveState();
-    const selected = this.getSelectedArticles();
+    try{
+      this.resetSaveState();
+      const selected = this.getSelectedArticles();
 
-    if (selected.length === 0) {
-      alert('Seleziona almeno un articolo');
-      return;
+      if (selected.length === 0) {
+        alert('Seleziona almeno un articolo');
+        return;
+      }
+
+      const selectedUrls = selected.map(a => a.link);
+      this.isGenerating = true;
+      const token = await this.auth.getAccessTokenSilently().toPromise();
+
+      fetch('https://sport.event-fit.it/api/v1/genArticle', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ urls: selectedUrls })
+      })
+      .then(res => res.json())
+      .then(data => {
+        console.log("Articolo generato:", data);
+
+        let parsedArticle = this.parseArticleContent(data.article);
+
+        this.generatedArticle = {
+          title: parsedArticle.title || 'Titolo non disponibile',
+          subtitle: parsedArticle.subtitle || '',
+          text: parsedArticle.text || ''
+        };
+
+        this.showGeneratedArticle = true;
+        this.isGenerating = false;
+      })
+      .catch(err => {
+        console.error("Errore nella generazione dell'articolo:", err);
+        this.isGenerating = false;
+        alert('Errore nella generazione dell\'articolo. Riprova.');
+      });
+    }catch(err){
+      alert('⚠️ Devi fare login per continuare');
+      this.auth.loginWithRedirect();
     }
-
-    const selectedUrls = selected.map(a => a.link);
-    this.isGenerating = true;
-    const token = await this.auth.getAccessTokenSilently().toPromise();
-
-    fetch('https://sport.event-fit.it/api/v1/genArticle', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({ urls: selectedUrls })
-    })
-    .then(res => res.json())
-    .then(data => {
-      console.log("Articolo generato:", data);
-
-      let parsedArticle = this.parseArticleContent(data.article);
-
-      this.generatedArticle = {
-        title: parsedArticle.title || 'Titolo non disponibile',
-        subtitle: parsedArticle.subtitle || '',
-        text: parsedArticle.text || ''
-      };
-
-      this.showGeneratedArticle = true;
-      this.isGenerating = false;
-    })
-    .catch(err => {
-      console.error("Errore nella generazione dell'articolo:", err);
-      this.isGenerating = false;
-      alert('Errore nella generazione dell\'articolo. Riprova.');
-    });
   }
 
 
@@ -288,7 +286,7 @@ export class HomepageComponent implements OnInit {
     try {
       const token = await this.auth.getAccessTokenSilently().toPromise();
       if (!token) {
-        return;
+        throw new Error('Login required');
       }
 
       const cleanTitle = this.generatedArticle.title.trim();
@@ -343,7 +341,8 @@ export class HomepageComponent implements OnInit {
       setTimeout(() => {
         this.saveErrorMessage = '';
       }, 6000);
-
+      alert('⚠️ Devi fare login per continuare');
+      this.auth.loginWithRedirect();
     } finally {
       this.isSavingArticle = false;
     }

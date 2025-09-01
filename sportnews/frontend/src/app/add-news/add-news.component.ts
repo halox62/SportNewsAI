@@ -1314,7 +1314,7 @@ export class AddNewsComponent implements OnInit {
     this.clearMessages();
 
     try {
-      const token = await this.auth.getAccessTokenSilently();
+      const token = await this.auth.getAccessTokenSilently().toPromise();
       if (!token) {
         throw new Error('Login required');
       }
@@ -1339,9 +1339,8 @@ export class AddNewsComponent implements OnInit {
       }
     });
   } catch (err) {
-    console.error('Token error:', err);
-    alert('⚠️ Devi fare login per continuare')
-    return;
+    alert('⚠️ Devi fare login per continuare');
+    this.auth.loginWithRedirect();
   }
   }
 
@@ -1350,7 +1349,7 @@ export class AddNewsComponent implements OnInit {
     this.clearMessages();
 
     try {
-      const token = await this.auth.getAccessTokenSilently();
+      const token = await this.auth.getAccessTokenSilently().toPromise();
       if (!token) {
         throw new Error('Login required');
       }
@@ -1374,9 +1373,8 @@ export class AddNewsComponent implements OnInit {
       }
     });
   } catch (err) {
-    console.error('Token error:', err);
-    alert('⚠️ Devi fare login per continuare')
-    return;
+    alert('⚠️ Devi fare login per continuare');
+    this.auth.loginWithRedirect();
   }
   }
 
@@ -1403,19 +1401,13 @@ export class AddNewsComponent implements OnInit {
     if (!this.articleToDelete) return;
 
     this.deletingArticle = this.articleToDelete.id;
-    const token="";
+
     try {
-      const token = await this.auth.getAccessTokenSilently();
+      const token = await this.auth.getAccessTokenSilently().toPromise();
       if (!token) {
         throw new Error('Login required');
       }
-    } catch (err) {
-      console.error('Token error:', err);
-      alert('⚠️ Devi fare login per continuare')
-      return;
-    }
 
-    try {
 
 
       const response = await fetch(`${this.deleteArticleUrl}/${this.articleToDelete.id}`, {
@@ -1463,6 +1455,8 @@ export class AddNewsComponent implements OnInit {
       setTimeout(() => {
         this.deleteErrorMessage = '';
       }, 5000);
+      alert('⚠️ Devi fare login per continuare');
+      this.auth.loginWithRedirect();
     } finally {
       this.deletingArticle = null;
     }
@@ -1576,74 +1570,72 @@ export class AddNewsComponent implements OnInit {
     this.clearMessages();
     const token="";
     try {
-      const token = await this.auth.getAccessTokenSilently();
+      const token = await this.auth.getAccessTokenSilently().toPromise();
       if (!token) {
         throw new Error('Login required');
       }
-    } catch (err) {
-      console.error('Token error:', err);
-      alert('⚠️ Devi fare login per continuare')
-      return;
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      };
+
+      // Prepare the news data
+      const newsData = {
+        titolo: this.newsArticle.titolo.trim(),
+        paragrafo: this.newsArticle.paragrafo?.trim() || '',
+        contenuto: this.newsArticle.contenuto.trim()
+      };
+
+      this.http.post<{success: boolean, message: string}>(this.addNewsUrl, newsData, { headers }).subscribe({
+        next: (response) => {
+          console.log('✅ Notizia aggiunta con successo:', response);
+
+          if (response.success) {
+            // Show success message
+            this.showSuccessMessage = true;
+
+            // Add to recent news list
+            this.addedNews.unshift({
+              ...this.newsArticle,
+              dataCreazione: new Date()
+            });
+
+            // Reset form
+            this.resetForm();
+
+            // Hide success message after 5 seconds
+            setTimeout(() => {
+              this.showSuccessMessage = false;
+            }, 5000);
+
+          } else {
+            this.errorMessage = response.message || 'Errore durante il salvataggio della notizia';
+          }
+
+          this.isSubmitting = false;
+        },
+        error: (error) => {
+          console.error('❌ Errore nell\'aggiunta della notizia:', error);
+
+          if (error.status === 401) {
+            this.errorMessage = 'Sessione scaduta. Effettua nuovamente il login.';
+            // Optionally redirect to login
+            // this.router.navigate(['/login']);
+          } else if (error.status === 403) {
+            this.errorMessage = 'Non hai i permessi per aggiungere notizie.';
+          } else if (error.status === 400) {
+            this.errorMessage = 'Dati non validi: ' + (error.error?.message || 'Controlla i campi inseriti');
+          } else {
+            this.errorMessage = 'Errore durante il salvataggio: ' + (error.error?.message || error.message || 'Errore sconosciuto');
+          }
+
+          this.isSubmitting = false;
+        }
+      });
+    }catch(err){
+      alert('⚠️ Devi fare login per continuare');
+      this.auth.loginWithRedirect();
     }
-
-    const headers = {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    };
-
-    // Prepare the news data
-    const newsData = {
-      titolo: this.newsArticle.titolo.trim(),
-      paragrafo: this.newsArticle.paragrafo?.trim() || '',
-      contenuto: this.newsArticle.contenuto.trim()
-    };
-
-    this.http.post<{success: boolean, message: string}>(this.addNewsUrl, newsData, { headers }).subscribe({
-      next: (response) => {
-        console.log('✅ Notizia aggiunta con successo:', response);
-
-        if (response.success) {
-          // Show success message
-          this.showSuccessMessage = true;
-
-          // Add to recent news list
-          this.addedNews.unshift({
-            ...this.newsArticle,
-            dataCreazione: new Date()
-          });
-
-          // Reset form
-          this.resetForm();
-
-          // Hide success message after 5 seconds
-          setTimeout(() => {
-            this.showSuccessMessage = false;
-          }, 5000);
-
-        } else {
-          this.errorMessage = response.message || 'Errore durante il salvataggio della notizia';
-        }
-
-        this.isSubmitting = false;
-      },
-      error: (error) => {
-        console.error('❌ Errore nell\'aggiunta della notizia:', error);
-
-        if (error.status === 401) {
-          this.errorMessage = 'Sessione scaduta. Effettua nuovamente il login.';
-          // Optionally redirect to login
-          // this.router.navigate(['/login']);
-        } else if (error.status === 403) {
-          this.errorMessage = 'Non hai i permessi per aggiungere notizie.';
-        } else if (error.status === 400) {
-          this.errorMessage = 'Dati non validi: ' + (error.error?.message || 'Controlla i campi inseriti');
-        } else {
-          this.errorMessage = 'Errore durante il salvataggio: ' + (error.error?.message || error.message || 'Errore sconosciuto');
-        }
-
-        this.isSubmitting = false;
-      }
-    });
   }
 
   // Recent News Management
@@ -1908,21 +1900,11 @@ export class AddNewsComponent implements OnInit {
     this.updatingArticle = true;
     this.updateSuccessMessage = false;
     this.updateErrorMessage = '';
-    const token="";
     try {
       const token = await this.auth.getAccessTokenSilently().toPromise();
       if (!token) {
         throw new Error('Login required');
       }
-    } catch (err) {
-      console.error('Token error:', err);
-      alert('⚠️ Devi fare login per continuare')
-      return;
-    }
-
-    try {
-
-
       // Prepara i dati per l'aggiornamento
       const updateData = {
         titolo: article.titolo?.trim(),
@@ -1983,6 +1965,9 @@ export class AddNewsComponent implements OnInit {
       setTimeout(() => {
         this.updateErrorMessage = '';
       }, 5000);
+      alert('⚠️ Devi fare login per continuare');
+      this.auth.loginWithRedirect();
+
     } finally {
       this.updatingArticle = false;
     }
