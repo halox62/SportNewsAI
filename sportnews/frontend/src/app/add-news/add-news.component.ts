@@ -62,8 +62,8 @@ interface SavedArticle {
 
           <button
             class="tab-button"
-            [class.active]="activeTab === 'manage'"
-            (click)="setActiveTab('manage')"
+            [class.active]="activeTab === 'save'"
+            (click)="setActiveTab('save')"
           >
             📚 Salvati ({{ savedArticles.length }})
           </button>
@@ -1120,12 +1120,13 @@ interface SavedArticle {
 export class AddNewsComponent implements OnInit {
   private readonly addNewsUrl = 'https://sport.event-fit.it/api/v1/addNews';
   private readonly myArticlesUrl = 'https://sport.event-fit.it/api/v1/my-articles';
+  private readonly mySaveUrl = 'https://sport.event-fit.it/api/v1/save';
   private readonly updateArticleUrl = 'https://sport.event-fit.it/api/v1/update-article';
   private readonly deleteArticleUrl = 'https://sport.event-fit.it/api/v1/delete-article';
   private readonly updateBlob = 'https://sport.event-fit.it/api/v1/update-blob-content';
 
   // Tab management
-  activeTab: 'add' | 'manage' = 'add';
+  activeTab: 'add' | 'save' | 'manage' = 'add';
 
   // Model per il form
   newsArticle: NewsArticle = {
@@ -1173,13 +1174,19 @@ export class AddNewsComponent implements OnInit {
     if (this.activeTab === 'manage') {
       this.loadMyArticles();
     }
+    if (this.activeTab === 'save') {
+      this.loadMySave();
+    }
   }
 
   // Tab Management
-  setActiveTab(tab: 'add' | 'manage'): void {
+  setActiveTab(tab: 'add' | 'manage' | 'save'): void {
     this.activeTab = tab;
     if (tab === 'manage' && this.savedArticles.length === 0) {
       this.loadMyArticles();
+    }
+    if (tab === 'save' && this.savedArticles.length === 0) {
+      this.loadMySave();
     }
     // Reset messages when switching tabs
     this.clearMessages();
@@ -1202,6 +1209,32 @@ export class AddNewsComponent implements OnInit {
     const headers = { Authorization: `Bearer ${token}` };
 
     this.http.get<{success: boolean, results: SavedArticle[]}>(this.myArticlesUrl, { headers }).subscribe({
+      next: (response) => {
+        console.log('✅ Articoli caricati:', response);
+        if (response.success) {
+          this.savedArticles = response.results.map(article => ({
+            ...article,
+            editing: false
+          }));
+        }
+        this.loadingArticles = false;
+      },
+      error: (error) => {
+        console.error('❌ Errore nell\'aggiornamento articolo:', error);
+        this.updateErrorMessage = 'Errore nell\'aggiornamento: ' + (error.error?.error || error.message || 'Errore sconosciuto');
+        this.updatingArticle = false;
+      }
+    });
+  }
+
+  async loadMySave(): Promise<void> {
+    this.loadingArticles = true;
+    this.clearMessages();
+
+    const token = await this.auth.getAccessTokenSilently().toPromise();
+    const headers = { Authorization: `Bearer ${token}` };
+
+    this.http.get<{success: boolean, results: SavedArticle[]}>(this.mySaveUrl, { headers }).subscribe({
       next: (response) => {
         console.log('✅ Articoli caricati:', response);
         if (response.success) {
