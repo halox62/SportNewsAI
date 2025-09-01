@@ -58,37 +58,44 @@ export class HomepageComponent implements OnInit {
   async searchArticles(): Promise<void> {
     if (!this.searchTerm.trim()) return;
 
-    const token = await this.auth.getAccessTokenSilently().toPromise();
+    try{
+      const token = await this.auth.getAccessTokenSilently().toPromise();
 
-    console.log(token);
+      console.log(token);
 
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
-
-    this.isLoading = true;
-
-    this.http.post<SearchResponse>(this.apiUrl, { query: this.searchTerm }, { headers })
-      .subscribe({
-        next: (response) => {
-          this.searchResults = response.results.map(article => ({
-            ...article,
-            selected: false
-          }));
-          this.isLoading = false;
-          this.selectAll = false;
-        },
-        error: (error) => {
-          console.error('Errore nella ricerca:', error);
-          this.isLoading = false;
-          if (error.status === 401) {
-           // alert('⚠️ Devi fare login per continuare');
-           // this.auth.loginWithRedirect(); // reindirizza al login
-          } else {
-            alert('Errore durante la ricerca: ' + (error.message || 'Sconosciuto'));
-          }
-        }
+      const headers = new HttpHeaders({
+        Authorization: `Bearer ${token}`
       });
+
+      this.isLoading = true;
+
+      this.http.post<SearchResponse>(this.apiUrl, { query: this.searchTerm }, { headers })
+        .subscribe({
+          next: (response) => {
+            this.searchResults = response.results.map(article => ({
+              ...article,
+              selected: false
+            }));
+            this.isLoading = false;
+            this.selectAll = false;
+          },
+          error: (error) => {
+            console.error('Errore nella ricerca:', error);
+            this.isLoading = false;
+            if (error.status === 401) {
+             // alert('⚠️ Devi fare login per continuare');
+             // this.auth.loginWithRedirect(); // reindirizza al login
+            } else {
+              alert('Errore durante la ricerca: ' + (error.message || 'Sconosciuto'));
+            }
+          }
+        });
+
+    }catch(err){
+      alert('⚠️ Devi fare login per continuare');
+    }
+
+
 
   }
 
