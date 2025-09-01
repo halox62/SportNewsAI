@@ -322,10 +322,6 @@ interface SavedArticle {
                 <div class="form-group">
                 <label class="form-label">📄 Contenuto</label>
 
-                <button type="button" (click)="loadContent(article)">
-                  📄 Carica contenuto
-                </button>
-
                 <textarea
                   class="form-textarea content-textarea"
                   [(ngModel)]="article.contenuto"
@@ -1302,6 +1298,13 @@ export class AddNewsComponent implements OnInit {
       });
   }
 
+  toggleArticleExpansion(article: SavedArticle): void {
+    article.expanded = !article.expanded;
+    if (article.expanded && !article.contenuto) {
+      this.loadContent(article);
+    }
+  }
+
   ngOnInit(): void {
     // Carica gli articoli all'avvio se siamo nella tab manage
     if (this.activeTab === 'manage') {
@@ -1486,11 +1489,6 @@ export class AddNewsComponent implements OnInit {
       this.deletingArticle = null;
     }
   }
-
-  toggleArticleExpansion(article: SavedArticle): void {
-    article.expanded = !article.expanded;
-  }
-
 
   private handleSuccess(): void {
     this.showSuccessMessage = true;
