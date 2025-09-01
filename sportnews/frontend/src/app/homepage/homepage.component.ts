@@ -24,7 +24,8 @@ interface SearchResponse {
 })
 export class HomepageComponent implements OnInit {
   private apiUrl = 'https://sport.event-fit.it/api/v1/search';
-  private baseUrl='https://sport.event-fit.it/api/v1';
+  //private baseUrl='https://sport.event-fit.it/api/v1';
+  private baseUrl='/api/v1';
   searchTerm: string = '';
 
   ngOnInit() {
