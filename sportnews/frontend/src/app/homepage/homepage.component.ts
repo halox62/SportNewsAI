@@ -58,7 +58,11 @@ export class HomepageComponent implements OnInit {
 
   async searchArticles(): Promise<void> {
   if (!this.searchTerm.trim()) return;
-  const token = await this.auth.getAccessTokenSilently().toPromise();
+  try {
+    const token = await this.auth.getAccessTokenSilently();
+    if (!token) {
+      throw new Error('Login required');
+    }
 
   const headers = new HttpHeaders({
     Authorization: `Bearer ${token}`
@@ -81,6 +85,11 @@ export class HomepageComponent implements OnInit {
         this.isLoading = false;
       }
     });
+  } catch (err) {
+    console.error('Token error:', err);
+    alert('⚠️ Devi fare login per continuare');
+    //this.auth.loginWithRedirect();
+  }
 }
 
   toggleSelectAll(): void {
