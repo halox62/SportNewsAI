@@ -60,9 +60,6 @@ export class HomepageComponent implements OnInit {
 
     try{
       const token = await this.auth.getAccessTokenSilently().toPromise();
-
-      console.log(token);
-
       const headers = new HttpHeaders({
         Authorization: `Bearer ${token}`
       });
