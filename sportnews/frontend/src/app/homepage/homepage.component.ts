@@ -61,7 +61,7 @@ export class HomepageComponent implements OnInit {
   try {
     const token = await this.auth.getAccessTokenSilently();
     if (!token) {
-      throw new Error('Login required');
+     // throw new Error('Login required');
     }
 
   const headers = new HttpHeaders({
