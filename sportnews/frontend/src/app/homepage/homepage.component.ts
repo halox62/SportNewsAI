@@ -60,6 +60,7 @@ export class HomepageComponent implements OnInit {
   if (!this.searchTerm.trim()) return;
 
   const token = await this.auth.getAccessTokenSilently().toPromise;
+  console.log(token);
 
   const headers = new HttpHeaders({
     Authorization: `Bearer ${token}`
