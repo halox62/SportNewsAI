@@ -250,7 +250,6 @@ interface SavedArticle {
                     class="btn-icon"
                     (click)="toggleArticleExpansion(article)"
                     title="Espandi/Comprimi"
-                    *ngIf="article.contenuto && article.contenuto.length > 150"
                   >
                     {{ article.expanded ? '📖' : '📑' }}
                   </button>
@@ -447,7 +446,6 @@ interface SavedArticle {
                     class="btn-icon"
                     (click)="toggleArticleExpansion(article)"
                     title="Espandi/Comprimi"
-                    *ngIf="article.contenuto && article.contenuto.length > 150"
                   >
                     {{ article.expanded ? '📖' : '📑' }}
                   </button>
