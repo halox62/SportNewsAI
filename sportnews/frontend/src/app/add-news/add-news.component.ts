@@ -250,7 +250,6 @@ interface SavedArticle {
                     class="btn-icon"
                     (click)="toggleArticleExpansion(article)"
                     title="Espandi/Comprimi"
-
                   >
                     {{ article.expanded ? '📖' : '📑' }}
                   </button>
@@ -274,7 +273,8 @@ interface SavedArticle {
                   </button>
                 </div>
               </div>
-              <h3 class="article-title">{{ article.titolo }}</h3>
+              <h3 class="1">
+                article-title">{{ article.titolo }}</h3>
               <p class="article-subtitle" *ngIf="article.sottotitolo">{{ article.sottotitolo }}</p>
               <div class="article-content-section" *ngIf="article.contenuto">
                 <div class="article-content-display" [class.article-content-preview]="!article.expanded">
@@ -320,20 +320,18 @@ interface SavedArticle {
                   </div>
                 </div>
                 <div class="form-group">
-                <label class="form-label">📄 Contenuto</label>
-
-                <textarea
-                  class="form-textarea content-textarea"
-                  [(ngModel)]="article.contenuto"
-                  rows="8"
-                  maxlength="2000"
-                  placeholder="Contenuto completo dell'articolo..."
-                ></textarea>
-
-                <div class="field-info">
-                  <small>Caratteri: {{ article.contenuto?.length || 0 }}/2000</small>
+                  <label class="form-label">📄 Contenuto</label>
+                  <textarea
+                    class="form-textarea content-textarea"
+                    [(ngModel)]="article.contenuto"
+                    rows="8"
+                    maxlength="2000"
+                    placeholder="Contenuto completo dell'articolo..."
+                  ></textarea>
+                  <div class="field-info">
+                    <small>Caratteri: {{ article.contenuto?.length || 0 }}/2000</small>
+                  </div>
                 </div>
-              </div>
                 <div class="edit-actions">
                   <button class="btn btn-secondary" (click)="cancelEditing(article)">
                     ❌ Annulla
@@ -447,7 +445,6 @@ interface SavedArticle {
                     class="btn-icon"
                     (click)="toggleArticleExpansion(article)"
                     title="Espandi/Comprimi"
-
                   >
                     {{ article.expanded ? '📖' : '📑' }}
                   </button>
@@ -1225,7 +1222,6 @@ interface SavedArticle {
   `]
 })
 
-
 export class AddNewsComponent implements OnInit {
   private readonly addNewsUrl = 'https://sport.event-fit.it/api/v1/addNews';
   private readonly myArticlesUrl = 'https://sport.event-fit.it/api/v1/my-articles';
@@ -1267,49 +1263,21 @@ export class AddNewsComponent implements OnInit {
   updateSuccessMessage: boolean = false;
   updateErrorMessage: string = '';
 
-
-
   // Nuove proprietà per la funzionalità di download
   downloadingArticle: number | null = null;
   downloadSuccessMessage: boolean = false;
   downloadErrorMessage: string = '';
 
-  constructor(private http: HttpClient, private router: Router, public auth: AuthService,
-    @Inject(PLATFORM_ID) private platformId: Object) {
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    public auth: AuthService,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {
     console.log('AddNewsComponent constructor called');
   }
 
-  loadContent(article: SavedArticle): void {
-    if (!article.link) {
-      console.error('Nessun link al blob trovato');
-      return;
-    }
-
-    this.http.get(article.link, { responseType: 'text' })
-      .subscribe({
-        next: (text: string) => {
-          article.contenuto = text;
-          console.log('Contenuto caricato:', text.substring(0, 100) + '...');
-        },
-        error: (err) => {
-          console.error('Errore caricando contenuto:', err);
-          alert('⚠️ Errore nel recupero del contenuto dell\'articolo');
-        }
-      });
-  }
-
-  toggleArticleExpansion(article: SavedArticle): void {
-    article.expanded = !article.expanded;
-    console.log('Expanded:', article.expanded, 'Contenuto:', article.contenuto);
-
-    if (article.expanded && !article.contenuto) {
-      console.log('Chiamo loadContent...');
-      this.loadContent(article);
-    }
-  }
-
   ngOnInit(): void {
-    // Carica gli articoli all'avvio se siamo nella tab manage
     if (this.activeTab === 'manage') {
       this.loadMyArticles();
     }
@@ -1327,7 +1295,6 @@ export class AddNewsComponent implements OnInit {
     if (tab === 'save' && this.savedArticles.length === 0) {
       this.loadMySave();
     }
-    // Reset messages when switching tabs
     this.clearMessages();
   }
 
@@ -1337,6 +1304,10 @@ export class AddNewsComponent implements OnInit {
     this.showSuccessMessage = false;
     this.updateSuccessMessage = false;
     this.updateErrorMessage = '';
+    this.deleteSuccessMessage = false;
+    this.deleteErrorMessage = '';
+    this.downloadSuccessMessage = false;
+    this.downloadErrorMessage = '';
   }
 
   // Load user's articles
@@ -1350,29 +1321,31 @@ export class AddNewsComponent implements OnInit {
         throw new Error('Login required');
       }
 
-    const headers = { Authorization: `Bearer ${token}` };
+      const headers = { Authorization: `Bearer ${token}` };
 
-    this.http.get<{success: boolean, results: SavedArticle[]}>(this.myArticlesUrl, { headers }).subscribe({
-      next: (response) => {
-        console.log('✅ Articoli caricati:', response);
-        if (response.success) {
-          this.myArticles = response.results.map(article => ({
-            ...article,
-            editing: false
-          }));
+      this.http.get<{ success: boolean; results: SavedArticle[] }>(this.myArticlesUrl, { headers }).subscribe({
+        next: (response) => {
+          console.log('✅ Articoli caricati:', response);
+          if (response.success) {
+            this.myArticles = response.results.map(article => ({
+              ...article,
+              editing: false,
+              expanded: false
+            }));
+          }
+          this.loadingArticles = false;
+        },
+        error: (error) => {
+          console.error('❌ Errore nel caricamento articoli:', error);
+          this.updateErrorMessage = 'Errore nel caricamento: ' + (error.error?.error || error.message || 'Errore sconosciuto');
+          this.loadingArticles = false;
         }
-        this.loadingArticles = false;
-      },
-      error: (error) => {
-        console.error('❌ Errore nell\'aggiornamento articolo:', error);
-        this.updateErrorMessage = 'Errore nell\'aggiornamento: ' + (error.error?.error || error.message || 'Errore sconosciuto');
-        this.updatingArticle = false;
-      }
-    });
-  } catch (err) {
-    alert('⚠️ Devi fare login per continuare');
-    this.auth.loginWithRedirect();
-  }
+      });
+    } catch (err) {
+      this.updateErrorMessage = 'Devi fare login per continuare';
+      this.loadingArticles = false;
+      this.auth.loginWithRedirect();
+    }
   }
 
   async loadMySave(): Promise<void> {
@@ -1384,50 +1357,46 @@ export class AddNewsComponent implements OnInit {
       if (!token) {
         throw new Error('Login required');
       }
-    const headers = { Authorization: `Bearer ${token}` };
 
-    this.http.get<{success: boolean, results: SavedArticle[]}>(this.mySaveUrl, { headers }).subscribe({
-      next: (response) => {
-        console.log('✅ Articoli caricati:', response);
-        if (response.success) {
-          this.savedArticles = response.results.map(article => ({
-            ...article,
-            editing: false
-          }));
+      const headers = { Authorization: `Bearer ${token}` };
+
+      this.http.get<{ success: boolean; results: SavedArticle[] }>(this.mySaveUrl, { headers }).subscribe({
+        next: (response) => {
+          console.log('✅ Articoli salvati caricati:', response);
+          if (response.success) {
+            this.savedArticles = response.results.map(article => ({
+              ...article,
+              editing: false,
+              expanded: false
+            }));
+          }
+          this.loadingArticles = false;
+        },
+        error: (error) => {
+          console.error('❌ Errore nel caricamento articoli salvati:', error);
+          this.updateErrorMessage = 'Errore nel caricamento: ' + (error.error?.error || error.message || 'Errore sconosciuto');
+          this.loadingArticles = false;
         }
-        this.loadingArticles = false;
-      },
-      error: (error) => {
-        console.error('❌ Errore nell\'aggiornamento articolo:', error);
-        this.updateErrorMessage = 'Errore nell\'aggiornamento: ' + (error.error?.error || error.message || 'Errore sconosciuto');
-        this.updatingArticle = false;
-      }
-    });
-  } catch (err) {
-    alert('⚠️ Devi fare login per continuare');
-    this.auth.loginWithRedirect();
-  }
+      });
+    } catch (err) {
+      this.updateErrorMessage = 'Devi fare login per continuare';
+      this.loadingArticles = false;
+      this.auth.loginWithRedirect();
+    }
   }
 
   confirmDeleteArticle(article: any): void {
     this.articleToDelete = article;
     this.showDeleteModal = true;
-    // Reset dei messaggi precedenti
     this.deleteSuccessMessage = false;
     this.deleteErrorMessage = '';
   }
 
-  /**
-   * Annulla l'eliminazione e chiude il modal
-   */
   cancelDelete(): void {
     this.showDeleteModal = false;
     this.articleToDelete = null;
   }
 
-  /**
-   * Elimina l'articolo chiamando l'API
-   */
   async deleteArticle(): Promise<void> {
     if (!this.articleToDelete) return;
 
@@ -1439,12 +1408,10 @@ export class AddNewsComponent implements OnInit {
         throw new Error('Login required');
       }
 
-
-
       const response = await fetch(`${this.deleteArticleUrl}/${this.articleToDelete.id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
@@ -1452,28 +1419,16 @@ export class AddNewsComponent implements OnInit {
       const result = await response.json();
 
       if (response.ok && result.success) {
-        // Rimuovi l'articolo dalla lista locale
-        this.savedArticles = this.savedArticles.filter(
-          article => article.id !== this.articleToDelete.id
-        );
-        this.myArticles = this.myArticles.filter(
-          article => article.id !== this.articleToDelete.id
-        );
-
-        // Mostra messaggio di successo
+        this.savedArticles = this.savedArticles.filter(article => article.id !== this.articleToDelete.id);
+        this.myArticles = this.myArticles.filter(article => article.id !== this.articleToDelete.id);
         this.deleteSuccessMessage = true;
         this.deleteErrorMessage = '';
-
-        // Chiudi il modal
         this.showDeleteModal = false;
         this.articleToDelete = null;
 
-        // Nascondi il messaggio di successo dopo 3 secondi
         setTimeout(() => {
           this.deleteSuccessMessage = false;
         }, 3000);
-
-        console.log('Articolo eliminato con successo');
       } else {
         throw new Error(result.error || 'Errore durante l\'eliminazione dell\'articolo');
       }
@@ -1482,304 +1437,121 @@ export class AddNewsComponent implements OnInit {
       this.deleteErrorMessage = error instanceof Error ? error.message : 'Errore sconosciuto durante l\'eliminazione';
       this.deleteSuccessMessage = false;
 
-      // Nascondi il messaggio di errore dopo 5 secondi
       setTimeout(() => {
         this.deleteErrorMessage = '';
       }, 5000);
-      alert('⚠️ Devi fare login per continuare');
-      this.auth.loginWithRedirect();
     } finally {
       this.deletingArticle = null;
     }
   }
 
-  private handleSuccess(): void {
-    this.showSuccessMessage = true;
-    this.addToAddedNewsList();
-    this.resetForm();
-    this.isSubmitting = false;
-
-    // Reload articles if we're in manage tab
-    if (this.activeTab === 'manage') {
-      setTimeout(() => {
-        this.loadMyArticles();
-      }, 1000);
-    }
-
-    // Hide success message after 3 seconds
-    setTimeout(() => {
-      this.showSuccessMessage = false;
-    }, 3000);
-  }
-
-
-  addToAddedNewsList(): void {
-    const newsWithDate = {
-      ...this.newsArticle,
-      dataCreazione: new Date(),
-      expanded: false
-    };
-
-    this.addedNews.unshift(newsWithDate);
-
-    // Keep only last 5 news
-    if (this.addedNews.length > 5) {
-      this.addedNews = this.addedNews.slice(0, 5);
-    }
-
-    console.log('📰 Notizia aggiunta alla lista:', newsWithDate);
-    console.log('📚 Lista completa notizie:', this.addedNews);
-  }
-
-
-
-  openArticleLink(link: string): void {
-    if (link) {
-      window.open(link, '_blank');
-    }
-  }
-
-  // Format article date
-  formatArticleDate(dateString: string): string {
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('it-IT', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    } catch (error) {
-      return dateString;
-    }
-  }
-
-
-
-  // Add News Form Methods
-  onInputChange(): void {
-    // Reset error messages when user starts typing
-    if (this.errorMessage) {
-      this.errorMessage = '';
-    }
-  }
-
-  getTitoloLength(): number {
-    return this.newsArticle.titolo?.length || 0;
-  }
-
-  getContenutoLength(): number {
-    return this.newsArticle.contenuto?.length || 0;
-  }
-
-  isFormValid(): boolean {
-    return !!(this.newsArticle.titolo?.trim() && this.newsArticle.contenuto?.trim());
-  }
-
-  resetForm(): void {
-    this.newsArticle = {
-      titolo: '',
-      paragrafo: '',
-      contenuto: ''
-    };
-    this.clearMessages();
-  }
-
-  async onSubmit(): Promise<void> {
-    if (!this.isFormValid()) {
-      this.errorMessage = 'Compila tutti i campi obbligatori';
-      return;
-    }
-
-    this.isSubmitting = true;
-    this.clearMessages();
-    const token="";
-    try {
-      const token = await this.auth.getAccessTokenSilently().toPromise();
-      if (!token) {
-        throw new Error('Login required');
-      }
-      const headers = {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      };
-
-      // Prepare the news data
-      const newsData = {
-        titolo: this.newsArticle.titolo.trim(),
-        paragrafo: this.newsArticle.paragrafo?.trim() || '',
-        contenuto: this.newsArticle.contenuto.trim()
-      };
-
-      this.http.post<{success: boolean, message: string}>(this.addNewsUrl, newsData, { headers }).subscribe({
-        next: (response) => {
-          console.log('✅ Notizia aggiunta con successo:', response);
-
-          if (response.success) {
-            // Show success message
-            this.showSuccessMessage = true;
-
-            // Add to recent news list
-            this.addedNews.unshift({
-              ...this.newsArticle,
-              dataCreazione: new Date()
-            });
-
-            // Reset form
-            this.resetForm();
-
-            // Hide success message after 5 seconds
-            setTimeout(() => {
-              this.showSuccessMessage = false;
-            }, 5000);
-
-          } else {
-            this.errorMessage = response.message || 'Errore durante il salvataggio della notizia';
-          }
-
-          this.isSubmitting = false;
-        },
-        error: (error) => {
-          console.error('❌ Errore nell\'aggiunta della notizia:', error);
-
-          if (error.status === 401) {
-            this.errorMessage = 'Sessione scaduta. Effettua nuovamente il login.';
-            // Optionally redirect to login
-            // this.router.navigate(['/login']);
-          } else if (error.status === 403) {
-            this.errorMessage = 'Non hai i permessi per aggiungere notizie.';
-          } else if (error.status === 400) {
-            this.errorMessage = 'Dati non validi: ' + (error.error?.message || 'Controlla i campi inseriti');
-          } else {
-            this.errorMessage = 'Errore durante il salvataggio: ' + (error.error?.message || error.message || 'Errore sconosciuto');
-          }
-
-          this.isSubmitting = false;
-        }
-      });
-    }catch(err){
-      alert('⚠️ Devi fare login per continuare');
-      this.auth.loginWithRedirect();
-    }
-  }
-
-  // Recent News Management
-  toggleAddedNews(): void {
-    this.showAddedNews = !this.showAddedNews;
-  }
-
-  formatDate(date: Date): string {
-    return date.toLocaleDateString('it-IT', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  }
-
-  // Navigation
-  goToHome(): void {
-    this.router.navigate(['/']);
-  }
-
-
-
   async startEditing(article: any): Promise<void> {
-    // Prima carica il contenuto completo dal blob se disponibile
-    await this.loadArticleContentFromBlob(article);
+    article.originalData = { ...article };
+    const contentLoaded = await this.loadArticleContentFromBlob(article);
 
-    // Poi avvia la modalità modifica
+    if (!contentLoaded && !article.contenuto) {
+      console.warn('Nessun contenuto disponibile per l\'articolo:', article.titolo);
+      article.contenuto = '';
+    }
+
     article.editing = true;
-    article.originalData = { ...article }; // Backup per il cancel
   }
 
-  /**
-   * Carica il contenuto dell'articolo dal blob storage
-   */
-  async loadArticleContentFromBlob(article: any): Promise<void> {
-    if (!article.link || !article.link.includes("blob.core.windows.net") || !article.link.endsWith(".txt")) {
-      return;
+  async loadArticleContentFromBlob(article: any): Promise<boolean> {
+    console.log('Tentativo di caricamento del contenuto per l\'articolo:', article.id, article.link);
+    if (!article.link || !article.link.includes('blob.core.windows.net') || !article.link.endsWith('.txt')) {
+      console.warn('Link blob non valido o assente:', article.link);
+      return false;
     }
 
     try {
       const response = await fetch(article.link);
+      console.log('Risposta ricevuta:', response.status, response.statusText);
       if (!response.ok) {
-        throw new Error(`Errore HTTP ${response.status}`);
+        throw new Error(`Errore HTTP ${response.status}: ${response.statusText}`);
       }
 
       const text = await response.text();
+      console.log('Contenuto grezzo:', text.substring(0, 200) + '...');
+      const titleMatch = text.match(/Title:\s*([\s\S]*?)(?=\nSubtitle:|\nText:|$)/);
+      const subtitleMatch = text.match(/Subtitle:\s*([\s\S]*?)(?=\nText:|$)/);
+      const textMatch = text.match(/Text:\s*([\s\S]*)/);
 
-      // Parsing formato Title/Subtitle/Text
-      const titleMatch = text.match(/Title:\s*(.+?)(?:\n|$)/);
-      const subtitleMatch = text.match(/Subtitle:\s*(.+?)(?:\n|$)/);
-      const textMatch = text.match(/Text:\s*(.+?)(?:\n|$)/);
-
-
-      // Aggiorna l'articolo con il contenuto completo dal blob
       if (titleMatch) {
         article.titolo = titleMatch[1].trim();
+        console.log('Titolo estratto:', article.titolo);
       }
       if (subtitleMatch) {
         article.sottotitolo = subtitleMatch[1].trim();
+        console.log('Sottotitolo estratto:', article.sottotitolo);
       }
       if (textMatch) {
         article.contenuto = textMatch[1].trim();
+        console.log('Contenuto estratto:', article.contenuto.substring(0, 100) + '...');
+      } else {
+        console.warn('Nessun campo "Text" trovato, uso contenuto completo');
+        article.contenuto = text.trim();
       }
 
+      return true;
     } catch (error) {
-      console.error("Errore nel caricamento dal blob:", error);
-      // In caso di errore, usa il contenuto esistente
+      console.error('Errore nel caricamento dal blob:', error);
+      this.updateErrorMessage = 'Impossibile caricare il contenuto dell\'articolo dal blob.';
+      setTimeout(() => {
+        this.updateErrorMessage = '';
+      }, 5000);
+      return false;
     }
   }
 
+  toggleArticleExpansion(article: SavedArticle): void {
+    article.expanded = !article.expanded;
+    if (article.expanded && !article.contenuto) {
+      this.loadArticleContentFromBlob(article);
+    }
+  }
 
   openArticleContent(article: any): void {
     const link = article.link;
 
-    if (link && link.includes("blob.core.windows.net") && link.endsWith(".txt")) {
+    if (link && link.includes('blob.core.windows.net') && link.endsWith('.txt')) {
       fetch(link)
         .then(res => {
-          if (!res.ok) throw new Error("Errore HTTP " + res.status);
+          if (!res.ok) throw new Error('Errore HTTP ' + res.status);
           return res.text();
         })
         .then(text => {
-          // Parsing formato Title/Subtitle/Text
-          const titleMatch = text.match(/Title:\s*(.+?)(?:\n|$)/);
-          const subtitleMatch = text.match(/Subtitle:\s*(.+?)(?:\n|$)/);
-          const textMatch = text.match(/Text:\s*([\s\S]+)/);
+          const titleMatch = text.match(/Title:\s*([\s\S]*?)(?=\nSubtitle:|\nText:|$)/);
+          const subtitleMatch = text.match(/Subtitle:\s*([\s\S]*?)(?=\nText:|$)/);
+          const textMatch = text.match(/Text:\s*([\s\S]*)/);
 
           const articleContent = {
-            title: titleMatch ? titleMatch[1].trim() : article.titolo || "Articolo",
-            subtitle: subtitleMatch ? subtitleMatch[1].trim() : article.sottotitolo || "",
+            title: titleMatch ? titleMatch[1].trim() : article.titolo || 'Articolo',
+            subtitle: subtitleMatch ? subtitleMatch[1].trim() : article.sottotitolo || '',
             text: textMatch ? textMatch[1].trim() : article.contenuto || text
           };
 
-          // Crea una nuova finestra/tab per mostrare l'articolo
           this.displayArticleInNewWindow(articleContent);
         })
         .catch(err => {
-          console.error("Errore nel caricamento dal blob:", err);
-          alert("Impossibile caricare l'articolo dal blob.");
+          console.error('Errore nel caricamento dal blob:', err);
+          this.updateErrorMessage = 'Impossibile caricare l\'articolo dal blob.';
+          setTimeout(() => {
+            this.updateErrorMessage = '';
+          }, 5000);
         });
     } else if (link) {
-      // Se non è un blob, apri il link direttamente
       window.open(link, '_blank');
     } else {
-      // Se non c'è link, mostra il contenuto locale
       const articleContent = {
-        title: article.titolo || "Articolo",
-        subtitle: article.sottotitolo || "",
-        text: article.contenuto || "Contenuto non disponibile"
+        title: article.titolo || 'Articolo',
+        subtitle: article.sottotitolo || '',
+        text: article.contenuto || 'Contenuto non disponibile'
       };
       this.displayArticleInNewWindow(articleContent);
     }
   }
 
-  /**
-   * Mostra l'articolo in una nuova finestra
-   */
   private displayArticleInNewWindow(articleContent: any): void {
     const newWindow = window.open('', '_blank');
     if (newWindow) {
@@ -1825,9 +1597,6 @@ export class AddNewsComponent implements OnInit {
     }
   }
 
-  /**
-   * Scarica l'articolo come file di testo
-   */
   async downloadArticle(article: any): Promise<void> {
     this.downloadingArticle = article.id;
     this.downloadSuccessMessage = false;
@@ -1836,8 +1605,7 @@ export class AddNewsComponent implements OnInit {
     try {
       let contentToDownload = '';
 
-      // Se l'articolo ha un link blob, scarica il contenuto completo
-      if (article.link && article.link.includes("blob.core.windows.net") && article.link.endsWith(".txt")) {
+      if (article.link && article.link.includes('blob.core.windows.net') && article.link.endsWith('.txt')) {
         try {
           const response = await fetch(article.link);
           if (response.ok) {
@@ -1846,21 +1614,16 @@ export class AddNewsComponent implements OnInit {
             throw new Error(`Errore HTTP ${response.status}`);
           }
         } catch (blobError) {
-          console.warn("Errore nel caricamento dal blob, uso contenuto locale:", blobError);
-          // Fallback al contenuto locale
+          console.warn('Errore nel caricamento dal blob, uso contenuto locale:', blobError);
           contentToDownload = this.formatArticleForDownload(article);
         }
       } else {
-        // Usa il contenuto locale
         contentToDownload = this.formatArticleForDownload(article);
       }
 
-      // Crea il file e avvia il download
       const blob = new Blob([contentToDownload], { type: 'text/plain;charset=utf-8' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
-
-      // Nome file sicuro
       const fileName = this.sanitizeFileName(article.titolo || 'articolo') + '.txt';
 
       link.href = url;
@@ -1870,12 +1633,10 @@ export class AddNewsComponent implements OnInit {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
-      // Mostra messaggio di successo
       this.downloadSuccessMessage = true;
       setTimeout(() => {
         this.downloadSuccessMessage = false;
       }, 3000);
-
     } catch (error) {
       console.error('Errore durante il download:', error);
       this.downloadErrorMessage = error instanceof Error ? error.message : 'Errore sconosciuto durante il download';
@@ -1887,60 +1648,54 @@ export class AddNewsComponent implements OnInit {
     }
   }
 
-  /**
-   * Formatta l'articolo per il download usando il contenuto locale
-   */
   private formatArticleForDownload(article: any): string {
     let content = '';
-
     if (article.titolo) {
       content += `Title: ${article.titolo}\n\n`;
     }
-
     if (article.sottotitolo) {
       content += `Subtitle: ${article.sottotitolo}\n\n`;
     }
-
     if (article.contenuto) {
       content += `Text: ${article.contenuto}`;
     }
-
     return content || 'Contenuto non disponibile';
   }
 
-  /**
-   * Sanifica il nome del file per il download
-   */
   private sanitizeFileName(fileName: string): string {
     return fileName
-      .replace(/[<>:"/\\|?*]/g, '') // Rimuove caratteri non validi per i nomi file
-      .replace(/\s+/g, '_') // Sostituisce spazi con underscore
-      .substring(0, 100); // Limita la lunghezza
+      .replace(/[<>:"/\\|?*]/g, '')
+      .replace(/\s+/g, '_')
+      .substring(0, 100);
   }
 
   async saveArticle(article: any): Promise<void> {
     if (!this.isArticleValid(article)) {
+      this.updateErrorMessage = 'Il titolo è obbligatorio';
+      setTimeout(() => {
+        this.updateErrorMessage = '';
+      }, 5000);
       return;
     }
 
     this.updatingArticle = true;
     this.updateSuccessMessage = false;
     this.updateErrorMessage = '';
+
     try {
       const token = await this.auth.getAccessTokenSilently().toPromise();
       if (!token) {
         throw new Error('Login required');
       }
-      // Prepara i dati per l'aggiornamento
+
       const updateData = {
         titolo: article.titolo?.trim(),
         sottotitolo: article.sottotitolo?.trim() || null,
         contenuto: article.contenuto?.trim(),
-        link: article.link // Mantieni il link esistente inizialmente
+        link: article.link
       };
 
-      // Se l'articolo ha un blob, aggiorna il contenuto del blob
-      if (article.link && article.link.includes("blob.core.windows.net") && article.link.endsWith(".txt")) {
+      if (article.link && article.link.includes('blob.core.windows.net') && article.link.endsWith('.txt')) {
         try {
           const updatedBlobUrl = await this.updateBlobContent(article, token);
           if (updatedBlobUrl) {
@@ -1948,15 +1703,13 @@ export class AddNewsComponent implements OnInit {
           }
         } catch (blobError) {
           console.warn('Errore nell\'aggiornamento del blob, continuo con l\'aggiornamento del database:', blobError);
-          // Continua comunque con l'aggiornamento del database anche se il blob fallisce
         }
       }
 
-      // Aggiorna l'articolo nel database
       const response = await fetch(`${this.updateArticleUrl}/${article.id}`, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(updateData)
@@ -1965,23 +1718,15 @@ export class AddNewsComponent implements OnInit {
       const result = await response.json();
 
       if (response.ok && result.success) {
-        // Aggiorna l'articolo nella lista locale
-        const index = this.savedArticles.findIndex(a => a.id === article.id);
+        const index = this.myArticles.findIndex(a => a.id === article.id);
         if (index !== -1) {
-          this.savedArticles[index] = {
-            ...this.savedArticles[index],
-            ...updateData,
-            editing: false
-          };
-          delete this.savedArticles[index];
+          this.myArticles[index] = { ...this.myArticles[index], ...updateData, editing: false };
         }
 
         this.updateSuccessMessage = true;
         setTimeout(() => {
           this.updateSuccessMessage = false;
         }, 3000);
-
-        console.log('Articolo aggiornato con successo');
       } else {
         throw new Error(result.error || 'Errore durante l\'aggiornamento dell\'articolo');
       }
@@ -1991,38 +1736,28 @@ export class AddNewsComponent implements OnInit {
       setTimeout(() => {
         this.updateErrorMessage = '';
       }, 5000);
-      alert('⚠️ Devi fare login per continuare');
-      this.auth.loginWithRedirect();
-
     } finally {
       this.updatingArticle = false;
     }
   }
 
-  /**
-   * Aggiorna il contenuto del blob con i nuovi dati dell'articolo
-   */
-  private async updateBlobContent(article: any, token:string): Promise<string | null> {
+  private async updateBlobContent(article: any, token: string): Promise<string | null> {
     try {
-      // Prepara il contenuto nel formato corretto per il blob
       let blobContent = '';
-
       if (article.titolo) {
         blobContent += `Title: ${article.titolo}\n`;
       }
-
       if (article.sottotitolo) {
         blobContent += `Subtitle: ${article.sottotitolo}\n`;
       }
-
       if (article.contenuto) {
         blobContent += `Text: ${article.contenuto}`;
       }
 
-      const response = await fetch(`${this.updateBlob}`, {
+      const response = await fetch(this.updateBlob, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -2035,36 +1770,156 @@ export class AddNewsComponent implements OnInit {
       const result = await response.json();
 
       if (response.ok && result.success) {
-        return result.blob_url || article.link; // Ritorna il nuovo URL o quello esistente
+        return result.blob_url || article.link;
       } else {
         throw new Error(result.error || 'Errore durante l\'aggiornamento del blob');
       }
     } catch (error) {
       console.error('Errore nell\'aggiornamento del blob:', error);
-      throw error; // Rilancia l'errore per essere gestito dal chiamante
+      throw error;
     }
   }
 
-  /**
-   * Annulla le modifiche e ripristina i dati originali
-   */
   cancelEditing(article: any): void {
     if (article.originalData) {
-      // Ripristina i dati originali
       Object.assign(article, article.originalData);
       delete article.originalData;
     }
     article.editing = false;
   }
 
-  /**
-   * Verifica se l'articolo è valido per il salvataggio
-   */
   isArticleValid(article: any): boolean {
     return article.titolo && article.titolo.trim().length > 0;
   }
 
+  onInputChange(): void {
+    if (this.errorMessage) {
+      this.errorMessage = '';
+    }
+  }
 
+  getTitoloLength(): number {
+    return this.newsArticle.titolo?.length || 0;
+  }
 
+  getContenutoLength(): number {
+    return this.newsArticle.contenuto?.length || 0;
+  }
 
+  isFormValid(): boolean {
+    return !!(this.newsArticle.titolo?.trim() && this.newsArticle.contenuto?.trim());
+  }
+
+  resetForm(): void {
+    this.newsArticle = {
+      titolo: '',
+      paragrafo: '',
+      contenuto: ''
+    };
+    this.clearMessages();
+  }
+
+  async onSubmit(): Promise<void> {
+    if (!this.isFormValid()) {
+      this.errorMessage = 'Compila tutti i campi obbligatori';
+      return;
+    }
+
+    this.isSubmitting = true;
+    this.clearMessages();
+
+    try {
+      const token = await this.auth.getAccessTokenSilently().toPromise();
+      if (!token) {
+        throw new Error('Login required');
+      }
+
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      };
+
+      const newsData = {
+        titolo: this.newsArticle.titolo.trim(),
+        paragrafo: this.newsArticle.paragrafo?.trim() || '',
+        contenuto: this.newsArticle.contenuto.trim()
+      };
+
+      this.http.post<{ success: boolean; message: string }>(this.addNewsUrl, newsData, { headers }).subscribe({
+        next: (response) => {
+          console.log('✅ Notizia aggiunta con successo:', response);
+          if (response.success) {
+            this.showSuccessMessage = true;
+            this.addedNews.unshift({
+              ...this.newsArticle,
+              dataCreazione: new Date()
+            });
+            this.resetForm();
+            if (this.activeTab === 'manage') {
+              setTimeout(() => {
+                this.loadMyArticles();
+              }, 1000);
+            }
+            setTimeout(() => {
+              this.showSuccessMessage = false;
+            }, 5000);
+          } else {
+            this.errorMessage = response.message || 'Errore durante il salvataggio della notizia';
+          }
+          this.isSubmitting = false;
+        },
+        error: (error) => {
+          console.error('❌ Errore nell\'aggiunta della notizia:', error);
+          if (error.status === 401) {
+            this.errorMessage = 'Sessione scaduta. Effettua nuovamente il login.';
+            this.auth.loginWithRedirect();
+          } else if (error.status === 403) {
+            this.errorMessage = 'Non hai i permessi per aggiungere notizie.';
+          } else if (error.status === 400) {
+            this.errorMessage = 'Dati non validi: ' + (error.error?.message || 'Controlla i campi inseriti');
+          } else {
+            this.errorMessage = 'Errore durante il salvataggio: ' + (error.error?.message || error.message || 'Errore sconosciuto');
+          }
+          this.isSubmitting = false;
+        }
+      });
+    } catch (err) {
+      this.errorMessage = 'Devi fare login per continuare';
+      this.isSubmitting = false;
+      this.auth.loginWithRedirect();
+    }
+  }
+
+  toggleAddedNews(): void {
+    this.showAddedNews = !this.showAddedNews;
+  }
+
+  formatDate(date: Date): string {
+    return date.toLocaleDateString('it-IT', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  formatArticleDate(dateString: string): string {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('it-IT', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      return dateString;
+    }
+  }
+
+  goToHome(): void {
+    this.router.navigate(['/']);
+  }
 }
