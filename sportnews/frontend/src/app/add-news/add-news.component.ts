@@ -1274,7 +1274,7 @@ export class AddNewsComponent implements OnInit {
   downloadSuccessMessage: boolean = false;
   downloadErrorMessage: string = '';
 
-  constructor(private http: HttpClient, private router: Router, public auth: AuthService,          // <-- inietti AuthService
+  constructor(private http: HttpClient, private router: Router, public auth: AuthService,
     @Inject(PLATFORM_ID) private platformId: Object) {
     console.log('AddNewsComponent constructor called');
   }
@@ -1299,10 +1299,10 @@ export class AddNewsComponent implements OnInit {
   }
 
   toggleArticleExpansion(article: SavedArticle): void {
-    article.expanded = !article.expanded;
     if (article.expanded && !article.contenuto) {
       this.loadContent(article);
     }
+    article.expanded = !article.expanded;
   }
 
   ngOnInit(): void {
