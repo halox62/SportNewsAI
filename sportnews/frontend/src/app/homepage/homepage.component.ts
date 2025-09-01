@@ -58,11 +58,7 @@ export class HomepageComponent implements OnInit {
 
   async searchArticles(): Promise<void> {
   if (!this.searchTerm.trim()) return;
-  try {
-    const token = await this.auth.getAccessTokenSilently();
-    if (!token) {
-     // throw new Error('Login required');
-    }
+  const token = await this.auth.getAccessTokenSilently().toPromise();
 
   const headers = new HttpHeaders({
     Authorization: `Bearer ${token}`
@@ -85,13 +81,6 @@ export class HomepageComponent implements OnInit {
         this.isLoading = false;
       }
     });
-  } catch (err) {
-    console.error('Token error:', err);
-    alert('⚠️ Devi fare login per continuare')
-
-    return;
-  }
-
 }
 
   toggleSelectAll(): void {
@@ -127,11 +116,7 @@ export class HomepageComponent implements OnInit {
 
     const selectedUrls = selected.map(a => a.link);
     this.isGenerating = true;
-    try {
-      const token = await this.auth.getAccessTokenSilently();
-      if (!token) {
-        throw new Error('Login required');
-      }
+    const token = await this.auth.getAccessTokenSilently().toPromise();
 
     fetch('https://sport.event-fit.it/api/v1/genArticle', {
       method: 'POST',
@@ -161,10 +146,6 @@ export class HomepageComponent implements OnInit {
       this.isGenerating = false;
       alert('Errore nella generazione dell\'articolo. Riprova.');
     });
-  } catch (err) {
-    alert('⚠️ Devi fare login per continuare');
-    return;
-  }
   }
 
 
@@ -258,21 +239,12 @@ export class HomepageComponent implements OnInit {
     this.isSavingArticle = true;
     this.saveSuccessMessage = false;
     this.saveErrorMessage = '';
-    const token="";
+
     try {
-      const token = await this.auth.getAccessTokenSilently();
+      const token = await this.auth.getAccessTokenSilently().toPromise();
       if (!token) {
-        throw new Error('Login required');
+        return;
       }
-    } catch (err) {
-      console.error('Token error:', err);
-      alert('⚠️ Devi fare login per continuare')
-
-      return;
-    }
-
-    try {
-
 
       const cleanTitle = this.generatedArticle.title.trim();
       const cleanSubtitle = this.generatedArticle.subtitle?.trim() || '';
