@@ -261,6 +261,7 @@ export class HomepageComponent implements OnInit {
         paragrafo: cleanSubtitle || null,
         contenuto: blobContent
       };
+      console.log(`${this.baseUrl}/save`)
 
       const response = await fetch(`${this.baseUrl}/save`, {
         method: 'POST',
@@ -272,6 +273,7 @@ export class HomepageComponent implements OnInit {
       });
 
       const result = await response.json();
+      console.log(result)
 
       if (response.ok && result.success) {
         this.articleSaved = true;
