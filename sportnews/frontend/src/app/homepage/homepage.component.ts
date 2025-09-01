@@ -59,7 +59,7 @@ export class HomepageComponent implements OnInit {
   async searchArticles(): Promise<void> {
   if (!this.searchTerm.trim()) return;
   try {
-    const token = await this.auth.getAccessTokenSilently();
+    const token = await this.auth.getAccessTokenSilently().toPromise;
     if (!token) {
       throw new Error('Login required');
     }
