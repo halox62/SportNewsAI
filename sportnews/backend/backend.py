@@ -140,10 +140,7 @@ def requires_auth(f):
         if parts[0].lower() != "bearer" or len(parts) != 2:
             return jsonify({"message": "Invalid authorization header"}), 401
 
-
         token = parts[1]
-
-
 
         try:
             jwks_url = f"https://{AUTH0_DOMAIN}/.well-known/jwks.json"
@@ -573,10 +570,6 @@ def delete_article(article_id, user_payload):
 @app.route("/api/v1/update-blob-content", methods=["POST"])
 @requires_auth
 def update_blob_content(user_payload):
-    """
-    Aggiorna il contenuto di un blob esistente e opzionalmente aggiorna
-    i dati dell'articolo nel DB.
-    """
     try:
         data = request.get_json()
         article_id = data.get("article_id")

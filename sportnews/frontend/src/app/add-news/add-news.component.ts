@@ -320,6 +320,7 @@ interface SavedArticle {
                   </div>
                 </div>
                 <div class="form-group">
+                <pre>{{ article | json }}</pre>
                   <label class="form-label">📄 Contenuto</label>
                   <textarea
                     class="form-textarea content-textarea"
@@ -1993,7 +1994,6 @@ export class AddNewsComponent implements OnInit {
         blobContent += `Text: ${article.contenuto}`;
       }
 
-      // Chiamata API per aggiornare il blob
       const response = await fetch(`${this.updateBlob}`, {
         method: 'POST',
         headers: {
