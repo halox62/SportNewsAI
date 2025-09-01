@@ -82,8 +82,8 @@ export class HomepageComponent implements OnInit {
         console.error('Errore nella ricerca:', error);
         this.isLoading = false;
         if (error.status === 401) {
-          alert('⚠️ Devi fare login per continuare');
-          this.auth.loginWithRedirect(); // reindirizza al login
+         // alert('⚠️ Devi fare login per continuare');
+         // this.auth.loginWithRedirect(); // reindirizza al login
         } else {
           alert('Errore durante la ricerca: ' + (error.message || 'Sconosciuto'));
         }
