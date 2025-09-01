@@ -274,7 +274,7 @@ interface SavedArticle {
                 </div>
               </div>
               <h3 class="1">
-                article-title">{{ article.titolo }}</h3>
+                {{ article.titolo }}</h3>
               <p class="article-subtitle" *ngIf="article.sottotitolo">{{ article.sottotitolo }}</p>
               <div class="article-content-section" *ngIf="article.contenuto">
                 <div class="article-content-display" [class.article-content-preview]="!article.expanded">
