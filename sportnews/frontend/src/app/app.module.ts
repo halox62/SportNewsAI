@@ -11,7 +11,6 @@ import { CommonModule } from '@angular/common';
 import { Nl2brPipe } from './nl2br.pipe';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AuthInterceptor } from './auth.interceptor';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 
 
@@ -26,7 +25,6 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     BrowserModule,
     HttpClientModule,
     FormsModule,
-    BrowserAnimationsModule,
     CommonModule,
     RouterModule.forRoot([
         { path: '', component: HomepageComponent },
