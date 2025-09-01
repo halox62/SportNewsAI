@@ -1299,10 +1299,13 @@ export class AddNewsComponent implements OnInit {
   }
 
   toggleArticleExpansion(article: SavedArticle): void {
+    article.expanded = !article.expanded;
+    console.log('Expanded:', article.expanded, 'Contenuto:', article.contenuto);
+
     if (article.expanded && !article.contenuto) {
+      console.log('Chiamo loadContent...');
       this.loadContent(article);
     }
-    article.expanded = !article.expanded;
   }
 
   ngOnInit(): void {
