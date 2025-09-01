@@ -379,7 +379,7 @@ def add_news(user_payload):
 
 @app.route("/api/v1/save", methods=["POST"])
 @requires_auth
-def add_news(user_payload):
+def save(user_payload):
     try:
         auth0_id = user_payload.get("sub")
         session = SessionLocal()
@@ -464,7 +464,7 @@ def get_my_articles(user_payload):
 
 @app.route("/api/v1/my-articles-save", methods=["GET"])
 @requires_auth
-def get_my_articles(user_payload):
+def get_my_articles_save(user_payload):
     try:
         auth0_id = user_payload.get("sub")
         session = SessionLocal()
