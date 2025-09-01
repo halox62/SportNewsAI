@@ -127,7 +127,11 @@ export class HomepageComponent implements OnInit {
 
     const selectedUrls = selected.map(a => a.link);
     this.isGenerating = true;
-    const token = await this.auth.getAccessTokenSilently().toPromise();
+    try {
+      const token = await this.auth.getAccessTokenSilently().toPromise();
+      if (!token) {
+        throw new Error('Login required');
+      }
 
     fetch('https://sport.event-fit.it/api/v1/genArticle', {
       method: 'POST',
@@ -157,6 +161,10 @@ export class HomepageComponent implements OnInit {
       this.isGenerating = false;
       alert('Errore nella generazione dell\'articolo. Riprova.');
     });
+  } catch (err) {
+    alert('⚠️ Devi fare login per continuare');
+    return;
+  }
   }
 
 

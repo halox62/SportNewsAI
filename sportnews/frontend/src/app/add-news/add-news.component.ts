@@ -1313,7 +1313,12 @@ export class AddNewsComponent implements OnInit {
     this.loadingArticles = true;
     this.clearMessages();
 
-    const token = await this.auth.getAccessTokenSilently().toPromise();
+    try {
+      const token = await this.auth.getAccessTokenSilently();
+      if (!token) {
+        throw new Error('Login required');
+      }
+
     const headers = { Authorization: `Bearer ${token}` };
 
     this.http.get<{success: boolean, results: SavedArticle[]}>(this.myArticlesUrl, { headers }).subscribe({
@@ -1333,13 +1338,22 @@ export class AddNewsComponent implements OnInit {
         this.updatingArticle = false;
       }
     });
+  } catch (err) {
+    console.error('Token error:', err);
+    alert('⚠️ Devi fare login per continuare')
+    return;
+  }
   }
 
   async loadMySave(): Promise<void> {
     this.loadingArticles = true;
     this.clearMessages();
 
-    const token = await this.auth.getAccessTokenSilently().toPromise();
+    try {
+      const token = await this.auth.getAccessTokenSilently();
+      if (!token) {
+        throw new Error('Login required');
+      }
     const headers = { Authorization: `Bearer ${token}` };
 
     this.http.get<{success: boolean, results: SavedArticle[]}>(this.mySaveUrl, { headers }).subscribe({
@@ -1359,6 +1373,11 @@ export class AddNewsComponent implements OnInit {
         this.updatingArticle = false;
       }
     });
+  } catch (err) {
+    console.error('Token error:', err);
+    alert('⚠️ Devi fare login per continuare')
+    return;
+  }
   }
 
   confirmDeleteArticle(article: any): void {
@@ -1384,14 +1403,20 @@ export class AddNewsComponent implements OnInit {
     if (!this.articleToDelete) return;
 
     this.deletingArticle = this.articleToDelete.id;
+    const token="";
+    try {
+      const token = await this.auth.getAccessTokenSilently();
+      if (!token) {
+        throw new Error('Login required');
+      }
+    } catch (err) {
+      console.error('Token error:', err);
+      alert('⚠️ Devi fare login per continuare')
+      return;
+    }
 
     try {
-      const token = await this.auth.getAccessTokenSilently().toPromise();
-      if (!token) {
-        this.errorMessage = 'Token di autenticazione mancante. Effettua il login.';
-        this.isSubmitting = false;
-        return;
-      }
+
 
       const response = await fetch(`${this.deleteArticleUrl}/${this.articleToDelete.id}`, {
         method: 'DELETE',
@@ -1549,11 +1574,15 @@ export class AddNewsComponent implements OnInit {
 
     this.isSubmitting = true;
     this.clearMessages();
-
-    const token = await this.auth.getAccessTokenSilently().toPromise();
-    if (!token) {
-      this.errorMessage = 'Token di autenticazione mancante. Effettua il login.';
-      this.isSubmitting = false;
+    const token="";
+    try {
+      const token = await this.auth.getAccessTokenSilently();
+      if (!token) {
+        throw new Error('Login required');
+      }
+    } catch (err) {
+      console.error('Token error:', err);
+      alert('⚠️ Devi fare login per continuare')
       return;
     }
 
@@ -1879,14 +1908,20 @@ export class AddNewsComponent implements OnInit {
     this.updatingArticle = true;
     this.updateSuccessMessage = false;
     this.updateErrorMessage = '';
-
+    const token="";
     try {
       const token = await this.auth.getAccessTokenSilently().toPromise();
       if (!token) {
-        this.errorMessage = 'Token di autenticazione mancante. Effettua il login.';
-        this.isSubmitting = false;
-        return;
+        throw new Error('Login required');
       }
+    } catch (err) {
+      console.error('Token error:', err);
+      alert('⚠️ Devi fare login per continuare')
+      return;
+    }
+
+    try {
+
 
       // Prepara i dati per l'aggiornamento
       const updateData = {
