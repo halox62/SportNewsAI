@@ -335,7 +335,7 @@ def genera_notizia_da_url(user_payload):
     return jsonify({"article": article})
 
 
-"""@app.route("/api/v1/addNews", methods=["POST"])
+@app.route("/api/v1/addNews", methods=["POST"])
 @requires_auth
 def add_news(user_payload):
     try:
@@ -373,7 +373,7 @@ def add_news(user_payload):
 
     except Exception as e:
         session.close()
-        return jsonify({"success": False, "error": str(e)}), 500"""
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
 
@@ -381,7 +381,6 @@ def add_news(user_payload):
 @requires_auth
 def save(user_payload):
     try:
-        print("save")
         auth0_id = user_payload.get("sub")
         session = SessionLocal()
         user = session.query(User).filter_by(auth0Id=auth0_id).first()
