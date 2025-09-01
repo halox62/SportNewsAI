@@ -246,13 +246,7 @@ interface SavedArticle {
                   <button class="btn-icon" (click)="openArticleContent(article)" title="Visualizza">
                     👁️
                   </button>
-                  <button
-                    class="btn-icon"
-                    (click)="toggleArticleExpansion(article)"
-                    title="Espandi/Comprimi"
-                  >
-                    {{ article.expanded ? '📖' : '📑' }}
-                  </button>
+
                   <button
                     class="btn-icon"
                     (click)="downloadArticle(article)"
@@ -441,13 +435,7 @@ interface SavedArticle {
                   <button class="btn-icon" (click)="openArticleContent(article)" title="Visualizza">
                     👁️
                   </button>
-                  <button
-                    class="btn-icon"
-                    (click)="toggleArticleExpansion(article)"
-                    title="Espandi/Comprimi"
-                  >
-                    {{ article.expanded ? '📖' : '📑' }}
-                  </button>
+
                   <button
                     class="btn-icon"
                     (click)="downloadArticle(article)"
