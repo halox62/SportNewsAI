@@ -59,6 +59,14 @@ interface SavedArticle {
           >
             📚 I Miei Articoli ({{ savedArticles.length }})
           </button>
+
+          <button
+            class="tab-button"
+            [class.active]="activeTab === 'manage'"
+            (click)="setActiveTab('manage')"
+          >
+            📚 Salvati ({{ savedArticles.length }})
+          </button>
         </div>
 
         <!-- Tab Content: Aggiungi Notizia -->
