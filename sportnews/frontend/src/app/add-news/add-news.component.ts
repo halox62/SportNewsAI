@@ -27,6 +27,7 @@ interface SavedArticle {
   originalContenuto?: string;
 }
 
+
 @Component({
   selector: 'app-add-news',
   standalone: false,
@@ -1391,6 +1392,7 @@ export class AddNewsComponent implements OnInit {
 
   // Gestione articoli salvati
   savedArticles: SavedArticle[] = [];
+  myArticles: SavedArticle[] = [];
   loadingArticles: boolean = false;
   updatingArticle: boolean = false;
   updateSuccessMessage: boolean = false;
@@ -1421,7 +1423,7 @@ export class AddNewsComponent implements OnInit {
   // Tab Management
   setActiveTab(tab: 'add' | 'manage' | 'save'): void {
     this.activeTab = tab;
-    if (tab === 'manage' && this.savedArticles.length === 0) {
+    if (tab === 'manage' && this.myArticles.length === 0) {
       this.loadMyArticles();
     }
     if (tab === 'save' && this.savedArticles.length === 0) {
@@ -1451,7 +1453,7 @@ export class AddNewsComponent implements OnInit {
       next: (response) => {
         console.log('✅ Articoli caricati:', response);
         if (response.success) {
-          this.savedArticles = response.results.map(article => ({
+          this.myArticles = response.results.map(article => ({
             ...article,
             editing: false
           }));
@@ -1539,6 +1541,9 @@ export class AddNewsComponent implements OnInit {
         this.savedArticles = this.savedArticles.filter(
           article => article.id !== this.articleToDelete.id
         );
+        this.myArticles = this.myArticles.filter(
+          article => article.id !== this.articleToDelete.id
+        );
 
         // Mostra messaggio di successo
         this.deleteSuccessMessage = true;
@@ -1574,8 +1579,6 @@ export class AddNewsComponent implements OnInit {
   toggleArticleExpansion(article: SavedArticle): void {
     article.expanded = !article.expanded;
   }
-
-
 
 
   private handleSuccess(): void {
