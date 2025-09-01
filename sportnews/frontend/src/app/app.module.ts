@@ -9,8 +9,8 @@ import { HomepageComponent } from './homepage/homepage.component';
 import { AddNewsComponent } from './add-news/add-news.component';
 import { CommonModule } from '@angular/common';
 import { Nl2brPipe } from './nl2br.pipe';
-//import { HTTP_INTERCEPTORS } from '@angular/common/http';
-//import { AuthInterceptor } from './auth.interceptor';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { AuthInterceptor } from './auth.interceptor';
 
 
 
@@ -40,7 +40,13 @@ import { Nl2brPipe } from './nl2br.pipe';
         }
     })
   ],
-  providers: [],
+  providers: [
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true
+    }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule {}
