@@ -24,7 +24,7 @@ export class AuthInterceptor implements HttpInterceptor {
             alert('⚠️ Sessione scaduta o non autenticato. Verrai reindirizzato al login.');
 
             // Redirect
-            this.auth.loginWithRedirect();
+           // this.auth.loginWithRedirect();
           });
         }
         return throwError(() => error);
