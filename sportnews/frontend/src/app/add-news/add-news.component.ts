@@ -65,7 +65,7 @@ interface SavedArticle {
             [class.active]="activeTab === 'save'"
             (click)="setActiveTab('save')"
           >
-            📚 Salvati ({{ savedArticles.length }})
+          ⛉ Salvati ({{ savedArticles.length }})
           </button>
         </div>
 
@@ -419,6 +419,245 @@ interface SavedArticle {
         </div>
       </div>
     </div>
+
+    <!-- Modal di conferma eliminazione -->
+    <div class="modal-overlay" *ngIf="showDeleteModal" (click)="cancelDelete()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>🗑️ Conferma Eliminazione</h3>
+        </div>
+        <div class="modal-body">
+          <p>Sei sicuro di voler eliminare questo articolo?</p>
+          <div class="article-to-delete" *ngIf="articleToDelete">
+            <strong>{{ articleToDelete.titolo }}</strong>
+            <small class="text-muted">{{ formatArticleDate(articleToDelete.data) }}</small>
+          </div>
+          <p class="warning-text">⚠️ Questa azione non può essere annullata.</p>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" (click)="cancelDelete()" [disabled]="deletingArticle">
+            ❌ Annulla
+          </button>
+          <button
+            class="btn btn-danger"
+            (click)="deleteArticle()"
+            [disabled]="deletingArticle"
+          >
+            <span *ngIf="!deletingArticle">🗑️ Elimina</span>
+            <span *ngIf="deletingArticle">⏳ Eliminando...</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-content" *ngIf="activeTab === 'save'">
+          <!-- Loading state -->
+          <div class="loading-container" *ngIf="loadingArticles">
+            <div class="loading-spinner">⏳</div>
+            <p>Caricamento articoli...</p>
+          </div>
+
+          <!-- Empty state -->
+          <div class="empty-state" *ngIf="!loadingArticles && savedArticles.length === 0">
+            <div class="empty-icon">📰</div>
+            <h3>Nessun articolo trovato</h3>
+            <p>Non hai ancora salvato nessun articolo.</p>
+          </div>
+
+          <!-- Articles list -->
+          <div class="articles-container" *ngIf="!loadingArticles && savedArticles.length > 0">
+            <div class="articles-header">
+              <h2>📚 I Tuoi Articoli Salvati</h2>
+              <button class="btn btn-secondary" (click)="loadMyArticles()">
+                🔄 Ricarica
+              </button>
+            </div>
+
+            <div class="articles-list">
+              <div class="article-item" *ngFor="let article of savedArticles; let i = index">
+                <!-- Modalità visualizzazione -->
+                <div class="article-content" *ngIf="!article.editing">
+                  <div class="article-header">
+                    <div class="article-info">
+                      <span class="article-number">#{{ i + 1 }}</span>
+                      <span class="article-date">{{ formatArticleDate(article.data) }}</span>
+                    </div>
+                    <div class="article-actions">
+
+                      <button class="btn-icon" (click)="openArticleContent(article)" title="Visualizza">
+                        👁️
+                      </button>
+                      <button
+                        class="btn-icon"
+                        (click)="toggleArticleExpansion(article)"
+                        title="Espandi/Comprimi"
+                        *ngIf="article.contenuto && article.contenuto.length > 150"
+                      >
+                        {{ article.expanded ? '📖' : '📑' }}
+                      </button>
+                      <button
+                        class="btn-icon"
+                        (click)="downloadArticle(article)"
+                        title="Scarica"
+                        [disabled]="downloadingArticle === article.id"
+                      >
+                        <span *ngIf="downloadingArticle !== article.id">💾</span>
+                        <span *ngIf="downloadingArticle === article.id">⏳</span>
+                      </button>
+                      <button
+                        class="btn-icon btn-delete"
+                        (click)="confirmDeleteArticle(article)"
+                        title="Elimina"
+                        [disabled]="deletingArticle === article.id"
+                      >
+                        <span *ngIf="deletingArticle !== article.id">🗑️</span>
+                        <span *ngIf="deletingArticle === article.id">⏳</span>
+                      </button>
+                    </div>
+                  </div>
+                  <h3 class="article-title">{{ article.titolo }}</h3>
+                  <p class="article-subtitle" *ngIf="article.sottotitolo">{{ article.sottotitolo }}</p>
+
+                  <!-- Contenuto dell'articolo -->
+                  <div class="article-content-section" *ngIf="article.contenuto">
+                    <div class="article-content-display" [class.article-content-preview]="!article.expanded">
+                      {{ article.contenuto }}
+                    </div>
+                    <button
+                      class="expand-content-btn"
+                      (click)="toggleArticleExpansion(article)"
+                      *ngIf="article.contenuto.length > 150"
+                    >
+                      {{ article.expanded ? '▲ Mostra meno' : '▼ Mostra tutto' }}
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Modalità modifica -->
+                <div class="article-edit-content" *ngIf="article.editing">
+                  <div class="edit-form">
+                    <div class="form-group">
+                      <label class="form-label">📰 Titolo</label>
+                      <input
+                        type="text"
+                        class="form-input"
+                        [(ngModel)]="article.titolo"
+                        maxlength="200"
+                        placeholder="Titolo dell'articolo..."
+                      />
+                      <div class="field-info">
+                        <small>Caratteri: {{ article.titolo?.length || 0 }}/200</small>
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label class="form-label">📝 Sottotitolo</label>
+                      <textarea
+                        class="form-textarea"
+                        [(ngModel)]="article.sottotitolo"
+                        rows="3"
+                        maxlength="500"
+                        placeholder="Breve descrizione o sottotitolo..."
+                      ></textarea>
+                      <div class="field-info">
+                        <small>Caratteri: {{ article.sottotitolo?.length || 0 }}/500</small>
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label class="form-label">📄 Contenuto</label>
+                      <textarea
+                        class="form-textarea content-textarea"
+                        [(ngModel)]="article.contenuto"
+                        rows="8"
+                        maxlength="2000"
+                        placeholder="Contenuto completo dell'articolo..."
+                      ></textarea>
+                      <div class="field-info">
+                        <small>Caratteri: {{ article.contenuto?.length || 0 }}/2000</small>
+                      </div>
+                    </div>
+
+                    <div class="edit-actions">
+                      <button class="btn btn-secondary" (click)="cancelEditing(article)">
+                        ❌ Annulla
+                      </button>
+                      <button
+                        class="btn btn-primary"
+                        (click)="saveArticle(article)"
+                        [disabled]="updatingArticle || !isArticleValid(article)"
+                      >
+                        <span *ngIf="!updatingArticle">💾 Salva Modifiche</span>
+                        <span *ngIf="updatingArticle">⏳ Salvando...</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Download status messages -->
+          <div class="status-messages" *ngIf="downloadSuccessMessage || downloadErrorMessage">
+            <div class="success-message" *ngIf="downloadSuccessMessage">
+              <div class="message-icon">✅</div>
+              <div class="message-content">
+                <h3>Download completato!</h3>
+                <p>L'articolo è stato scaricato con successo.</p>
+              </div>
+            </div>
+
+            <div class="error-message" *ngIf="downloadErrorMessage">
+              <div class="message-icon">❌</div>
+              <div class="message-content">
+                <h3>Errore nel download</h3>
+                <p>{{ downloadErrorMessage }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Delete status messages -->
+          <div class="status-messages" *ngIf="deleteSuccessMessage || deleteErrorMessage">
+            <div class="success-message" *ngIf="deleteSuccessMessage">
+              <div class="message-icon">✅</div>
+              <div class="message-content">
+                <h3>Articolo eliminato!</h3>
+                <p>L'articolo è stato eliminato con successo.</p>
+              </div>
+            </div>
+
+            <div class="error-message" *ngIf="deleteErrorMessage">
+              <div class="message-icon">❌</div>
+              <div class="message-content">
+                <h3>Errore nell'eliminazione</h3>
+                <p>{{ deleteErrorMessage }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+      <!-- Lista notizie aggiunte -->
+      <div class="recent-news-section" *ngIf="addedNews.length > 0 && activeTab === 'add'">
+        <div class="section-header">
+          <h2 class="section-title">📚 Notizie Aggiunte ({{ addedNews.length }})</h2>
+          <button class="toggle-button" (click)="toggleAddedNews()">
+            {{ showAddedNews ? '▲ Nascondi' : '▼ Mostra' }}
+          </button>
+        </div>
+
+        <div class="recent-news-list" *ngIf="showAddedNews">
+          <div class="recent-news-item" *ngFor="let news of addedNews; let i = index">
+            <div class="news-item-header">
+              <span class="news-number">#{{ i + 1 }}</span>
+              <span class="news-date">{{ formatDate(news.dataCreazione!) }}</span>
+            </div>
+            <h3 class="news-title">{{ news.titolo }}</h3>
+            <p class="news-subtitle">{{ news.contenuto }}</p>
+          </div>
+        </div>
+      </div>
+
 
     <!-- Modal di conferma eliminazione -->
     <div class="modal-overlay" *ngIf="showDeleteModal" (click)="cancelDelete()">
