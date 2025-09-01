@@ -13,5 +13,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copia il codice
 COPY . .
 
-# Comando di avvio con gunicorn
-CMD ["gunicorn", "-b", "0.0.0.0:5000", "backend:app"]
+# Script di avvio
+COPY start.sh .
+RUN chmod +x start.sh
+
+CMD ["./start.sh"]

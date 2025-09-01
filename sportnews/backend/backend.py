@@ -47,8 +47,8 @@ DB_CONFIG = {
     #"ssl_ca": "DigiCertGlobalRootCA.crt.pem"
 }
 
-AUTH0_DOMAIN = os.getenv("AUTH0_DOMAIN")  # es: "dev-crydqe7sub8m26h7.us.auth0.com"
-API_AUDIENCE = os.getenv("API_AUDIENCE")  # es: "https://myapi/"
+AUTH0_DOMAIN = os.getenv("AUTH0_DOMAIN")
+API_AUDIENCE = os.getenv("API_AUDIENCE")
 ALGORITHMS = ["RS256"]
 
 
@@ -616,7 +616,6 @@ def update_blob_content(user_payload):
         return jsonify({"success": False, "error": str(e)}), 500
 
 if __name__ == '__main__':
-    Base.metadata.create_all(engine)
     app.run(host = 'localhost', port = 8080, debug = True)
 
 
