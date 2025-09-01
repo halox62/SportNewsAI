@@ -320,19 +320,24 @@ interface SavedArticle {
                   </div>
                 </div>
                 <div class="form-group">
-                <pre>{{ article | json }}</pre>
-                  <label class="form-label">📄 Contenuto</label>
-                  <textarea
-                    class="form-textarea content-textarea"
-                    [(ngModel)]="article.contenuto"
-                    rows="8"
-                    maxlength="2000"
-                    placeholder="Contenuto completo dell'articolo..."
-                  ></textarea>
-                  <div class="field-info">
-                    <small>Caratteri: {{ article.contenuto?.length || 0 }}/2000</small>
-                  </div>
+                <label class="form-label">📄 Contenuto</label>
+
+                <button type="button" (click)="loadContent(article)">
+                  📄 Carica contenuto
+                </button>
+
+                <textarea
+                  class="form-textarea content-textarea"
+                  [(ngModel)]="article.contenuto"
+                  rows="8"
+                  maxlength="2000"
+                  placeholder="Contenuto completo dell'articolo..."
+                ></textarea>
+
+                <div class="field-info">
+                  <small>Caratteri: {{ article.contenuto?.length || 0 }}/2000</small>
                 </div>
+              </div>
                 <div class="edit-actions">
                   <button class="btn btn-secondary" (click)="cancelEditing(article)">
                     ❌ Annulla
@@ -1276,6 +1281,25 @@ export class AddNewsComponent implements OnInit {
   constructor(private http: HttpClient, private router: Router, public auth: AuthService,          // <-- inietti AuthService
     @Inject(PLATFORM_ID) private platformId: Object) {
     console.log('AddNewsComponent constructor called');
+  }
+
+  loadContent(article: SavedArticle): void {
+    if (!article.link) {
+      console.error('Nessun link al blob trovato');
+      return;
+    }
+
+    this.http.get(article.link, { responseType: 'text' })
+      .subscribe({
+        next: (text: string) => {
+          article.contenuto = text;
+          console.log('Contenuto caricato:', text.substring(0, 100) + '...');
+        },
+        error: (err) => {
+          console.error('Errore caricando contenuto:', err);
+          alert('⚠️ Errore nel recupero del contenuto dell\'articolo');
+        }
+      });
   }
 
   ngOnInit(): void {
