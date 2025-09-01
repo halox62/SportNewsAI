@@ -9,8 +9,6 @@ import { HomepageComponent } from './homepage/homepage.component';
 import { AddNewsComponent } from './add-news/add-news.component';
 import { CommonModule } from '@angular/common';
 import { Nl2brPipe } from './nl2br.pipe';
-import { HTTP_INTERCEPTORS } from '@angular/common/http';
-import { AuthInterceptor } from './auth.interceptor';
 
 
 
@@ -40,13 +38,7 @@ import { AuthInterceptor } from './auth.interceptor';
         }
     })
   ],
-  providers: [
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: AuthInterceptor,
-      multi: true
-    }
-  ],
+  providers: [],
   bootstrap: [AppComponent]
 })
 export class AppModule {}
