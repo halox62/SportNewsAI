@@ -366,19 +366,20 @@ def genera_notizia_da_url(user_payload):
     joined_text = "\n\n---\n\n".join(combined_texts)
 
     prompt = f"""
-    Read the content of the following sports news articles:
+Read the content of the following sports news articles:
 
-    {joined_text}
+{joined_text}
 
-    Using the information from all these sources, write a single coherent sports news article in the following format:
+Using the information from all these sources, write a single coherent sports news article in the following format:
 
-    Title: (max 80 characters)
-    Subtitle: (max 120 characters)
-    Text: A concise summary of all the key facts combined from the articles, no longer than 500 characters.
+Title: (max 80 characters)
+Subtitle: (max 120 characters)
+Text: A concise summary of all the key facts combined from the articles, no longer than 500 characters.
 
-    The article must be factual, concise, and written in a neutral journalistic style. Avoid repetition and merge overlapping information.
-    """
+The article must be factual, concise, and written in a neutral journalistic style. Avoid repetition and merge overlapping information.
 
+The article must be written in Italian.
+"""
     response = llm.invoke(prompt)
     article = response.content.strip()
 
@@ -650,9 +651,6 @@ def update_blob_content(user_payload):
         blob_client = blob_service_client.get_blob_client(container_name, blob_url.split("/")[-1])
         blob_client.upload_blob(content, overwrite=True)
 
-        # Aggiorna eventualmente altri campi del DB (titolo, paragrafo, ecc.)
-        # articolo.titolo = data.get("titolo", articolo.titolo)
-        # articolo.paragrafo = data.get("sottotitolo", articolo.paragrafo)
         session.commit()
         session.close()
 
