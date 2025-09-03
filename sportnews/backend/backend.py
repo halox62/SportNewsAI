@@ -241,7 +241,6 @@ def search_news(user_payload):
               params_everything = {
                   'q': f'"{keyword}"',
                   'language': 'it',
-                  'from': '2020-01-01',
                   'sources': 'ansa,it,la-gazzetta-dello-sport,it-sky-sport',
                   'sortBy': 'publishedAt',
                   'pageSize': 20,
