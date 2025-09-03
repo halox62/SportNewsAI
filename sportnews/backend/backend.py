@@ -241,9 +241,20 @@ def search_news(user_payload):
             print(f"[WARN] Errore DB: {e}")
 
 
-        unique_results = {item["link"]: item for item in combined_results if item.get("link")}
-        results = list(unique_results.values())
+        unique_results = {}
+        for item in combined_results:
+            titolo = (item.get("titolo") or "").strip().lower()
+            link = (item.get("link") or "").strip().lower()
 
+            if titolo in unique_results or link in unique_results:
+                continue
+
+            if titolo:
+                unique_results[titolo] = item
+            elif link:
+                unique_results[link] = item
+
+        results = list(unique_results.values())
 
         results.sort(key=lambda x: x.get("data") or "", reverse=True)
 
