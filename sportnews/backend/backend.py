@@ -217,7 +217,7 @@ def search_news(user_payload):
               'q': keyword,
               'category': 'sports',
               'language': 'it',
-              'pageSize': 5,
+              'pageSize': 20,
               'apiKey': API_KEY
           }
           response = requests.get(url_headlines, params=params_headlines, timeout=5)
@@ -238,11 +238,11 @@ def search_news(user_payload):
               # --- 2️⃣ Fallback: everything con query sportiva ---
               url_everything = 'https://newsapi.org/v2/everything'
               params_everything = {
-                  'q': f'"{keyword}" AND (calcio OR sport OR partita OR torneo OR squadra OR atleta)',
+                  'q': f'"{keyword}" AND (sport OR atleta)',
                   'language': 'it',
                   'sources': 'ansa,it,la-gazzetta-dello-sport,it-sky-sport',
                   'sortBy': 'publishedAt',
-                  'pageSize': 5,
+                  'pageSize': 20,
                   'apiKey': API_KEY
               }
               response = requests.get(url_everything, params=params_everything, timeout=5)
