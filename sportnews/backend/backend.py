@@ -214,7 +214,7 @@ def search_news(user_payload):
           # --- 1️⃣ Proviamo top-headlines categoria sport ---
           url_headlines = 'https://newsapi.org/v2/top-headlines'
           params_headlines = {
-              'q': keyword,
+              'q': f'"{keyword}"',
               'category': 'sports',
               'language': 'it',
               'pageSize': 10,
