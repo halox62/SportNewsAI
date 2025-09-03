@@ -217,7 +217,8 @@ def search_news(user_payload):
               'q': f'"{keyword}"',
               'category': 'sports',
               'language': 'it',
-              'pageSize': 10,
+              'from': '2020-01-01',
+              'pageSize': 20,
               'apiKey': API_KEY
           }
           response = requests.get(url_headlines, params=params_headlines, timeout=5)
@@ -240,6 +241,7 @@ def search_news(user_payload):
               params_everything = {
                   'q': f'"{keyword}"',
                   'language': 'it',
+                  'from': '2020-01-01',
                   'sources': 'ansa,it,la-gazzetta-dello-sport,it-sky-sport',
                   'sortBy': 'publishedAt',
                   'pageSize': 20,
@@ -271,11 +273,11 @@ def search_news(user_payload):
             print(f"[WARN] Errore DB: {e}")
 
         keyword_lower = keyword.lower()
-        """combined_results = [
+        combined_results = [
             art for art in combined_results
             if keyword_lower in (art.get("titolo") or "").lower()
                or keyword_lower in (art.get("sottotitolo") or "").lower()
-        ]"""
+        ]
 
         unique_results = {}
         for item in combined_results:
