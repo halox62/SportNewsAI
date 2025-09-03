@@ -273,12 +273,12 @@ def search_news(user_payload):
         except Exception as e:
             print(f"[WARN] Errore DB: {e}")
 
-        keyword_lower = keyword.lower()
+        """keyword_lower = keyword.lower()
         combined_results = [
             art for art in combined_results
             if keyword_lower in (art.get("titolo") or "").lower()
                or keyword_lower in (art.get("sottotitolo") or "").lower()
-        ]
+        ]"""
 
         unique_results = {}
         for item in combined_results:
