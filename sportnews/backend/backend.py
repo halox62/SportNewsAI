@@ -205,7 +205,7 @@ def search_news(user_payload):
         if not keyword:
             return jsonify({"success": False, "error": "Query mancante"}), 400
 
-        results = []
+        combined_results = []
 
         # --- NewsAPI ---
         try:
@@ -222,7 +222,7 @@ def search_news(user_payload):
             response.raise_for_status()
             news_data = response.json()
 
-            results.extend([
+            combined_results.extend([
                 {
                     "titolo": art.get("title"),
                     "sottotitolo": art.get("description"),
@@ -236,11 +236,16 @@ def search_news(user_payload):
 
         # --- Database ---
         try:
-            results.extend(query_database_articles(keyword))
+            combined_results.extend(query_database_articles(keyword))
         except Exception as e:
             print(f"[WARN] Errore DB: {e}")
 
-        results.sort(key=lambda x: x["data"] or "", reverse=True)
+
+        unique_results = {item["link"]: item for item in combined_results if item.get("link")}
+        results = list(unique_results.values())
+
+
+        results.sort(key=lambda x: x.get("data") or "", reverse=True)
 
         return jsonify({"success": True, "results": results}), 200
 

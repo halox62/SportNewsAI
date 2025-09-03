@@ -1330,8 +1330,7 @@ export class AddNewsComponent implements OnInit {
         }
       });
     } catch (err) {
-      this.updateErrorMessage = 'Devi fare login per continuare';
-      this.loadingArticles = false;
+      alert('⚠️ Devi fare login per continuare');
       this.auth.loginWithRedirect();
     }
   }
@@ -1367,8 +1366,7 @@ export class AddNewsComponent implements OnInit {
         }
       });
     } catch (err) {
-      this.updateErrorMessage = 'Devi fare login per continuare';
-      this.loadingArticles = false;
+      alert('⚠️ Devi fare login per continuare');
       this.auth.loginWithRedirect();
     }
   }
@@ -1421,13 +1419,8 @@ export class AddNewsComponent implements OnInit {
         throw new Error(result.error || 'Errore durante l\'eliminazione dell\'articolo');
       }
     } catch (error) {
-      console.error('Errore durante l\'eliminazione:', error);
-      this.deleteErrorMessage = error instanceof Error ? error.message : 'Errore sconosciuto durante l\'eliminazione';
-      this.deleteSuccessMessage = false;
-
-      setTimeout(() => {
-        this.deleteErrorMessage = '';
-      }, 5000);
+      alert('⚠️ Devi fare login per continuare');
+      this.auth.loginWithRedirect();
     } finally {
       this.deletingArticle = null;
     }
@@ -1719,11 +1712,8 @@ export class AddNewsComponent implements OnInit {
         throw new Error(result.error || 'Errore durante l\'aggiornamento dell\'articolo');
       }
     } catch (error) {
-      console.error('Errore durante l\'aggiornamento:', error);
-      this.updateErrorMessage = error instanceof Error ? error.message : 'Errore sconosciuto durante l\'aggiornamento';
-      setTimeout(() => {
-        this.updateErrorMessage = '';
-      }, 5000);
+      alert('⚠️ Devi fare login per continuare');
+      this.auth.loginWithRedirect();
     } finally {
       this.updatingArticle = false;
     }
@@ -1763,7 +1753,8 @@ export class AddNewsComponent implements OnInit {
         throw new Error(result.error || 'Errore durante l\'aggiornamento del blob');
       }
     } catch (error) {
-      console.error('Errore nell\'aggiornamento del blob:', error);
+      alert('⚠️ Devi fare login per continuare');
+      this.auth.loginWithRedirect();
       throw error;
     }
   }
@@ -1859,7 +1850,7 @@ export class AddNewsComponent implements OnInit {
         error: (error) => {
           console.error('❌ Errore nell\'aggiunta della notizia:', error);
           if (error.status === 401) {
-            this.errorMessage = 'Sessione scaduta. Effettua nuovamente il login.';
+            alert('⚠️ Devi fare login per continuare');
             this.auth.loginWithRedirect();
           } else if (error.status === 403) {
             this.errorMessage = 'Non hai i permessi per aggiungere notizie.';
@@ -1872,8 +1863,7 @@ export class AddNewsComponent implements OnInit {
         }
       });
     } catch (err) {
-      this.errorMessage = 'Devi fare login per continuare';
-      this.isSubmitting = false;
+      alert('⚠️ Devi fare login per continuare');
       this.auth.loginWithRedirect();
     }
   }
