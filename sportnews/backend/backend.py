@@ -217,7 +217,7 @@ def search_news(user_payload):
               'q': keyword,
               'category': 'sports',
               'language': 'it',
-              'pageSize': 20,
+              'pageSize': 10,
               'apiKey': API_KEY
           }
           response = requests.get(url_headlines, params=params_headlines, timeout=5)
@@ -269,6 +269,13 @@ def search_news(user_payload):
             combined_results.extend(query_database_articles(keyword))
         except Exception as e:
             print(f"[WARN] Errore DB: {e}")
+
+        keyword_lower = keyword.lower()
+        combined_results = [
+            art for art in combined_results
+            if keyword_lower in (art.get("titolo") or "").lower()
+               or keyword_lower in (art.get("sottotitolo") or "").lower()
+        ]
 
 
         unique_results = {}
