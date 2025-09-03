@@ -25,6 +25,7 @@ from jose import jwt
 import requests
 import time
 from functools import wraps
+from datetime import datetime
 
 
 DB_FILE = "news.db"
