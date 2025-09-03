@@ -271,11 +271,11 @@ def search_news(user_payload):
             print(f"[WARN] Errore DB: {e}")
 
         keyword_lower = keyword.lower()
-        combined_results = [
+        """combined_results = [
             art for art in combined_results
             if keyword_lower in (art.get("titolo") or "").lower()
                or keyword_lower in (art.get("sottotitolo") or "").lower()
-        ]
+        ]"""
 
         unique_results = {}
         for item in combined_results:
