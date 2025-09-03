@@ -209,28 +209,58 @@ def search_news(user_payload):
 
         # --- NewsAPI ---
         try:
-            url = 'https://newsapi.org/v2/everything'
-            params = {
-                'q': f'"{keyword}"',
-                'language': 'it',
-                'sources': 'ansa,it,la-gazzetta-dello-sport,it-sky-sport',
-                'sortBy': 'publishedAt',
-                'pageSize': 5,
-                'apiKey': API_KEY
-            }
-            response = requests.get(url, params=params, timeout=5)
-            response.raise_for_status()
-            news_data = response.json()
+          combined_results_newsapi = []
 
-            combined_results.extend([
-                {
-                    "titolo": art.get("title"),
-                    "sottotitolo": art.get("description"),
-                    "link": art.get("url"),
-                    "data": art.get("publishedAt")
-                }
-                for art in news_data.get('articles', [])
-            ])
+          # --- 1️⃣ Proviamo top-headlines categoria sport ---
+          url_headlines = 'https://newsapi.org/v2/top-headlines'
+          params_headlines = {
+              'q': keyword,
+              'category': 'sports',
+              'language': 'it',
+              'pageSize': 5,
+              'apiKey': API_KEY
+          }
+          response = requests.get(url_headlines, params=params_headlines, timeout=5)
+          response.raise_for_status()
+          news_data = response.json()
+
+          if news_data.get('articles'):
+              combined_results_newsapi.extend([
+                  {
+                      "titolo": art.get("title"),
+                      "sottotitolo": art.get("description"),
+                      "link": art.get("url"),
+                      "data": art.get("publishedAt")
+                  }
+                  for art in news_data.get('articles', [])
+              ])
+          else:
+              # --- 2️⃣ Fallback: everything con query sportiva ---
+              url_everything = 'https://newsapi.org/v2/everything'
+              params_everything = {
+                  'q': f'"{keyword}" AND (calcio OR sport OR partita OR torneo OR squadra OR atleta)',
+                  'language': 'it',
+                  'sources': 'ansa,it,la-gazzetta-dello-sport,it-sky-sport',
+                  'sortBy': 'publishedAt',
+                  'pageSize': 5,
+                  'apiKey': API_KEY
+              }
+              response = requests.get(url_everything, params=params_everything, timeout=5)
+              response.raise_for_status()
+              news_data = response.json()
+
+              combined_results_newsapi.extend([
+                  {
+                      "titolo": art.get("title"),
+                      "sottotitolo": art.get("description"),
+                      "link": art.get("url"),
+                      "data": art.get("publishedAt")
+                  }
+                  for art in news_data.get('articles', [])
+              ])
+
+          combined_results.extend(combined_results_newsapi)
+
         except Exception as e:
             print(f"[WARN] Errore NewsAPI: {e}")
 
