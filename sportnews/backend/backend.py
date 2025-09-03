@@ -238,7 +238,7 @@ def search_news(user_payload):
               # --- 2️⃣ Fallback: everything con query sportiva ---
               url_everything = 'https://newsapi.org/v2/everything'
               params_everything = {
-                  'q': f'"{keyword}" AND (sport OR atleta)',
+                  'q': f'"{keyword}"',
                   'language': 'it',
                   'sources': 'ansa,it,la-gazzetta-dello-sport,it-sky-sport',
                   'sortBy': 'publishedAt',
@@ -276,7 +276,6 @@ def search_news(user_payload):
             if keyword_lower in (art.get("titolo") or "").lower()
                or keyword_lower in (art.get("sottotitolo") or "").lower()
         ]
-
 
         unique_results = {}
         for item in combined_results:
