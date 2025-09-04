@@ -114,25 +114,41 @@
       <button class="back-button" (click)="backToSearch()">
         ← Torna alla ricerca
       </button>
-      <div class="translate-section">
-        <label for="language-select">🌍 Traduci in:</label>
-        <select id="language-select" [(ngModel)]="selectedLanguage">
-          <option value="en">Inglese</option>
-          <option value="fr">Francese</option>
-          <option value="de">Tedesco</option>
-          <option value="es">Spagnolo</option>
-          <option value="it">Italiano</option>
-        </select>
 
-        <button
-          class="action-button secondary"
-          (click)="translateGeneratedArticle(selectedLanguage)"
-          [disabled]="isGenerating"
-        >
-          <span *ngIf="!isGenerating">🌐 Traduci</span>
-          <span *ngIf="isGenerating">⏳ Traducendo...</span>
-        </button>
+      <!-- Improved Translation Section -->
+      <div class="translate-section">
+        <div class="translate-header">
+          <span class="translate-icon">🌍</span>
+          <span class="translate-title">Traduzione</span>
+        </div>
+        <div class="translate-controls">
+          <div class="language-selector-wrapper">
+            <label class="sr-only" for="language-select">Seleziona lingua</label>
+            <select id="language-select" [(ngModel)]="selectedLanguage" class="language-select">
+              <option value="en">🇬🇧 Inglese</option>
+              <option value="fr">🇫🇷 Francese</option>
+              <option value="de">🇩🇪 Tedesco</option>
+              <option value="es">🇪🇸 Spagnolo</option>
+              <option value="it">🇮🇹 Italiano</option>
+            </select>
+          </div>
+          <button
+            class="translate-button"
+            (click)="translateGeneratedArticle(selectedLanguage)"
+            [disabled]="isGenerating"
+          >
+            <span class="translate-button-content" *ngIf="!isGenerating">
+              <span class="translate-button-icon">🚀</span>
+              <span class="translate-button-text">Traduci</span>
+            </span>
+            <span class="translate-button-content" *ngIf="isGenerating">
+              <span class="translate-button-spinner">⏳</span>
+              <span class="translate-button-text">Traducendo...</span>
+            </span>
+          </button>
+        </div>
       </div>
+
       <div class="article-meta">
         <span class="generated-badge">Articolo Generato</span>
         <span class="save-status" *ngIf="articleSaved" title="Articolo salvato">✅ Salvato</span>
@@ -319,8 +335,196 @@
   transform: translateY(-1px);
 }
 
-/* Responsive design */
+/* IMPROVED TRANSLATION SECTION STYLES */
+.translate-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.translate-section:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 35px rgba(102, 126, 234, 0.3);
+}
+
+.translate-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  color: white;
+}
+
+.translate-icon {
+  font-size: 1.5rem;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-4px); }
+}
+
+.translate-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.translate-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.language-selector-wrapper {
+  position: relative;
+  flex: 1;
+  min-width: 180px;
+}
+
+.language-select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  color: #2d3748;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 12px center;
+  background-repeat: no-repeat;
+  background-size: 16px;
+  padding-right: 40px;
+}
+
+.language-select:focus {
+  outline: none;
+  border-color: #4c51bf;
+  box-shadow: 0 0 0 3px rgba(76, 81, 191, 0.2);
+  background: white;
+}
+
+.language-select:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+  background: white;
+}
+
+.translate-button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%);
+  color: white;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+  min-width: 120px;
+}
+
+.translate-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+  background: linear-gradient(135deg, #ff5252 0%, #ff7043 100%);
+}
+
+.translate-button:active:not(:disabled) {
+  transform: translateY(0px);
+  box-shadow: 0 3px 10px rgba(255, 107, 107, 0.3);
+}
+
+.translate-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.2);
+}
+
+.translate-button-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+}
+
+.translate-button-icon {
+  font-size: 1.1rem;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.translate-button-spinner {
+  font-size: 1.1rem;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.translate-button-text {
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Responsive design for translation section */
 @media (max-width: 768px) {
+  .translate-section {
+    padding: 16px;
+    margin: 10px 0;
+  }
+
+  .translate-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .language-selector-wrapper {
+    min-width: auto;
+  }
+
+  .translate-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .translate-header {
+    justify-content: center;
+    text-align: center;
+  }
+
   .action-buttons-footer {
     flex-direction: column;
   }
@@ -331,6 +535,27 @@
 
   .save-messages {
     margin: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .translate-section {
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .translate-title {
+    font-size: 1rem;
+  }
+
+  .language-select {
+    padding: 10px 14px;
+    font-size: 0.9rem;
+  }
+
+  .translate-button {
+    padding: 10px 20px;
+    font-size: 0.9rem;
   }
 }
 </style>

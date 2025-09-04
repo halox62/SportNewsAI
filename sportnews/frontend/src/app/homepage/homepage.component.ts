@@ -212,11 +212,9 @@ export class HomepageComponent implements OnInit {
         throw new Error("⚠️ Nessun testo tradotto ricevuto dall'API");
       }
 
-      console.log("Traduzione ricevuta:", data);
 
       const parsedArticle = this.parseArticleContent(data.article);
 
-      console.log(data.article)
 
 
       this.generatedArticle = {
