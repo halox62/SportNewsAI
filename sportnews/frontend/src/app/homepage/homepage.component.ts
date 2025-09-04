@@ -47,6 +47,8 @@ export class HomepageComponent implements OnInit {
   saveSuccessMessage: boolean = false;
   saveErrorMessage: string = '';
 
+  selectedLanguage: string = 'en'; // default Inglese
+
   constructor(private http: HttpClient, private router: Router, public auth: AuthService,
     @Inject(PLATFORM_ID) private platformId: Object) {}
 
@@ -90,33 +92,6 @@ export class HomepageComponent implements OnInit {
   }
 
 
-
-  /*async searchArticles(): Promise<void> {
-  if (!this.searchTerm.trim()) return;
-  const token = await this.auth.getAccessTokenSilently().toPromise();
-
-  const headers = new HttpHeaders({
-    Authorization: `Bearer ${token}`
-  });
-
-  this.isLoading = true;
-
-  this.http.post<SearchResponse>(this.apiUrl, { query: this.searchTerm }, { headers })
-    .subscribe({
-      next: (response) => {
-        this.searchResults = response.results.map(article => ({
-          ...article,
-          selected: false
-        }));
-        this.isLoading = false;
-        this.selectAll = false;
-      },
-      error: (error) => {
-        console.error('Errore nella ricerca:', error);
-        this.isLoading = false;
-      }
-    });
-}*/
 
   toggleSelectAll(): void {
     this.searchResults.forEach(article => {
@@ -167,10 +142,8 @@ export class HomepageComponent implements OnInit {
         .then(data => {
           console.log("Articolo generato:", data);
 
-          // Usa il nuovo parser
           const parsedArticle = this.parseArticleContent(data.article);
 
-          console.log("Articolo parsato:", parsedArticle);
 
           this.generatedArticle = {
             title: parsedArticle.title || 'Titolo non disponibile',
@@ -205,6 +178,51 @@ export class HomepageComponent implements OnInit {
       subtitle: subtitleMatch ? subtitleMatch[1].trim() : '',
       text: textMatch ? textMatch[1].trim() : ''
     };
+  }
+
+  async translateGeneratedArticle(targetLanguage: string): Promise<void> {
+    if (!this.generatedArticle) {
+      alert('⚠️ Prima devi generare un articolo.');
+      return;
+    }
+
+    try {
+      this.isGenerating = true;
+      const token = await this.auth.getAccessTokenSilently().toPromise();
+
+      const fullText = `
+        Titolo: ${this.generatedArticle.title}
+        Sottotitolo: ${this.generatedArticle.subtitle}
+        Testo: ${this.generatedArticle.text}
+      `;
+
+      const response = await fetch('https://sport.event-fit.it/api/v1/translate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          text: fullText,
+          language: targetLanguage
+        })
+      });
+
+      const data = await response.json();
+      console.log("Traduzione ricevuta:", data);
+
+      this.generatedArticle = {
+        title: data.translated_text,
+        subtitle: '',
+        text: ''
+      };
+
+      this.isGenerating = false;
+    } catch (err) {
+      console.error("Errore nella traduzione:", err);
+      this.isGenerating = false;
+      alert("Errore nella traduzione del testo. Riprova.");
+    }
   }
 
   formatDate(dateString: string): string {

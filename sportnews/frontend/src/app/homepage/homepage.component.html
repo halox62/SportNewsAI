@@ -114,6 +114,25 @@
       <button class="back-button" (click)="backToSearch()">
         ← Torna alla ricerca
       </button>
+      <div class="translate-section">
+        <label for="language-select">🌍 Traduci in:</label>
+        <select id="language-select" [(ngModel)]="selectedLanguage">
+          <option value="en">Inglese</option>
+          <option value="fr">Francese</option>
+          <option value="de">Tedesco</option>
+          <option value="es">Spagnolo</option>
+          <option value="it">Italiano</option>
+        </select>
+
+        <button
+          class="action-button secondary"
+          (click)="translateGeneratedArticle(selectedLanguage)"
+          [disabled]="isGenerating"
+        >
+          <span *ngIf="!isGenerating">🌐 Traduci</span>
+          <span *ngIf="isGenerating">⏳ Traducendo...</span>
+        </button>
+      </div>
       <div class="article-meta">
         <span class="generated-badge">Articolo Generato</span>
         <span class="save-status" *ngIf="articleSaved" title="Articolo salvato">✅ Salvato</span>
