@@ -209,13 +209,15 @@ export class HomepageComponent implements OnInit {
       });
 
       const data = await response.json();
-      console.log("Traduzione ricevuta:", data);
+
+      const parsedArticle = this.parseArticleContent(data.article);
 
       this.generatedArticle = {
-        title: data.translated_text,
-        subtitle: '',
-        text: ''
+        title: parsedArticle.title || 'Titolo non disponibile',
+        subtitle: parsedArticle.subtitle || '',
+        text: parsedArticle.text || ''
       };
+
 
       this.isGenerating = false;
     } catch (err) {
