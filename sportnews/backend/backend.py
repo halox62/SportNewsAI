@@ -386,6 +386,36 @@ The article must be written in Italian.
     return jsonify({"article": article})
 
 
+@app.route('/api/v1/translate', methods=['POST'])
+@requires_auth
+def translate_text(user_payload):
+    data = request.get_json()
+
+    if not data or "text" not in data or "language" not in data:
+        return jsonify({"error": "Missing 'text' or 'language' in request body"}), 400
+
+    text = data["text"]
+    target_language = data["language"]
+
+    prompt = f"""
+    Traduci il seguente testo nella lingua "{target_language}".
+    Mantieni il significato e il tono originale.
+
+    Testo:
+    {text}
+    """
+
+    response = llm.invoke(prompt)
+    translated_text = response.content.strip()
+
+    return jsonify({
+        "original_text": text,
+        "translated_text": translated_text,
+        "language": target_language
+    })
+
+
+
 @app.route("/api/v1/addNews", methods=["POST"])
 @requires_auth
 def add_news(user_payload):

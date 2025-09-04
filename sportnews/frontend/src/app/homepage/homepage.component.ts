@@ -168,6 +168,8 @@ export class HomepageComponent implements OnInit {
 
         let parsedArticle = this.parseArticleContent(data.article);
 
+        console.log(parsedArticle)
+
         this.generatedArticle = {
           title: parsedArticle.title || 'Titolo non disponibile',
           subtitle: parsedArticle.subtitle || '',
