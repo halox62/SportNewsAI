@@ -144,7 +144,6 @@ export class HomepageComponent implements OnInit {
 
           const parsedArticle = this.parseArticleContent(data.article);
 
-
           this.generatedArticle = {
             title: parsedArticle.title || 'Titolo non disponibile',
             subtitle: parsedArticle.subtitle || '',
@@ -169,9 +168,9 @@ export class HomepageComponent implements OnInit {
    * Parser robusto per estrarre Titolo, Sottotitolo e Testo da una stringa
    */
   parseArticleContent(articleText: string): { title: string; subtitle: string; text: string } {
-    const titleMatch = articleText.match(/Titolo:\s*(.+?)(?=\nSottotitolo:|$)/s);
-    const subtitleMatch = articleText.match(/Sottotitolo:\s*(.+?)(?=\nTesto:|$)/s);
-    const textMatch = articleText.match(/Testo:\s*(.+)/s);
+    const titleMatch = articleText.match(/(?:Titolo|Title):\s*([\s\S]*?)(?=\n(?:Sottotitolo|Subtitle):|$)/);
+    const subtitleMatch = articleText.match(/(?:Sottotitolo|Subtitle):\s*([\s\S]*?)(?=\n(?:Testo|Text):|$)/);
+    const textMatch = articleText.match(/(?:Testo|Text):\s*([\s\S]*)/);
 
     return {
       title: titleMatch ? titleMatch[1].trim() : '',
