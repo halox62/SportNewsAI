@@ -220,6 +220,8 @@ export class HomepageComponent implements OnInit {
       // Usa translated_text, non article
       const parsedArticle = this.parseArticleContent(data.translated_text);
 
+      console.log(data.translated_text)
+
 
       this.generatedArticle = {
         title: parsedArticle.title || 'Titolo non disponibile',
