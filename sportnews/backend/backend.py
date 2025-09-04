@@ -389,6 +389,7 @@ The article must be written in Italian.
 @app.route('/api/v1/translate', methods=['POST'])
 @requires_auth
 def translate_text(user_payload):
+    import json
     data = request.get_json()
 
     if not data or "text" not in data or "language" not in data:
@@ -398,21 +399,25 @@ def translate_text(user_payload):
     target_language = data["language"]
 
     prompt = f"""
-    Traduci il seguente testo nella lingua "{target_language}".
-    Mantieni il significato e il tono originale.
+    Traduci il seguente articolo in {target_language}.
+    Restituisci il risultato in JSON con le chiavi:
+    - title
+    - subtitle
+    - text
 
-    Testo:
+    Articolo da tradurre:
     {text}
     """
 
     response = llm.invoke(prompt)
-    translated_text = response.content.strip()
 
-    return jsonify({
-        "original_text": text,
-        "translated_text": translated_text,
-        "language": target_language
-    })
+    try:
+        translated_article = json.loads(response.content)
+    except Exception as e:
+        # fallback in caso di output non JSON
+        return jsonify({"error": "Traduzione non valida", "details": str(e), "raw": response.content}), 500
+
+    return jsonify(translated_article)
 
 
 
