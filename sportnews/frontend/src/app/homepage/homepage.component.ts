@@ -208,14 +208,17 @@ export class HomepageComponent implements OnInit {
         })
       });
 
-      const data = await response.json();
 
-      console.log(data);
+      const data = await response.json();
 
       if (!data.article) {
         throw new Error("⚠️ Nessun testo tradotto ricevuto dall'API");
       }
-      const parsedArticle = this.parseArticleContent(data.article);
+
+      console.log("Traduzione ricevuta:", data);
+
+      // Usa translated_text, non article
+      const parsedArticle = this.parseArticleContent(data.translated_text);
 
 
       this.generatedArticle = {
@@ -223,7 +226,6 @@ export class HomepageComponent implements OnInit {
         subtitle: parsedArticle.subtitle || '',
         text: parsedArticle.text || ''
       };
-
 
       this.isGenerating = false;
     } catch (err) {
