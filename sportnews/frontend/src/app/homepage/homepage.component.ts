@@ -210,7 +210,11 @@ export class HomepageComponent implements OnInit {
 
       const data = await response.json();
 
+      if (!data.article) {
+        throw new Error("⚠️ Nessun testo tradotto ricevuto dall'API");
+      }
       const parsedArticle = this.parseArticleContent(data.article);
+
 
       this.generatedArticle = {
         title: parsedArticle.title || 'Titolo non disponibile',
