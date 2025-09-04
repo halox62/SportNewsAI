@@ -164,13 +164,15 @@ export class HomepageComponent implements OnInit {
     }
   }
 
-  /**
-   * Parser robusto per estrarre Titolo, Sottotitolo e Testo da una stringa
-   */
+
   parseArticleContent(articleText: string): { title: string; subtitle: string; text: string } {
+    console.log(articleText)
     const titleMatch = articleText.match(/(?:Titolo|Title):\s*([\s\S]*?)(?=\n(?:Sottotitolo|Subtitle):|$)/);
+    console.log(titleMatch)
     const subtitleMatch = articleText.match(/(?:Sottotitolo|Subtitle):\s*([\s\S]*?)(?=\n(?:Testo|Text):|$)/);
+    console.log(subtitleMatch)
     const textMatch = articleText.match(/(?:Testo|Text):\s*([\s\S]*)/);
+    console.log(textMatch)
 
     return {
       title: titleMatch ? titleMatch[1].trim() : '',
@@ -216,7 +218,6 @@ export class HomepageComponent implements OnInit {
 
       console.log("Traduzione ricevuta:", data);
 
-      // Usa translated_text, non article
       const parsedArticle = this.parseArticleContent(data.translated_text);
 
       console.log(data.translated_text)

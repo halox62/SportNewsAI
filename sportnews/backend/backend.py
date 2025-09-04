@@ -402,9 +402,9 @@ def translate_text(user_payload):
       Translate the following article into {target_language}.
       Return the result using the following format:
 
-      Title:
-      Subtitle:
-      Text:
+      Title: ...
+      Subtitle: ...
+      Text: ...
 
       Article to translate:
       {text}
