@@ -411,13 +411,9 @@ def translate_text(user_payload):
 
     response = llm.invoke(prompt)
 
-    try:
-        translated_article = json.loads(response.content)
-    except Exception as e:
-        # fallback in caso di output non JSON
-        return jsonify({"error": "Traduzione non valida", "details": str(e), "raw": response.content}), 500
+    article = response.content.strip()
 
-    return jsonify(translated_article)
+    return jsonify({"article": article})
 
 
 
