@@ -339,7 +339,7 @@ def get_text_from_blob_url(blob_url):
 
 @app.route('/api/v1/genArticle', methods=['POST'])
 @requires_auth
-def genera_notizia_da_url(user_payload):
+def traslate(user_payload):
     data = request.get_json()
     urls = data.get("urls", [])
 
