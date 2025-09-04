@@ -399,15 +399,16 @@ def translate_text(user_payload):
     target_language = data["language"]
 
     prompt = f"""
-    Traduci il seguente articolo in {target_language}.
-    Restituisci il risultato in JSON con le chiavi:
-    - title
-    - subtitle
-    - text
+      Translate the following article into {target_language}.
+      Return the result using the following format:
 
-    Articolo da tradurre:
-    {text}
-    """
+      Title:
+      Subtitle:
+      Text:
+
+      Article to translate:
+      {text}
+      """
 
     response = llm.invoke(prompt)
 
