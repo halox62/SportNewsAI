@@ -117,10 +117,6 @@
 
       <!-- Improved Translation Section -->
       <div class="translate-section">
-        <div class="translate-header">
-          <span class="translate-icon">🌍</span>
-          <span class="translate-title">Traduzione</span>
-        </div>
         <div class="translate-controls">
           <div class="language-selector-wrapper">
             <label class="sr-only" for="language-select">Seleziona lingua</label>
@@ -138,7 +134,6 @@
             [disabled]="isGenerating"
           >
             <span class="translate-button-content" *ngIf="!isGenerating">
-              <span class="translate-button-icon">🚀</span>
               <span class="translate-button-text">Traduci</span>
             </span>
             <span class="translate-button-content" *ngIf="isGenerating">
