@@ -134,6 +134,7 @@ export class HomepageComponent implements OnInit {
     this.selectAll = selectedCount === this.searchResults.length && this.searchResults.length > 0;
   }
 
+
   getSelectedArticles(): ArticleResult[] {
     return this.searchResults.filter(article => article.selected);
   }
@@ -141,7 +142,7 @@ export class HomepageComponent implements OnInit {
   generatedArticle: { title: string; subtitle: string; text: string } | null = null;
 
   async processSelectedArticles(): Promise<void> {
-    try{
+    try {
       this.resetSaveState();
       const selected = this.getSelectedArticles();
 
@@ -162,44 +163,42 @@ export class HomepageComponent implements OnInit {
         },
         body: JSON.stringify({ urls: selectedUrls })
       })
-      .then(res => res.json())
-      .then(data => {
-        console.log("Articolo generato:", data);
+        .then(res => res.json())
+        .then(data => {
+          console.log("Articolo generato:", data);
 
-        let parsedArticle = this.parseArticleContent(data.article);
+          // Usa il nuovo parser
+          const parsedArticle = this.parseArticleContent(data.article);
 
-        console.log(parsedArticle)
+          console.log("Articolo parsato:", parsedArticle);
 
-        this.generatedArticle = {
-          title: parsedArticle.title || 'Titolo non disponibile',
-          subtitle: parsedArticle.subtitle || '',
-          text: parsedArticle.text || ''
-        };
+          this.generatedArticle = {
+            title: parsedArticle.title || 'Titolo non disponibile',
+            subtitle: parsedArticle.subtitle || '',
+            text: parsedArticle.text || ''
+          };
 
-        this.showGeneratedArticle = true;
-        this.isGenerating = false;
-      })
-      .catch(err => {
-        console.error("Errore nella generazione dell'articolo:", err);
-        this.isGenerating = false;
-        alert('Errore nella generazione dell\'articolo. Riprova.');
-      });
-    }catch(err){
+          this.showGeneratedArticle = true;
+          this.isGenerating = false;
+        })
+        .catch(err => {
+          console.error("Errore nella generazione dell'articolo:", err);
+          this.isGenerating = false;
+          alert('Errore nella generazione dell\'articolo. Riprova.');
+        });
+    } catch (err) {
       alert('⚠️ Devi fare login per continuare');
       this.auth.loginWithRedirect();
     }
   }
 
-
-  private parseArticleContent(articleString: string): { title: string; subtitle: string; text: string } {
-    if (!articleString) {
-      return { title: '', subtitle: '', text: '' };
-    }
-
-
-    const titleMatch = articleString.match(/Title:\s*(.+?)(?:\n|$)/);
-    const subtitleMatch = articleString.match(/Subtitle:\s*(.+?)(?:\n|$)/);
-    const textMatch = articleString.match(/Text:\s*(.+)/s);
+  /**
+   * Parser robusto per estrarre Titolo, Sottotitolo e Testo da una stringa
+   */
+  parseArticleContent(articleText: string): { title: string; subtitle: string; text: string } {
+    const titleMatch = articleText.match(/Titolo:\s*(.+?)(?=\nSottotitolo:|$)/s);
+    const subtitleMatch = articleText.match(/Sottotitolo:\s*(.+?)(?=\nTesto:|$)/s);
+    const textMatch = articleText.match(/Testo:\s*(.+)/s);
 
     return {
       title: titleMatch ? titleMatch[1].trim() : '',
@@ -207,8 +206,6 @@ export class HomepageComponent implements OnInit {
       text: textMatch ? textMatch[1].trim() : ''
     };
   }
-
-
 
   formatDate(dateString: string): string {
     const date = new Date(dateString);
