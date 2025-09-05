@@ -417,149 +417,148 @@ interface SavedArticle {
     </div>
 
     <!-- Tab Content: Bozza -->
-    <!-- Tab Content: Bozza -->
-<div class="tab-content" *ngIf="activeTab === 'bozza'">
-  <!-- Loading state -->
-  <div class="loading-container" *ngIf="loadingArticles">
-    <div class="loading-spinner">⏳</div>
-    <p>Caricamento articoli...</p>
-  </div>
-
-  <!-- Empty state -->
-  <div class="empty-state" *ngIf="!loadingArticles && savedArticles.length === 0">
-    <div class="empty-icon">📰</div>
-    <h3>Nessun articolo salvato come bozza</h3>
-    <p>Non hai ancora nessuna bozza di articolo.</p>
-  </div>
-
-  <!-- Articles list -->
-  <div class="articles-container" *ngIf="!loadingArticles && savedArticles.length > 0">
-    <div class="articles-header">
-      <h2>📚 Le tue bozze</h2>
-      <button class="btn btn-secondary" (click)="loadMyBozza()">
-        🔄 Ricarica
-      </button>
+  <div class="tab-content" *ngIf="activeTab === 'bozza'">
+    <!-- Loading state -->
+    <div class="loading-container" *ngIf="loadingArticles">
+      <div class="loading-spinner">⏳</div>
+      <p>Caricamento articoli...</p>
     </div>
-    <div class="articles-list">
-      <div class="article-item" *ngFor="let article of savedArticles; let i = index">
-        <!-- Modalità visualizzazione -->
-        <div class="article-content" *ngIf="!article.editing">
-          <div class="article-header">
-            <div class="article-info">
-              <span class="article-number">#{{ i + 1 }}</span>
-              <span class="article-date">{{ formatArticleDate(article.data) }}</span>
-            </div>
-            <div class="article-actions">
-              <button class="btn-icon" (click)="startEditing(article)" title="Modifica">
-                ✏️
-              </button>
-              <button class="btn-icon" (click)="openArticleContent(article)" title="Visualizza">
-                👁️
-              </button>
-              <button
-                class="btn-icon"
-                (click)="downloadArticle(article)"
-                title="Scarica"
-                [disabled]="downloadingArticle === article.id"
-              >
-                <span *ngIf="downloadingArticle !== article.id">💾</span>
-                <span *ngIf="downloadingArticle === article.id">⏳</span>
-              </button>
-              <button
-                class="btn-icon btn-delete"
-                (click)="confirmDeleteArticle(article)"
-                title="Elimina"
-                [disabled]="deletingArticle === article.id"
-              >
-                <span *ngIf="deletingArticle !== article.id">🗑️</span>
-                <span *ngIf="deletingArticle === article.id">⏳</span>
-              </button>
-            </div>
-          </div>
-          <h3 class="article-title">{{ article.titolo }}</h3>
-          <p class="article-subtitle" *ngIf="article.sottotitolo">{{ article.sottotitolo }}</p>
-          <div class="article-content-section" *ngIf="article.contenuto">
-            <div class="article-content-display" [class.article-content-preview]="!article.expanded">
-              {{ article.contenuto }}
-            </div>
-            <button
-              class="expand-content-btn"
-              (click)="toggleArticleExpansion(article)"
-              *ngIf="article.contenuto.length > 150"
-            >
-              {{ article.expanded ? '▲ Mostra meno' : '▼ Mostra tutto' }}
-            </button>
-          </div>
-        </div>
 
-        <!-- Modalità modifica -->
-        <div class="article-edit-content" *ngIf="article.editing">
-          <div class="edit-form">
-            <div class="form-group">
-              <label class="form-label">📰 Titolo</label>
-              <input
-                type="text"
-                class="form-input"
-                [(ngModel)]="article.titolo"
-                maxlength="200"
-                placeholder="Titolo dell'articolo..."
-              />
-              <div class="field-info">
-                <small>Caratteri: {{ article.titolo?.length || 0 }}/200</small>
+    <!-- Empty state -->
+    <div class="empty-state" *ngIf="!loadingArticles && myBozze.length === 0">
+      <div class="empty-icon">📰</div>
+      <h3>Nessun articolo salvato come bozza</h3>
+      <p>Non hai ancora nessuna bozza di articolo.</p>
+    </div>
+
+    <!-- Articles list -->
+    <div class="articles-container" *ngIf="!loadingArticles && myBozze.length > 0">
+      <div class="articles-header">
+        <h2>📚 Le tue bozze</h2>
+        <button class="btn btn-secondary" (click)="loadMyBozza()">
+          🔄 Ricarica
+        </button>
+      </div>
+      <div class="articles-list">
+        <div class="article-item" *ngFor="let article of myBozze; let i = index">
+          <!-- Modalità visualizzazione -->
+          <div class="article-content" *ngIf="!article.editing">
+            <div class="article-header">
+              <div class="article-info">
+                <span class="article-number">#{{ i + 1 }}</span>
+                <span class="article-date">{{ formatArticleDate(article.data) }}</span>
+              </div>
+              <div class="article-actions">
+                <button class="btn-icon" (click)="startEditing(article)" title="Modifica">
+                  ✏️
+                </button>
+                <button class="btn-icon" (click)="openArticleContent(article)" title="Visualizza">
+                  👁️
+                </button>
+                <button
+                  class="btn-icon"
+                  (click)="downloadArticle(article)"
+                  title="Scarica"
+                  [disabled]="downloadingArticle === article.id"
+                >
+                  <span *ngIf="downloadingArticle !== article.id">💾</span>
+                  <span *ngIf="downloadingArticle === article.id">⏳</span>
+                </button>
+                <button
+                  class="btn-icon btn-delete"
+                  (click)="confirmDeleteArticle(article)"
+                  title="Elimina"
+                  [disabled]="deletingArticle === article.id"
+                >
+                  <span *ngIf="deletingArticle !== article.id">🗑️</span>
+                  <span *ngIf="deletingArticle === article.id">⏳</span>
+                </button>
               </div>
             </div>
-            <div class="form-group">
-              <label class="form-label">📝 Sottotitolo</label>
-              <textarea
-                class="form-textarea"
-                [(ngModel)]="article.sottotitolo"
-                rows="3"
-                maxlength="500"
-                placeholder="Breve descrizione o sottotitolo..."
-              ></textarea>
-              <div class="field-info">
-                <small>Caratteri: {{ article.sottotitolo?.length || 0 }}/500</small>
+            <h3 class="article-title">{{ article.titolo }}</h3>
+            <p class="article-subtitle" *ngIf="article.sottotitolo">{{ article.sottotitolo }}</p>
+            <div class="article-content-section" *ngIf="article.contenuto">
+              <div class="article-content-display" [class.article-content-preview]="!article.expanded">
+                {{ article.contenuto }}
               </div>
-            </div>
-            <div class="form-group">
-              <label class="form-label">📄 Contenuto</label>
-              <textarea
-                class="form-textarea content-textarea"
-                [(ngModel)]="article.contenuto"
-                rows="8"
-                maxlength="2000"
-                placeholder="Contenuto completo dell'articolo..."
-              ></textarea>
-              <div class="field-info">
-                <small>Caratteri: {{ article.contenuto?.length || 0 }}/2000</small>
-              </div>
-            </div>
-            <div class="edit-actions">
-              <button class="btn btn-secondary" (click)="cancelEditing(article)">
-                ❌ Annulla
-              </button>
               <button
-                class="btn btn-warning"
-                (click)="saveArticle(article)"
-                [disabled]="updatingArticle || !isArticleValid(article)"
+                class="expand-content-btn"
+                (click)="toggleArticleExpansion(article)"
+                *ngIf="article.contenuto.length > 150"
               >
-                <span *ngIf="!updatingArticle">📝 Salva Bozza</span>
-                <span *ngIf="updatingArticle">⏳ Salvando...</span>
+                {{ article.expanded ? '▲ Mostra meno' : '▼ Mostra tutto' }}
               </button>
-              <button
-                class="btn btn-primary"
-                (click)="publishArticle(article)"
-                [disabled]="updatingArticle || !isArticleValid(article)"
-              >
-                <span *ngIf="!updatingArticle">🚀 Pubblica</span>
-                <span *ngIf="updatingArticle">⏳ Pubblicando...</span>
-              </button>
+            </div>
+          </div>
+
+          <!-- Modalità modifica -->
+          <div class="article-edit-content" *ngIf="article.editing">
+            <div class="edit-form">
+              <div class="form-group">
+                <label class="form-label">📰 Titolo</label>
+                <input
+                  type="text"
+                  class="form-input"
+                  [(ngModel)]="article.titolo"
+                  maxlength="200"
+                  placeholder="Titolo dell'articolo..."
+                />
+                <div class="field-info">
+                  <small>Caratteri: {{ article.titolo?.length || 0 }}/200</small>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">📝 Sottotitolo</label>
+                <textarea
+                  class="form-textarea"
+                  [(ngModel)]="article.sottotitolo"
+                  rows="3"
+                  maxlength="500"
+                  placeholder="Breve descrizione o sottotitolo..."
+                ></textarea>
+                <div class="field-info">
+                  <small>Caratteri: {{ article.sottotitolo?.length || 0 }}/500</small>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">📄 Contenuto</label>
+                <textarea
+                  class="form-textarea content-textarea"
+                  [(ngModel)]="article.contenuto"
+                  rows="8"
+                  maxlength="2000"
+                  placeholder="Contenuto completo dell'articolo..."
+                ></textarea>
+                <div class="field-info">
+                  <small>Caratteri: {{ article.contenuto?.length || 0 }}/2000</small>
+                </div>
+              </div>
+              <div class="edit-actions">
+                <button class="btn btn-secondary" (click)="cancelEditing(article)">
+                  ❌ Annulla
+                </button>
+                <button
+                  class="btn btn-warning"
+                  (click)="saveArticle(article)"
+                  [disabled]="updatingArticle || !isArticleValid(article)"
+                >
+                  <span *ngIf="!updatingArticle">📝 Salva Bozza</span>
+                  <span *ngIf="updatingArticle">⏳ Salvando...</span>
+                </button>
+                <button
+                  class="btn btn-primary"
+                  (click)="publishArticle(article)"
+                  [disabled]="updatingArticle || !isArticleValid(article)"
+                >
+                  <span *ngIf="!updatingArticle">🚀 Pubblica</span>
+                  <span *ngIf="updatingArticle">⏳ Pubblicando...</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
   <!-- Download status messages -->
   <div class="status-messages" *ngIf="downloadSuccessMessage || downloadErrorMessage">
@@ -1540,7 +1539,6 @@ export class AddNewsComponent implements OnInit {
     this.downloadErrorMessage = '';
   }
 
-  // Load user's articles
   async loadMyArticles(): Promise<void> {
     this.loadingArticles = true;
     this.clearMessages();
