@@ -607,7 +607,7 @@ def get_my_bozze(user_payload):
             session.close()
             return jsonify({"success": False, "error": "Utente non trovato"}), 404
 
-        articles = session.query(Articolo).filter_by(idUser=str(user.idUser),bozze="true").all()
+        articles = session.query(Articolo).filter_by(idUser=str(user.idUser),bozza="true").all()
         results = [
             {
                 "id": art.id,
