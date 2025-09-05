@@ -98,7 +98,7 @@ interface SavedArticle {
 
       <!-- Form per aggiungere notizia -->
       <div class="form-container">
-        <form class="news-form" (ngSubmit)="onSubmit()" #newsForm="ngForm" novalidate>
+        <form class="news-form" (ngSubmit)="onSubmit('notizia')" #newsForm="ngForm" novalidate>
           <!-- Titolo -->
           <div class="form-group">
             <label for="titolo" class="form-label required">
@@ -169,6 +169,7 @@ interface SavedArticle {
           </div>
 
           <!-- Pulsanti -->
+          <form (ngSubmit)="onSubmit('notizia')">
           <div class="form-actions">
             <button
               type="button"
@@ -178,15 +179,28 @@ interface SavedArticle {
             >
               🔄 Reset
             </button>
+
             <button
               type="submit"
               class="btn btn-primary"
               [disabled]="isSubmitting || !isFormValid()"
+              (click)="submitType = 'notizia'"
             >
               <span *ngIf="!isSubmitting">💾 Salva Notizia</span>
               <span *ngIf="isSubmitting">⏳ Salvando...</span>
             </button>
+
+            <button
+              type="submit"
+              class="btn btn-warning"
+              [disabled]="isSubmitting || !isFormValid()"
+              (click)="submitType = 'bozza'"
+            >
+              <span *ngIf="!isSubmitting">📝 Salva come Bozza</span>
+              <span *ngIf="isSubmitting">⏳ Salvando...</span>
+            </button>
           </div>
+        </form>
         </form>
       </div>
 
@@ -1365,6 +1379,7 @@ export class AddNewsComponent implements OnInit {
   private readonly myArticlesUrl = 'https://sport.event-fit.it/api/v1/my-articles';
   private readonly mySaveUrl = 'https://sport.event-fit.it/api/v1/my-articles-save';
   private readonly myBozzaUrl = 'https://sport.event-fit.it/api/v1/my-bozze';
+  private readonly addBozza = 'https://sport.event-fit.it/api/v1/bozza';
   private readonly updateArticleUrl = 'https://sport.event-fit.it/api/v1/update-article';
   private readonly deleteArticleUrl = 'https://sport.event-fit.it/api/v1/delete-article';
   private readonly updateBlob = 'https://sport.event-fit.it/api/v1/update-blob-content';
@@ -1406,6 +1421,9 @@ export class AddNewsComponent implements OnInit {
   downloadingArticle: number | null = null;
   downloadSuccessMessage: boolean = false;
   downloadErrorMessage: string = '';
+
+  submitType: 'notizia' | 'bozza' = 'notizia';
+
 
   constructor(
     private http: HttpClient,
@@ -1542,7 +1560,7 @@ export class AddNewsComponent implements OnInit {
 
       this.http.get<{ success: boolean; results: SavedArticle[] }>(this.myBozzaUrl, { headers }).subscribe({
         next: (response) => {
-          console.log('✅ Articoli salvati caricati:', response);
+          console.log('✅ Articoli bozza caricati:', response);
           if (response.success) {
             this.savedArticles = response.results.map(article => ({
               ...article,
@@ -1991,7 +2009,9 @@ export class AddNewsComponent implements OnInit {
     this.clearMessages();
   }
 
-  async onSubmit(): Promise<void> {
+
+
+  async onSubmit(type: 'notizia' | 'bozza'): Promise<void> {
     if (!this.isFormValid()) {
       this.errorMessage = 'Compila tutti i campi obbligatori';
       return;
@@ -2016,45 +2036,87 @@ export class AddNewsComponent implements OnInit {
         paragrafo: this.newsArticle.paragrafo?.trim() || '',
         contenuto: this.newsArticle.contenuto.trim()
       };
-
-      this.http.post<{ success: boolean; message: string }>(this.addNewsUrl, newsData, { headers }).subscribe({
-        next: (response) => {
-          console.log('✅ Notizia aggiunta con successo:', response);
-          if (response.success) {
-            this.showSuccessMessage = true;
-            this.addedNews.unshift({
-              ...this.newsArticle,
-              dataCreazione: new Date()
-            });
-            this.resetForm();
-            if (this.activeTab === 'manage') {
+      if(type=='notizia'){
+        this.http.post<{ success: boolean; message: string }>(this.addNewsUrl, newsData, { headers }).subscribe({
+          next: (response) => {
+            console.log('✅ Notizia aggiunta con successo:', response);
+            if (response.success) {
+              this.showSuccessMessage = true;
+              this.addedNews.unshift({
+                ...this.newsArticle,
+                dataCreazione: new Date()
+              });
+              this.resetForm();
+              if (this.activeTab === 'manage') {
+                setTimeout(() => {
+                  this.loadMyArticles();
+                }, 1000);
+              }
               setTimeout(() => {
-                this.loadMyArticles();
-              }, 1000);
+                this.showSuccessMessage = false;
+              }, 5000);
+            } else {
+              this.errorMessage = response.message || 'Errore durante il salvataggio della notizia';
             }
-            setTimeout(() => {
-              this.showSuccessMessage = false;
-            }, 5000);
-          } else {
-            this.errorMessage = response.message || 'Errore durante il salvataggio della notizia';
+            this.isSubmitting = false;
+          },
+          error: (error) => {
+            console.error('❌ Errore nell\'aggiunta della notizia:', error);
+            if (error.status === 401) {
+              alert('⚠️ Devi fare login per continuare');
+              this.auth.loginWithRedirect();
+            } else if (error.status === 403) {
+              this.errorMessage = 'Non hai i permessi per aggiungere notizie.';
+            } else if (error.status === 400) {
+              this.errorMessage = 'Dati non validi: ' + (error.error?.message || 'Controlla i campi inseriti');
+            } else {
+              this.errorMessage = 'Errore durante il salvataggio: ' + (error.error?.message || error.message || 'Errore sconosciuto');
+            }
+            this.isSubmitting = false;
           }
-          this.isSubmitting = false;
-        },
-        error: (error) => {
-          console.error('❌ Errore nell\'aggiunta della notizia:', error);
-          if (error.status === 401) {
-            alert('⚠️ Devi fare login per continuare');
-            this.auth.loginWithRedirect();
-          } else if (error.status === 403) {
-            this.errorMessage = 'Non hai i permessi per aggiungere notizie.';
-          } else if (error.status === 400) {
-            this.errorMessage = 'Dati non validi: ' + (error.error?.message || 'Controlla i campi inseriti');
-          } else {
-            this.errorMessage = 'Errore durante il salvataggio: ' + (error.error?.message || error.message || 'Errore sconosciuto');
+        });
+      }else{
+        this.http.post<{ success: boolean; message: string }>(this.addBozza, newsData, { headers }).subscribe({
+          next: (response) => {
+            console.log('✅ Bozza aggiunta con successo:', response);
+            if (response.success) {
+              this.showSuccessMessage = true;
+              this.addedNews.unshift({
+                ...this.newsArticle,
+                dataCreazione: new Date()
+              });
+              this.resetForm();
+              if (this.activeTab === 'manage') {
+                setTimeout(() => {
+                  this.loadMyArticles();
+                }, 1000);
+              }
+              setTimeout(() => {
+                this.showSuccessMessage = false;
+              }, 5000);
+            } else {
+              this.errorMessage = response.message || 'Errore durante il salvataggio della notizia';
+            }
+            this.isSubmitting = false;
+          },
+          error: (error) => {
+            console.error('❌ Errore nell\'aggiunta della notizia:', error);
+            if (error.status === 401) {
+              alert('⚠️ Devi fare login per continuare');
+              this.auth.loginWithRedirect();
+            } else if (error.status === 403) {
+              this.errorMessage = 'Non hai i permessi per aggiungere notizie.';
+            } else if (error.status === 400) {
+              this.errorMessage = 'Dati non validi: ' + (error.error?.message || 'Controlla i campi inseriti');
+            } else {
+              this.errorMessage = 'Errore durante il salvataggio: ' + (error.error?.message || error.message || 'Errore sconosciuto');
+            }
+            this.isSubmitting = false;
           }
-          this.isSubmitting = false;
-        }
-      });
+        });
+      }
+
+
     } catch (err) {
       alert('⚠️ Devi fare login per continuare');
       this.auth.loginWithRedirect();
