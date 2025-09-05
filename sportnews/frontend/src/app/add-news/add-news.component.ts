@@ -98,7 +98,7 @@ interface SavedArticle {
 
       <!-- Form per aggiungere notizia -->
       <div class="form-container">
-        <form class="news-form" (ngSubmit)="onSubmit()" #newsForm="ngForm" novalidate>
+        <form class="news-form" (ngSubmit)="onSubmit('notizia')" #newsForm="ngForm" novalidate>
           <!-- Titolo -->
           <div class="form-group">
             <label for="titolo" class="form-label required">
@@ -168,8 +168,6 @@ interface SavedArticle {
             </div>
           </div>
 
-          <!-- Pulsanti -->
-          <form (ngSubmit)="onSubmit()">
           <div class="form-actions">
             <button
               type="button"
@@ -200,7 +198,6 @@ interface SavedArticle {
               <span *ngIf="isSubmitting">⏳ Salvando...</span>
             </button>
           </div>
-        </form>
         </form>
       </div>
 
@@ -2011,7 +2008,7 @@ export class AddNewsComponent implements OnInit {
 
 
 
-  async onSubmit(): Promise<void> {
+  async onSubmit(type: 'notizia' | 'bozza'): Promise<void> {
     if (!this.isFormValid()) {
       this.errorMessage = 'Compila tutti i campi obbligatori';
       return;
@@ -2036,7 +2033,7 @@ export class AddNewsComponent implements OnInit {
         paragrafo: this.newsArticle.paragrafo?.trim() || '',
         contenuto: this.newsArticle.contenuto.trim()
       };
-      if (this.submitType === 'notizia') {
+      if(type=='notizia'){
         this.http.post<{ success: boolean; message: string }>(this.addNewsUrl, newsData, { headers }).subscribe({
           next: (response) => {
             console.log('✅ Notizia aggiunta con successo:', response);
@@ -2075,7 +2072,7 @@ export class AddNewsComponent implements OnInit {
             this.isSubmitting = false;
           }
         });
-      }if (this.submitType === 'bozza') {
+      }else{
         this.http.post<{ success: boolean; message: string }>(this.addBozza, newsData, { headers }).subscribe({
           next: (response) => {
             console.log('✅ Bozza aggiunta con successo:', response);
