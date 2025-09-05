@@ -597,7 +597,7 @@ def get_my_articles(user_payload):
 
 @app.route("/api/v1/my-bozze", methods=["GET"])
 @requires_auth
-def get_my_articles(user_payload):
+def get_my_bozze(user_payload):
     try:
         auth0_id = user_payload.get("sub")
         session = SessionLocal()
