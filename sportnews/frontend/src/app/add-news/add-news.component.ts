@@ -67,6 +67,13 @@ interface SavedArticle {
       >
         ⛉ Salvati ({{ savedArticles.length }})
       </button>
+      <button
+        class="tab-button"
+        [class.active]="activeTab === 'bozza'"
+        (click)="setActiveTab('bozza')"
+      >
+        ⛉ Bozza ({{ savedArticles.length }})
+      </button>
     </div>
 
     <!-- Tab Content: Aggiungi Notizia -->
@@ -1214,12 +1221,13 @@ export class AddNewsComponent implements OnInit {
   private readonly addNewsUrl = 'https://sport.event-fit.it/api/v1/addNews';
   private readonly myArticlesUrl = 'https://sport.event-fit.it/api/v1/my-articles';
   private readonly mySaveUrl = 'https://sport.event-fit.it/api/v1/my-articles-save';
+  private readonly myBozzaUrl = 'https://sport.event-fit.it/api/v1/my-bozze';
   private readonly updateArticleUrl = 'https://sport.event-fit.it/api/v1/update-article';
   private readonly deleteArticleUrl = 'https://sport.event-fit.it/api/v1/delete-article';
   private readonly updateBlob = 'https://sport.event-fit.it/api/v1/update-blob-content';
 
   // Tab management
-  activeTab: 'add' | 'save' | 'manage' = 'add';
+  activeTab: 'add' | 'save' | 'bozza' | 'manage' = 'add';
 
   // Model per il form
   newsArticle: NewsArticle = {
@@ -1272,16 +1280,22 @@ export class AddNewsComponent implements OnInit {
     if (this.activeTab === 'save') {
       this.loadMySave();
     }
+    if (this.activeTab === 'bozza') {
+      this.loadMyBozza();
+    }
   }
 
   // Tab Management
-  setActiveTab(tab: 'add' | 'manage' | 'save'): void {
+  setActiveTab(tab: 'add' | 'manage' | 'save' | 'bozza'): void {
     this.activeTab = tab;
     if (tab === 'manage' && this.myArticles.length === 0) {
       this.loadMyArticles();
     }
     if (tab === 'save' && this.savedArticles.length === 0) {
       this.loadMySave();
+    }
+    if (tab === 'bozza' && this.savedArticles.length === 0) {
+      this.loadMyBozza();
     }
     this.clearMessages();
   }
@@ -1348,6 +1362,42 @@ export class AddNewsComponent implements OnInit {
       const headers = { Authorization: `Bearer ${token}` };
 
       this.http.get<{ success: boolean; results: SavedArticle[] }>(this.mySaveUrl, { headers }).subscribe({
+        next: (response) => {
+          console.log('✅ Articoli salvati caricati:', response);
+          if (response.success) {
+            this.savedArticles = response.results.map(article => ({
+              ...article,
+              editing: false,
+              expanded: false
+            }));
+          }
+          this.loadingArticles = false;
+        },
+        error: (error) => {
+          console.error('❌ Errore nel caricamento articoli salvati:', error);
+          this.updateErrorMessage = 'Errore nel caricamento: ' + (error.error?.error || error.message || 'Errore sconosciuto');
+          this.loadingArticles = false;
+        }
+      });
+    } catch (err) {
+      alert('⚠️ Devi fare login per continuare');
+      this.auth.loginWithRedirect();
+    }
+  }
+
+  async loadMyBozza(): Promise<void> {
+    this.loadingArticles = true;
+    this.clearMessages();
+
+    try {
+      const token = await this.auth.getAccessTokenSilently().toPromise();
+      if (!token) {
+        throw new Error('Login required');
+      }
+
+      const headers = { Authorization: `Bearer ${token}` };
+
+      this.http.get<{ success: boolean; results: SavedArticle[] }>(this.myBozzaUrl, { headers }).subscribe({
         next: (response) => {
           console.log('✅ Articoli salvati caricati:', response);
           if (response.success) {

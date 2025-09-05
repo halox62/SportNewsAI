@@ -84,6 +84,8 @@ class Articolo(Base):
     idUser=Column(String(200), nullable=False)
     data = Column(DateTime, nullable=False, server_default=func.now())
     saved=Column(String(200), nullable=False)
+    bozza=Column(String(200), nullable=False)
+
 
 class User(Base):
     __tablename__ = 'users'
@@ -446,7 +448,8 @@ def add_news(user_payload):
             paragrafo=paragrafo,
             blob_url=blob_url,
             idUser=str(user.idUser),
-            saved="false"
+            saved="false",
+            bozza="false"
         )
         session.add(articolo)
         session.commit()
@@ -488,7 +491,52 @@ def save(user_payload):
             paragrafo=paragrafo,
             blob_url=blob_url,
             idUser=str(user.idUser),
-            saved="true"
+            saved="true",
+            bozza="false"
+        )
+        print(articolo)
+        session.add(articolo)
+        session.commit()
+        session.close()
+        print("ok")
+
+        return jsonify({"success": True, "message": "Articolo salvato con successo", "blob_url": blob_url}), 201
+
+    except Exception as e:
+        session.close()
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/v1/bozza", methods=["POST"])
+@requires_auth
+def bozza(user_payload):
+    try:
+        auth0_id = user_payload.get("sub")
+        session = SessionLocal()
+        user = session.query(User).filter_by(auth0Id=auth0_id).first()
+        if not user:
+            session.close()
+            return jsonify({"success": False, "error": "Utente non registrato"}), 401
+
+        data = request.get_json()
+        titolo = data.get("titolo")
+        paragrafo = data.get("paragrafo")
+        contenuto = data.get("contenuto")
+
+        if not titolo or not contenuto:
+            session.close()
+            return jsonify({"success": False, "error": "Titolo e contenuto sono obbligatori"}), 400
+
+        filename = f"{int(time.time())}_{titolo[:30].replace(' ', '_')}.txt"
+        blob_url = upload_article_to_blob(contenuto, filename)
+
+        articolo = Articolo(
+            titolo=titolo,
+            paragrafo=paragrafo,
+            blob_url=blob_url,
+            idUser=str(user.idUser),
+            saved="false",
+            bozza="true"
         )
         print(articolo)
         session.add(articolo)
@@ -529,6 +577,36 @@ def get_my_articles(user_payload):
             return jsonify({"success": False, "error": "Utente non trovato"}), 404
 
         articles = session.query(Articolo).filter_by(idUser=str(user.idUser),saved="false").all()
+        results = [
+            {
+                "id": art.id,
+                "titolo": art.titolo,
+                "sottotitolo": art.paragrafo,
+                "link": art.blob_url,
+                "data": art.data.isoformat() if art.data else None
+            }
+            for art in articles
+        ]
+        session.close()
+        return jsonify({"success": True, "results": results}), 200
+
+    except Exception as e:
+        session.close()
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/v1/my-bozze", methods=["GET"])
+@requires_auth
+def get_my_articles(user_payload):
+    try:
+        auth0_id = user_payload.get("sub")
+        session = SessionLocal()
+        user = session.query(User).filter_by(auth0Id=auth0_id).first()
+        if not user:
+            session.close()
+            return jsonify({"success": False, "error": "Utente non trovato"}), 404
+
+        articles = session.query(Articolo).filter_by(idUser=str(user.idUser),bozze="true").all()
         results = [
             {
                 "id": art.id,
