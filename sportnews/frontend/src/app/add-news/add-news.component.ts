@@ -260,7 +260,9 @@ interface SavedArticle {
                   <button class="btn-icon" (click)="openArticleContent(article)" title="Visualizza">
                     👁️
                   </button>
-
+                  <button class="btn-icon" (click)="to_bozza(article)" title="Visualizza">
+                  📚
+                  </button>
                   <button
                     class="btn-icon"
                     (click)="downloadArticle(article)"
@@ -1446,6 +1448,7 @@ export class AddNewsComponent implements OnInit {
   private readonly addBozza = 'https://sport.event-fit.it/api/v1/bozza';
   private readonly updateArticleUrl = 'https://sport.event-fit.it/api/v1/update-article';
   private readonly publishBozza = 'https://sport.event-fit.it/api/v1/publish';
+  private readonly to_bozzaUrl = 'https://sport.event-fit.it/api/v1/to_bozza';
   private readonly deleteArticleUrl = 'https://sport.event-fit.it/api/v1/delete-article';
   private readonly updateBlob = 'https://sport.event-fit.it/api/v1/update-blob-content';
 
@@ -1700,6 +1703,69 @@ export class AddNewsComponent implements OnInit {
     } catch (error) {
       console.error('Errore durante la pubblicazione:', error);
       this.updateErrorMessage = error instanceof Error ? error.message : 'Errore sconosciuto durante la pubblicazione';
+      setTimeout(() => {
+        this.updateErrorMessage = '';
+      }, 5000);
+      alert('⚠️ Devi fare login per continuare');
+      this.auth.loginWithRedirect();
+    } finally {
+      this.updatingArticle = false;
+    }
+  }
+
+
+  async to_bozza(article: any): Promise<void> {
+    if (!this.isArticleValid(article)) {
+      this.updateErrorMessage = 'Il titolo è obbligatorio';
+      setTimeout(() => {
+        this.updateErrorMessage = '';
+      }, 5000);
+      return;
+    }
+
+    this.updatingArticle = true;
+    this.updateSuccessMessage = false;
+    this.updateErrorMessage = '';
+
+    try {
+      const token = await this.auth.getAccessTokenSilently().toPromise();
+      if (!token) {
+        throw new Error('Login required');
+      }
+
+      const response = await fetch(`${this.to_bozzaUrl}/${article.id}`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        this.myArticles = this.myArticles.filter(a => a.id !== article.id);
+        // Lo aggiungo alle bozze
+        this.myBozze.unshift({
+          ...article,
+          editing: false
+        });
+
+        this.updateSuccessMessage = true;
+        setTimeout(() => {
+          this.updateSuccessMessage = false;
+        }, 3000);
+
+        if (this.activeTab === 'manage') {
+          setTimeout(() => this.loadMyArticles(), 1000);
+        }
+
+      } else {
+        throw new Error(result.error || 'Errore durante lo spostamento in bozza');
+      }
+    } catch (error) {
+      console.error('Errore durante lo spostamento in bozza:', error);
+      this.updateErrorMessage = error instanceof Error ? error.message : 'Errore sconosciuto';
       setTimeout(() => {
         this.updateErrorMessage = '';
       }, 5000);
