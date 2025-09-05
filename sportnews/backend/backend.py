@@ -26,6 +26,7 @@ import requests
 import time
 from functools import wraps
 from datetime import datetime
+import bleach
 
 
 DB_FILE = "news.db"
@@ -94,6 +95,10 @@ class User(Base):
     email = Column(String(200))
 
 
+def sanitize_input(text):
+    return bleach.clean(text, tags=[], attributes={}, strip=True)
+
+
 @app.route("/api/v1/register", methods=["POST"])
 def register_user():
     try:
@@ -101,8 +106,6 @@ def register_user():
         auth0Id = data.get("auth0Id")
         name = data.get("name")
         email = data.get("email")
-
-        print(data)
 
         if not auth0Id or not name or not email:
             return jsonify({"success": False, "error": "Dati mancanti"}), 400
@@ -433,9 +436,9 @@ def add_news(user_payload):
             return jsonify({"success": False, "error": "Utente non registrato"}), 401
 
         data = request.get_json()
-        titolo = data.get("titolo")
-        paragrafo = data.get("paragrafo")
-        contenuto = data.get("contenuto")
+        titolo = sanitize_input(data.get("titolo"))
+        paragrafo = sanitize_input(data.get("paragrafo"))
+        contenuto = sanitize_input(data.get("contenuto"))
 
         if not titolo or not contenuto:
             session.close()
@@ -476,9 +479,9 @@ def save(user_payload):
             return jsonify({"success": False, "error": "Utente non registrato"}), 401
 
         data = request.get_json()
-        titolo = data.get("titolo")
-        paragrafo = data.get("paragrafo")
-        contenuto = data.get("contenuto")
+        titolo = sanitize_input(data.get("titolo"))
+        paragrafo = sanitize_input(data.get("paragrafo"))
+        contenuto = sanitize_input(data.get("contenuto"))
 
         if not titolo or not contenuto:
             session.close()
@@ -520,9 +523,9 @@ def bozza(user_payload):
             return jsonify({"success": False, "error": "Utente non registrato"}), 401
 
         data = request.get_json()
-        titolo = data.get("titolo")
-        paragrafo = data.get("paragrafo")
-        contenuto = data.get("contenuto")
+        titolo = sanitize_input(data.get("titolo"))
+        paragrafo = sanitize_input(data.get("paragrafo"))
+        contenuto = sanitize_input(data.get("contenuto"))
 
         if not titolo or not contenuto:
             session.close()
@@ -733,9 +736,9 @@ def update_article(article_id, user_payload):
 
         # Prende i dati dal body
         data = request.get_json()
-        titolo = data.get("titolo")
-        paragrafo = data.get("paragrafo")
-        contenuto = data.get("contenuto")
+        titolo = sanitize_input(data.get("titolo"))
+        paragrafo = sanitize_input(data.get("paragrafo"))
+        contenuto = sanitize_input(data.get("contenuto"))
 
         if titolo:
             articolo.titolo = titolo
