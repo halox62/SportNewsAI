@@ -2009,6 +2009,8 @@ export class AddNewsComponent implements OnInit {
 
 
   async onSubmit(type: 'notizia' | 'bozza'): Promise<void> {
+    this.submitType = type;
+
     if (!this.isFormValid()) {
       this.errorMessage = 'Compila tutti i campi obbligatori';
       return;
@@ -2019,9 +2021,7 @@ export class AddNewsComponent implements OnInit {
 
     try {
       const token = await this.auth.getAccessTokenSilently().toPromise();
-      if (!token) {
-        throw new Error('Login required');
-      }
+      if (!token) throw new Error('Login required');
 
       const headers = {
         Authorization: `Bearer ${token}`,
@@ -2033,86 +2033,39 @@ export class AddNewsComponent implements OnInit {
         paragrafo: this.newsArticle.paragrafo?.trim() || '',
         contenuto: this.newsArticle.contenuto.trim()
       };
-      if(type=='notizia'){
-        this.http.post<{ success: boolean; message: string }>(this.addNewsUrl, newsData, { headers }).subscribe({
-          next: (response) => {
-            console.log('✅ Notizia aggiunta con successo:', response);
-            if (response.success) {
-              this.showSuccessMessage = true;
-              this.addedNews.unshift({
-                ...this.newsArticle,
-                dataCreazione: new Date()
-              });
-              this.resetForm();
-              if (this.activeTab === 'manage') {
-                setTimeout(() => {
-                  this.loadMyArticles();
-                }, 1000);
-              }
-              setTimeout(() => {
-                this.showSuccessMessage = false;
-              }, 5000);
-            } else {
-              this.errorMessage = response.message || 'Errore durante il salvataggio della notizia';
-            }
-            this.isSubmitting = false;
-          },
-          error: (error) => {
-            console.error('❌ Errore nell\'aggiunta della notizia:', error);
-            if (error.status === 401) {
-              alert('⚠️ Devi fare login per continuare');
-              this.auth.loginWithRedirect();
-            } else if (error.status === 403) {
-              this.errorMessage = 'Non hai i permessi per aggiungere notizie.';
-            } else if (error.status === 400) {
-              this.errorMessage = 'Dati non validi: ' + (error.error?.message || 'Controlla i campi inseriti');
-            } else {
-              this.errorMessage = 'Errore durante il salvataggio: ' + (error.error?.message || error.message || 'Errore sconosciuto');
-            }
-            this.isSubmitting = false;
-          }
-        });
-      }else{
-        this.http.post<{ success: boolean; message: string }>(this.addBozza, newsData, { headers }).subscribe({
-          next: (response) => {
-            console.log('✅ Bozza aggiunta con successo:', response);
-            if (response.success) {
-              this.showSuccessMessage = true;
-              this.addedNews.unshift({
-                ...this.newsArticle,
-                dataCreazione: new Date()
-              });
-              this.resetForm();
-              if (this.activeTab === 'manage') {
-                setTimeout(() => {
-                  this.loadMyArticles();
-                }, 1000);
-              }
-              setTimeout(() => {
-                this.showSuccessMessage = false;
-              }, 5000);
-            } else {
-              this.errorMessage = response.message || 'Errore durante il salvataggio della notizia';
-            }
-            this.isSubmitting = false;
-          },
-          error: (error) => {
-            console.error('❌ Errore nell\'aggiunta della notizia:', error);
-            if (error.status === 401) {
-              alert('⚠️ Devi fare login per continuare');
-              this.auth.loginWithRedirect();
-            } else if (error.status === 403) {
-              this.errorMessage = 'Non hai i permessi per aggiungere notizie.';
-            } else if (error.status === 400) {
-              this.errorMessage = 'Dati non validi: ' + (error.error?.message || 'Controlla i campi inseriti');
-            } else {
-              this.errorMessage = 'Errore durante il salvataggio: ' + (error.error?.message || error.message || 'Errore sconosciuto');
-            }
-            this.isSubmitting = false;
-          }
-        });
-      }
 
+      const url = this.submitType === 'notizia' ? this.addNewsUrl : this.addBozza;
+
+      this.http.post<{ success: boolean; message: string }>(url, newsData, { headers }).subscribe({
+        next: (response) => {
+          console.log(`✅ ${this.submitType === 'notizia' ? 'Notizia' : 'Bozza'} aggiunta con successo:`, response);
+          if (response.success) {
+            this.showSuccessMessage = true;
+            this.addedNews.unshift({
+              ...this.newsArticle,
+              dataCreazione: new Date()
+            });
+            this.resetForm();
+            if (this.activeTab === 'manage') {
+              setTimeout(() => this.loadMyArticles(), 1000);
+            }
+            setTimeout(() => this.showSuccessMessage = false, 5000);
+          } else {
+            this.errorMessage = response.message || 'Errore durante il salvataggio';
+          }
+          this.isSubmitting = false;
+        },
+        error: (error) => {
+          console.error('❌ Errore:', error);
+          if (error.status === 401) {
+            alert('⚠️ Devi fare login per continuare');
+            this.auth.loginWithRedirect();
+          } else {
+            this.errorMessage = error.error?.message || 'Errore durante il salvataggio';
+          }
+          this.isSubmitting = false;
+        }
+      });
 
     } catch (err) {
       alert('⚠️ Devi fare login per continuare');
