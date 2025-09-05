@@ -705,7 +705,7 @@ def update_article(article_id, user_payload):
         data = request.get_json()
         titolo = data.get("titolo")
         paragrafo = data.get("paragrafo")
-        contenuto = data.get("contenuto")  # opzionale, se vuoi aggiornare il blob
+        contenuto = data.get("contenuto")
 
         if titolo:
             articolo.titolo = titolo
@@ -714,7 +714,6 @@ def update_article(article_id, user_payload):
 
         # Se il contenuto cambia, aggiorna anche il blob
         if contenuto:
-            import time
             filename = f"{int(time.time())}_{titolo[:30].replace(' ', '_')}.txt"
             blob_url = upload_article_to_blob(contenuto, filename)
             articolo.blob_url = blob_url

@@ -2007,7 +2007,7 @@ export class AddNewsComponent implements OnInit {
 
       const updateData = {
         titolo: article.titolo?.trim(),
-        sottotitolo: article.sottotitolo?.trim() || null,
+        paragrafo: article.sottotitolo?.trim(),
         contenuto: article.contenuto?.trim(),
         link: article.link
       };
