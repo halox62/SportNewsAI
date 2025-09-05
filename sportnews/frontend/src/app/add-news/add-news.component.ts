@@ -98,108 +98,104 @@ interface SavedArticle {
 
       <!-- Form per aggiungere notizia -->
       <div class="form-container">
-        <form class="news-form" #newsForm="ngForm" novalidate>
-          <!-- Titolo -->
-          <div class="form-group">
-            <label for="titolo" class="form-label required">
-              📰 Titolo
-            </label>
-            <input
-              type="text"
-              id="titolo"
-              name="titolo"
-              [(ngModel)]="newsArticle.titolo"
-              class="form-input"
-              placeholder="Inserisci il titolo della notizia..."
-              #titoloRef="ngModel"
-              required
-              maxlength="200"
-              (input)="onInputChange()"
-            />
-            <div class="field-info">
-              <small>Caratteri: {{ getTitoloLength() }}/200</small>
-            </div>
-            <div class="validation-error" *ngIf="titoloRef.invalid && titoloRef.touched">
-              <small>⚠️ Il titolo è obbligatorio</small>
-            </div>
+      <form class="news-form" #newsForm="ngForm" novalidate>
+        <!-- Titolo -->
+        <div class="form-group">
+          <label for="titolo" class="form-label required">📰 Titolo</label>
+          <input
+            type="text"
+            id="titolo"
+            name="titolo"
+            [(ngModel)]="newsArticle.titolo"
+            class="form-input"
+            placeholder="Inserisci il titolo della notizia..."
+            #titoloRef="ngModel"
+            required
+            maxlength="200"
+            (input)="onInputChange()"
+          />
+          <div class="field-info">
+            <small>Caratteri: {{ getTitoloLength() }}/200</small>
           </div>
-
-          <div class="form-group">
-            <label for="paragrafo" class="form-label">
-              📝 Paragrafo
-            </label>
-            <textarea
-              id="paragrafo"
-              name="paragrafo"
-              [(ngModel)]="newsArticle.paragrafo"
-              class="form-textarea"
-              placeholder="Inserisci un breve paragrafo introduttivo..."
-              rows="3"
-              maxlength="500"
-              (input)="onInputChange()"
-            ></textarea>
-            <div class="field-info">
-              <small>Caratteri: {{ newsArticle.paragrafo?.length || 0 }}/500</small>
-            </div>
+          <div class="validation-error" *ngIf="titoloRef.invalid && titoloRef.touched">
+            <small>⚠️ Il titolo è obbligatorio</small>
           </div>
+        </div>
 
-          <!-- Contenuto -->
-          <div class="form-group">
-            <label for="contenuto" class="form-label required">
-              📝 Contenuto
-            </label>
-            <textarea
-              id="contenuto"
-              name="contenuto"
-              [(ngModel)]="newsArticle.contenuto"
-              class="form-textarea"
-              placeholder="Inserisci il contenuto della notizia..."
-              rows="6"
-              #contenutoRef="ngModel"
-              required
-              maxlength="1000"
-              (input)="onInputChange()"
-            ></textarea>
-            <div class="field-info">
-              <small>Caratteri: {{ getContenutoLength() }}/1000</small>
-            </div>
-            <div class="validation-error" *ngIf="contenutoRef.invalid && contenutoRef.touched">
-              <small>⚠️ Il contenuto è obbligatorio</small>
-            </div>
+        <!-- Paragrafo -->
+        <div class="form-group">
+          <label for="paragrafo" class="form-label">📝 Paragrafo</label>
+          <textarea
+            id="paragrafo"
+            name="paragrafo"
+            [(ngModel)]="newsArticle.paragrafo"
+            class="form-textarea"
+            placeholder="Inserisci un breve paragrafo introduttivo..."
+            rows="3"
+            maxlength="500"
+            (input)="onInputChange()"
+          ></textarea>
+          <div class="field-info">
+            <small>Caratteri: {{ newsArticle.paragrafo?.length || 0 }}/500</small>
           </div>
+        </div>
 
-          <div class="form-actions">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              (click)="resetForm()"
-              [disabled]="isSubmitting"
-            >
-              🔄 Reset
-            </button>
-
-            <button
-              type="submit"
-              class="btn btn-primary"
-              [disabled]="isSubmitting || !isFormValid()"
-              (click)="submitType = 'notizia'"
-            >
-              <span *ngIf="!isSubmitting">💾 Salva Notizia</span>
-              <span *ngIf="isSubmitting">⏳ Salvando...</span>
-            </button>
-
-            <button
-              type="submit"
-              class="btn btn-warning"
-              [disabled]="isSubmitting || !isFormValid()"
-              (click)="submitType = 'bozza'"
-            >
-              <span *ngIf="!isSubmitting">📝 Salva come Bozza</span>
-              <span *ngIf="isSubmitting">⏳ Salvando...</span>
-            </button>
+        <!-- Contenuto -->
+        <div class="form-group">
+          <label for="contenuto" class="form-label required">📝 Contenuto</label>
+          <textarea
+            id="contenuto"
+            name="contenuto"
+            [(ngModel)]="newsArticle.contenuto"
+            class="form-textarea"
+            placeholder="Inserisci il contenuto della notizia..."
+            rows="6"
+            #contenutoRef="ngModel"
+            required
+            maxlength="1000"
+            (input)="onInputChange()"
+          ></textarea>
+          <div class="field-info">
+            <small>Caratteri: {{ getContenutoLength() }}/1000</small>
           </div>
-        </form>
-      </div>
+          <div class="validation-error" *ngIf="contenutoRef.invalid && contenutoRef.touched">
+            <small>⚠️ Il contenuto è obbligatorio</small>
+          </div>
+        </div>
+
+        <!-- Azioni -->
+        <div class="form-actions">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="resetForm()"
+            [disabled]="isSubmitting"
+          >
+            🔄 Reset
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-primary"
+            [disabled]="isSubmitting || !isFormValid()"
+            (click)="onSubmit('notizia')"
+          >
+            <span *ngIf="!isSubmitting">💾 Salva Notizia</span>
+            <span *ngIf="isSubmitting">⏳ Salvando...</span>
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-warning"
+            [disabled]="isSubmitting || !isFormValid()"
+            (click)="onSubmit('bozza')"
+          >
+            <span *ngIf="!isSubmitting">📝 Salva come Bozza</span>
+            <span *ngIf="isSubmitting">⏳ Salvando...</span>
+          </button>
+        </div>
+      </form>
+    </div>
 
       <!-- Lista notizie aggiunte -->
       <div class="recent-news-section" *ngIf="addedNews.length > 0">
