@@ -185,7 +185,8 @@ def query_database_articles(keyword: str):
     try:
         results = session.query(Articolo).filter(
             Articolo.titolo.ilike(f'%{keyword}%'),
-            Articolo.saved == "false"
+            Articolo.saved == "false",
+            Articolo.bozza == "false"
         ).all()
         return [
             {
