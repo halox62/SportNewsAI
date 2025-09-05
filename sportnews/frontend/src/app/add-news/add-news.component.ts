@@ -341,23 +341,35 @@ interface SavedArticle {
                   </div>
                 </div>
                 <div class="edit-actions">
-                  <button class="btn btn-secondary" (click)="cancelEditing(article)">
-                    ❌ Annulla
-                  </button>
-                  <button
-                    class="btn btn-primary"
-                    (click)="saveArticle(article)"
-                    [disabled]="updatingArticle || !isArticleValid(article)"
-                  >
-                    <span *ngIf="!updatingArticle">💾 Salva Modifiche</span>
-                    <span *ngIf="updatingArticle">⏳ Salvando...</span>
-                  </button>
-                </div>
+                <button class="btn btn-secondary" (click)="cancelEditing(article)">
+                  ❌ Annulla
+                </button>
+
+                <button
+                  class="btn btn-warning"
+                  (click)="saveArticle(article, 'bozza')"
+                  [disabled]="updatingArticle || !isArticleValid(article)"
+                >
+                  <span *ngIf="!updatingArticle">📝 Salva Bozza</span>
+                  <span *ngIf="updatingArticle">⏳ Salvando...</span>
+                </button>
+
+                <button
+                  class="btn btn-primary"
+                  (click)="saveArticle(article, 'notizia')"
+                  [disabled]="updatingArticle || !isArticleValid(article)"
+                >
+                  <span *ngIf="!updatingArticle">💾 Pubblica Notizia</span>
+                  <span *ngIf="updatingArticle">⏳ Salvando...</span>
+                </button>
+              </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+
 
       <!-- Update status messages -->
       <div class="status-messages" *ngIf="updateSuccessMessage || updateErrorMessage">
@@ -414,7 +426,7 @@ interface SavedArticle {
       </div>
     </div>
 
-    <!-- Tab Content: Salvati -->
+    <!-- Tab Content: Bozza -->
     <div class="tab-content" *ngIf="activeTab === 'bozza'">
       <!-- Loading state -->
       <div class="loading-container" *ngIf="loadingArticles">
@@ -446,6 +458,9 @@ interface SavedArticle {
                   <span class="article-date">{{ formatArticleDate(article.data) }}</span>
                 </div>
                 <div class="article-actions">
+                <button class="btn-icon" (click)="startEditing(article)" title="Modifica">
+                    ✏️
+                  </button>
                   <button class="btn-icon" (click)="openArticleContent(article)" title="Visualizza">
                     👁️
                   </button>
@@ -1854,12 +1869,10 @@ export class AddNewsComponent implements OnInit {
       .substring(0, 100);
   }
 
-  async saveArticle(article: any): Promise<void> {
+  async saveArticle(article: any, type: 'bozza' | 'notizia' = 'notizia'): Promise<void> {
     if (!this.isArticleValid(article)) {
       this.updateErrorMessage = 'Il titolo è obbligatorio';
-      setTimeout(() => {
-        this.updateErrorMessage = '';
-      }, 5000);
+      setTimeout(() => (this.updateErrorMessage = ''), 5000);
       return;
     }
 
@@ -1869,29 +1882,32 @@ export class AddNewsComponent implements OnInit {
 
     try {
       const token = await this.auth.getAccessTokenSilently().toPromise();
-      if (!token) {
-        throw new Error('Login required');
-      }
+      if (!token) throw new Error('Login required');
 
-      const updateData = {
+      const updateData: any = {
         titolo: article.titolo?.trim(),
         sottotitolo: article.sottotitolo?.trim() || null,
         contenuto: article.contenuto?.trim(),
         link: article.link
       };
 
-      if (article.link && article.link.includes('blob.core.windows.net') && article.link.endsWith('.txt')) {
+      // Aggiornamento del blob se presente
+      if (article.link?.includes('blob.core.windows.net') && article.link.endsWith('.txt')) {
         try {
           const updatedBlobUrl = await this.updateBlobContent(article, token);
-          if (updatedBlobUrl) {
-            updateData.link = updatedBlobUrl;
-          }
+          if (updatedBlobUrl) updateData.link = updatedBlobUrl;
         } catch (blobError) {
-          console.warn('Errore nell\'aggiornamento del blob, continuo con l\'aggiornamento del database:', blobError);
+          console.warn('Errore aggiornamento blob, continuo con DB:', blobError);
         }
       }
 
-      const response = await fetch(`${this.updateArticleUrl}/${article.id}`, {
+      // Differenzia bozze e notizie
+      const url =
+        type === 'notizia'
+          ? `${this.updateArticleUrl}/${article.id}`
+          : `${this.addBozza}/${article.id}`;
+
+      const response = await fetch(url, {
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -1905,13 +1921,10 @@ export class AddNewsComponent implements OnInit {
       if (response.ok && result.success) {
         const index = this.myArticles.findIndex(a => a.id === article.id);
         if (index !== -1) {
-          this.myArticles[index] = { ...this.myArticles[index], ...updateData, editing: false };
+          this.myArticles[index] = { ...this.myArticles[index], ...updateData, editing: false, isBozza: type === 'bozza' };
         }
-
         this.updateSuccessMessage = true;
-        setTimeout(() => {
-          this.updateSuccessMessage = false;
-        }, 3000);
+        setTimeout(() => (this.updateSuccessMessage = false), 3000);
       } else {
         throw new Error(result.error || 'Errore durante l\'aggiornamento dell\'articolo');
       }

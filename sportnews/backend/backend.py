@@ -539,11 +539,9 @@ def bozza(user_payload):
             saved="false",
             bozza="true"
         )
-        print(articolo)
         session.add(articolo)
         session.commit()
         session.close()
-        print("ok")
 
         return jsonify({"success": True, "message": "Articolo salvato con successo", "blob_url": blob_url}), 201
 
@@ -577,7 +575,7 @@ def get_my_articles(user_payload):
             session.close()
             return jsonify({"success": False, "error": "Utente non trovato"}), 404
 
-        articles = session.query(Articolo).filter_by(idUser=str(user.idUser),saved="false").all()
+        articles = session.query(Articolo).filter_by(idUser=str(user.idUser),saved="false",bozza="false").all()
         results = [
             {
                 "id": art.id,
