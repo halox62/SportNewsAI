@@ -62,17 +62,17 @@ interface SavedArticle {
       </button>
       <button
         class="tab-button"
+        [class.active]="activeTab === 'bozza'"
+        (click)="setActiveTab('bozza')"
+      >
+        📚 Bozza ({{ myBozze.length }})
+      </button>
+      <button
+        class="tab-button"
         [class.active]="activeTab === 'save'"
         (click)="setActiveTab('save')"
       >
         ⛉ Salvati ({{ savedArticles.length }})
-      </button>
-      <button
-        class="tab-button"
-        [class.active]="activeTab === 'bozza'"
-        (click)="setActiveTab('bozza')"
-      >
-        ⛉ Bozza ({{ myBozze.length }})
       </button>
     </div>
 
