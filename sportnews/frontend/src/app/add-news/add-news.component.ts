@@ -98,7 +98,7 @@ interface SavedArticle {
 
       <!-- Form per aggiungere notizia -->
       <div class="form-container">
-        <form class="news-form" (ngSubmit)="onSubmit('notizia')" #newsForm="ngForm" novalidate>
+        <form class="news-form" (ngSubmit)="onSubmit()" #newsForm="ngForm" novalidate>
           <!-- Titolo -->
           <div class="form-group">
             <label for="titolo" class="form-label required">
@@ -169,7 +169,7 @@ interface SavedArticle {
           </div>
 
           <!-- Pulsanti -->
-          <form (ngSubmit)="onSubmit('notizia')">
+          <form (ngSubmit)="onSubmit()">
           <div class="form-actions">
             <button
               type="button"
@@ -2011,7 +2011,7 @@ export class AddNewsComponent implements OnInit {
 
 
 
-  async onSubmit(type: 'notizia' | 'bozza'): Promise<void> {
+  async onSubmit(): Promise<void> {
     if (!this.isFormValid()) {
       this.errorMessage = 'Compila tutti i campi obbligatori';
       return;
@@ -2036,7 +2036,7 @@ export class AddNewsComponent implements OnInit {
         paragrafo: this.newsArticle.paragrafo?.trim() || '',
         contenuto: this.newsArticle.contenuto.trim()
       };
-      if(type=='notizia'){
+      if (this.submitType === 'notizia') {
         this.http.post<{ success: boolean; message: string }>(this.addNewsUrl, newsData, { headers }).subscribe({
           next: (response) => {
             console.log('✅ Notizia aggiunta con successo:', response);
@@ -2075,7 +2075,7 @@ export class AddNewsComponent implements OnInit {
             this.isSubmitting = false;
           }
         });
-      }else{
+      }if (this.submitType === 'bozza') {
         this.http.post<{ success: boolean; message: string }>(this.addBozza, newsData, { headers }).subscribe({
           next: (response) => {
             console.log('✅ Bozza aggiunta con successo:', response);
