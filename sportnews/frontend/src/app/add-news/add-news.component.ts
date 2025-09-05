@@ -98,7 +98,7 @@ interface SavedArticle {
 
       <!-- Form per aggiungere notizia -->
       <div class="form-container">
-        <form class="news-form" (ngSubmit)="onSubmit('notizia')" #newsForm="ngForm" novalidate>
+        <form class="news-form" #newsForm="ngForm" novalidate>
           <!-- Titolo -->
           <div class="form-group">
             <label for="titolo" class="form-label required">
