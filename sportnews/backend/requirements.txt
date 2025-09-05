@@ -12,3 +12,4 @@ python-dateutil
 azure-storage-blob
 lxml_html_clean
 python-jose
+bleach
