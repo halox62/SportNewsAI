@@ -72,7 +72,7 @@ interface SavedArticle {
         [class.active]="activeTab === 'bozza'"
         (click)="setActiveTab('bozza')"
       >
-        ⛉ Bozza ({{ savedArticles.length }})
+        ⛉ Bozza ({{ myBozze.length }})
       </button>
     </div>
 

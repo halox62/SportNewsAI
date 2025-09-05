@@ -241,39 +241,87 @@ export class HomepageComponent implements OnInit {
       minute: '2-digit'
     });
   }
-  openArticle(link: string): void {
-    if (link.includes("blob.core.windows.net") && link.endsWith(".txt")) {
+  openArticle(article: any): void {
+    const link = article.link;
+
+    if (link && link.includes('blob.core.windows.net') && link.endsWith('.txt')) {
       fetch(link)
         .then(res => {
-          if (!res.ok) throw new Error("Errore HTTP " + res.status);
+          if (!res.ok) throw new Error('Errore HTTP ' + res.status);
           return res.text();
         })
         .then(text => {
-          // Parsing formato Title/Subtitle/Text
-          const titleMatch = text.match(/Title:\s*(.+?)(?:\n|$)/);
-          const subtitleMatch = text.match(/Subtitle:\s*(.+?)(?:\n|$)/);
-          const textMatch = text.match(/Text:\s*([\s\S]+)/);
+          const titleMatch = text.match(/Title:\s*([\s\S]*?)(?=\nSubtitle:|\nText:|$)/);
+          const subtitleMatch = text.match(/Subtitle:\s*([\s\S]*?)(?=\nText:|$)/);
+          const textMatch = text.match(/Text:\s*([\s\S]*)/);
 
-          this.savedArticle = {
-            title: titleMatch ? titleMatch[1].trim() : "Articolo salvato",
-            subtitle: subtitleMatch ? subtitleMatch[1].trim() : "",
-            text: textMatch ? textMatch[1].trim() : text
+          const articleContent = {
+            title: titleMatch ? titleMatch[1].trim() : article.titolo || 'Articolo',
+            subtitle: subtitleMatch ? subtitleMatch[1].trim() : article.sottotitolo || '',
+            text: textMatch ? textMatch[1].trim() : article.contenuto || text
           };
 
-          // Chiudo risultati e mostro solo l'articolo salvato
-          this.showSavedArticle = true;
-          this.showGeneratedArticle = false;
-          this.searchResults = [];
+          this.displayArticleInNewWindow(articleContent);
         })
         .catch(err => {
-          console.error("Errore nel caricamento dal blob:", err);
-          alert("Impossibile caricare l'articolo dal blob.");
+          console.error('Errore nel caricamento dal blob:', err);
         });
-    } else {
+    } else if (link) {
       window.open(link, '_blank');
+    } else {
+      const articleContent = {
+        title: article.titolo || 'Articolo',
+        subtitle: article.sottotitolo || '',
+        text: article.contenuto || 'Contenuto non disponibile'
+      };
+      this.displayArticleInNewWindow(articleContent);
     }
   }
 
+  private displayArticleInNewWindow(articleContent: any): void {
+    const newWindow = window.open('', '_blank');
+    if (newWindow) {
+      newWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>${articleContent.title}</title>
+          <meta charset="UTF-8">
+          <style>
+            body {
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+              max-width: 800px;
+              margin: 40px auto;
+              padding: 20px;
+              line-height: 1.6;
+              color: #333;
+            }
+            h1 {
+              color: #2c3e50;
+              border-bottom: 3px solid #667eea;
+              padding-bottom: 10px;
+            }
+            h2 {
+              color: #666;
+              font-style: italic;
+              margin-bottom: 20px;
+            }
+            .content {
+              white-space: pre-line;
+              text-align: justify;
+            }
+          </style>
+        </head>
+        <body>
+          <h1>${articleContent.title}</h1>
+          ${articleContent.subtitle ? `<h2>${articleContent.subtitle}</h2>` : ''}
+          <div class="content">${articleContent.text}</div>
+        </body>
+        </html>
+      `);
+      newWindow.document.close();
+    }
+  }
 
 
   onInputChange(event: any): void {
