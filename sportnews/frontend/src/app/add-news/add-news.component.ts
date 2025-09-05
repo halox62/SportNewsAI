@@ -341,28 +341,18 @@ interface SavedArticle {
                   </div>
                 </div>
                 <div class="edit-actions">
-                <button class="btn btn-secondary" (click)="cancelEditing(article)">
-                  ❌ Annulla
-                </button>
-
-                <button
-                  class="btn btn-warning"
-                  (click)="saveArticle(article, 'bozza')"
-                  [disabled]="updatingArticle || !isArticleValid(article)"
-                >
-                  <span *ngIf="!updatingArticle">📝 Salva Bozza</span>
-                  <span *ngIf="updatingArticle">⏳ Salvando...</span>
-                </button>
-
-                <button
-                  class="btn btn-primary"
-                  (click)="saveArticle(article, 'notizia')"
-                  [disabled]="updatingArticle || !isArticleValid(article)"
-                >
-                  <span *ngIf="!updatingArticle">💾 Pubblica Notizia</span>
-                  <span *ngIf="updatingArticle">⏳ Salvando...</span>
-                </button>
-              </div>
+                  <button class="btn btn-secondary" (click)="cancelEditing(article)">
+                    ❌ Annulla
+                  </button>
+                  <button
+                    class="btn btn-primary"
+                    (click)="saveArticle(article)"
+                    [disabled]="updatingArticle || !isArticleValid(article)"
+                  >
+                    <span *ngIf="!updatingArticle">💾 Salva Modifiche</span>
+                    <span *ngIf="updatingArticle">⏳ Salvando...</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -427,119 +417,186 @@ interface SavedArticle {
     </div>
 
     <!-- Tab Content: Bozza -->
-    <div class="tab-content" *ngIf="activeTab === 'bozza'">
-      <!-- Loading state -->
-      <div class="loading-container" *ngIf="loadingArticles">
-        <div class="loading-spinner">⏳</div>
-        <p>Caricamento articoli...</p>
-      </div>
+    <!-- Tab Content: Bozza -->
+<div class="tab-content" *ngIf="activeTab === 'bozza'">
+  <!-- Loading state -->
+  <div class="loading-container" *ngIf="loadingArticles">
+    <div class="loading-spinner">⏳</div>
+    <p>Caricamento articoli...</p>
+  </div>
 
-      <!-- Empty state -->
-      <div class="empty-state" *ngIf="!loadingArticles && savedArticles.length === 0">
-        <div class="empty-icon">📰</div>
-        <h3>Nessun articolo salvato come bozza</h3>
-        <p>Non hai ancora nessuna bozza di articolo.</p>
-      </div>
+  <!-- Empty state -->
+  <div class="empty-state" *ngIf="!loadingArticles && savedArticles.length === 0">
+    <div class="empty-icon">📰</div>
+    <h3>Nessun articolo salvato come bozza</h3>
+    <p>Non hai ancora nessuna bozza di articolo.</p>
+  </div>
 
-      <!-- Articles list -->
-      <div class="articles-container" *ngIf="!loadingArticles && savedArticles.length > 0">
-        <div class="articles-header">
-          <h2>📚 Le tue bozze</h2>
-          <button class="btn btn-secondary" (click)="loadMyBozza()">
-            🔄 Ricarica
-          </button>
+  <!-- Articles list -->
+  <div class="articles-container" *ngIf="!loadingArticles && savedArticles.length > 0">
+    <div class="articles-header">
+      <h2>📚 Le tue bozze</h2>
+      <button class="btn btn-secondary" (click)="loadMyBozza()">
+        🔄 Ricarica
+      </button>
+    </div>
+    <div class="articles-list">
+      <div class="article-item" *ngFor="let article of savedArticles; let i = index">
+        <!-- Modalità visualizzazione -->
+        <div class="article-content" *ngIf="!article.editing">
+          <div class="article-header">
+            <div class="article-info">
+              <span class="article-number">#{{ i + 1 }}</span>
+              <span class="article-date">{{ formatArticleDate(article.data) }}</span>
+            </div>
+            <div class="article-actions">
+              <button class="btn-icon" (click)="startEditing(article)" title="Modifica">
+                ✏️
+              </button>
+              <button class="btn-icon" (click)="openArticleContent(article)" title="Visualizza">
+                👁️
+              </button>
+              <button
+                class="btn-icon"
+                (click)="downloadArticle(article)"
+                title="Scarica"
+                [disabled]="downloadingArticle === article.id"
+              >
+                <span *ngIf="downloadingArticle !== article.id">💾</span>
+                <span *ngIf="downloadingArticle === article.id">⏳</span>
+              </button>
+              <button
+                class="btn-icon btn-delete"
+                (click)="confirmDeleteArticle(article)"
+                title="Elimina"
+                [disabled]="deletingArticle === article.id"
+              >
+                <span *ngIf="deletingArticle !== article.id">🗑️</span>
+                <span *ngIf="deletingArticle === article.id">⏳</span>
+              </button>
+            </div>
+          </div>
+          <h3 class="article-title">{{ article.titolo }}</h3>
+          <p class="article-subtitle" *ngIf="article.sottotitolo">{{ article.sottotitolo }}</p>
+          <div class="article-content-section" *ngIf="article.contenuto">
+            <div class="article-content-display" [class.article-content-preview]="!article.expanded">
+              {{ article.contenuto }}
+            </div>
+            <button
+              class="expand-content-btn"
+              (click)="toggleArticleExpansion(article)"
+              *ngIf="article.contenuto.length > 150"
+            >
+              {{ article.expanded ? '▲ Mostra meno' : '▼ Mostra tutto' }}
+            </button>
+          </div>
         </div>
-        <div class="articles-list">
-          <div class="article-item" *ngFor="let article of savedArticles; let i = index">
-            <div class="article-content">
-              <div class="article-header">
-                <div class="article-info">
-                  <span class="article-number">#{{ i + 1 }}</span>
-                  <span class="article-date">{{ formatArticleDate(article.data) }}</span>
-                </div>
-                <div class="article-actions">
-                <button class="btn-icon" (click)="startEditing(article)" title="Modifica">
-                    ✏️
-                  </button>
-                  <button class="btn-icon" (click)="openArticleContent(article)" title="Visualizza">
-                    👁️
-                  </button>
 
-                  <button
-                    class="btn-icon"
-                    (click)="downloadArticle(article)"
-                    title="Scarica"
-                    [disabled]="downloadingArticle === article.id"
-                  >
-                    <span *ngIf="downloadingArticle !== article.id">💾</span>
-                    <span *ngIf="downloadingArticle === article.id">⏳</span>
-                  </button>
-                  <button
-                    class="btn-icon btn-delete"
-                    (click)="confirmDeleteArticle(article)"
-                    title="Elimina"
-                    [disabled]="deletingArticle === article.id"
-                  >
-                    <span *ngIf="deletingArticle !== article.id">🗑️</span>
-                    <span *ngIf="deletingArticle === article.id">⏳</span>
-                  </button>
-                </div>
+        <!-- Modalità modifica -->
+        <div class="article-edit-content" *ngIf="article.editing">
+          <div class="edit-form">
+            <div class="form-group">
+              <label class="form-label">📰 Titolo</label>
+              <input
+                type="text"
+                class="form-input"
+                [(ngModel)]="article.titolo"
+                maxlength="200"
+                placeholder="Titolo dell'articolo..."
+              />
+              <div class="field-info">
+                <small>Caratteri: {{ article.titolo?.length || 0 }}/200</small>
               </div>
-              <h3 class="article-title">{{ article.titolo }}</h3>
-              <p class="article-subtitle" *ngIf="article.sottotitolo">{{ article.sottotitolo }}</p>
-              <div class="article-content-section" *ngIf="article.contenuto">
-                <div class="article-content-display" [class.article-content-preview]="!article.expanded">
-                  {{ article.contenuto }}
-                </div>
-                <button
-                  class="expand-content-btn"
-                  (click)="toggleArticleExpansion(article)"
-                  *ngIf="article.contenuto.length > 150"
-                >
-                  {{ article.expanded ? '▲ Mostra meno' : '▼ Mostra tutto' }}
-                </button>
+            </div>
+            <div class="form-group">
+              <label class="form-label">📝 Sottotitolo</label>
+              <textarea
+                class="form-textarea"
+                [(ngModel)]="article.sottotitolo"
+                rows="3"
+                maxlength="500"
+                placeholder="Breve descrizione o sottotitolo..."
+              ></textarea>
+              <div class="field-info">
+                <small>Caratteri: {{ article.sottotitolo?.length || 0 }}/500</small>
               </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">📄 Contenuto</label>
+              <textarea
+                class="form-textarea content-textarea"
+                [(ngModel)]="article.contenuto"
+                rows="8"
+                maxlength="2000"
+                placeholder="Contenuto completo dell'articolo..."
+              ></textarea>
+              <div class="field-info">
+                <small>Caratteri: {{ article.contenuto?.length || 0 }}/2000</small>
+              </div>
+            </div>
+            <div class="edit-actions">
+              <button class="btn btn-secondary" (click)="cancelEditing(article)">
+                ❌ Annulla
+              </button>
+              <button
+                class="btn btn-warning"
+                (click)="saveArticle(article)"
+                [disabled]="updatingArticle || !isArticleValid(article)"
+              >
+                <span *ngIf="!updatingArticle">📝 Salva Bozza</span>
+                <span *ngIf="updatingArticle">⏳ Salvando...</span>
+              </button>
+              <button
+                class="btn btn-primary"
+                (click)="publishArticle(article)"
+                [disabled]="updatingArticle || !isArticleValid(article)"
+              >
+                <span *ngIf="!updatingArticle">🚀 Pubblica</span>
+                <span *ngIf="updatingArticle">⏳ Pubblicando...</span>
+              </button>
             </div>
           </div>
         </div>
       </div>
+    </div>
+  </div>
 
-      <!-- Download status messages -->
-      <div class="status-messages" *ngIf="downloadSuccessMessage || downloadErrorMessage">
-        <div class="success-message" *ngIf="downloadSuccessMessage">
-          <div class="message-icon">✅</div>
-          <div class="message-content">
-            <h3>Download completato!</h3>
-            <p>L'articolo è stato scaricato con successo.</p>
-          </div>
-        </div>
-        <div class="error-message" *ngIf="downloadErrorMessage">
-          <div class="message-icon">❌</div>
-          <div class="message-content">
-            <h3>Errore nel download</h3>
-            <p>{{ downloadErrorMessage }}</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Delete status messages -->
-      <div class="status-messages" *ngIf="deleteSuccessMessage || deleteErrorMessage">
-        <div class="success-message" *ngIf="deleteSuccessMessage">
-          <div class="message-icon">✅</div>
-          <div class="message-content">
-            <h3>Articolo eliminato!</h3>
-            <p>L'articolo è stato eliminato con successo.</p>
-          </div>
-        </div>
-        <div class="error-message" *ngIf="deleteErrorMessage">
-          <div class="message-icon">❌</div>
-          <div class="message-content">
-            <h3>Errore nell'eliminazione</h3>
-            <p>{{ deleteErrorMessage }}</p>
-          </div>
-        </div>
+  <!-- Download status messages -->
+  <div class="status-messages" *ngIf="downloadSuccessMessage || downloadErrorMessage">
+    <div class="success-message" *ngIf="downloadSuccessMessage">
+      <div class="message-icon">✅</div>
+      <div class="message-content">
+        <h3>Download completato!</h3>
+        <p>L'articolo è stato scaricato con successo.</p>
       </div>
     </div>
+    <div class="error-message" *ngIf="downloadErrorMessage">
+      <div class="message-icon">❌</div>
+      <div class="message-content">
+        <h3>Errore nel download</h3>
+        <p>{{ downloadErrorMessage }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete status messages -->
+  <div class="status-messages" *ngIf="deleteSuccessMessage || deleteErrorMessage">
+    <div class="success-message" *ngIf="deleteSuccessMessage">
+      <div class="message-icon">✅</div>
+      <div class="message-content">
+        <h3>Articolo eliminato!</h3>
+        <p>L'articolo è stato eliminato con successo.</p>
+      </div>
+    </div>
+    <div class="error-message" *ngIf="deleteErrorMessage">
+      <div class="message-icon">❌</div>
+      <div class="message-content">
+        <h3>Errore nell'eliminazione</h3>
+        <p>{{ deleteErrorMessage }}</p>
+      </div>
+    </div>
+  </div>
+</div>
 
     <!-- Modal di conferma eliminazione -->
     <div class="modal-overlay" *ngIf="showDeleteModal" (click)="cancelDelete()">
@@ -1389,6 +1446,7 @@ export class AddNewsComponent implements OnInit {
   private readonly myBozzaUrl = 'https://sport.event-fit.it/api/v1/my-bozze';
   private readonly addBozza = 'https://sport.event-fit.it/api/v1/bozza';
   private readonly updateArticleUrl = 'https://sport.event-fit.it/api/v1/update-article';
+  private readonly publishBozza = 'https://sport.event-fit.it/api/v1/publish';
   private readonly deleteArticleUrl = 'https://sport.event-fit.it/api/v1/delete-article';
   private readonly updateBlob = 'https://sport.event-fit.it/api/v1/update-blob-content';
 
@@ -1420,6 +1478,7 @@ export class AddNewsComponent implements OnInit {
   // Gestione articoli salvati
   savedArticles: SavedArticle[] = [];
   myArticles: SavedArticle[] = [];
+  myBozze: SavedArticle[] = [];
   loadingArticles: boolean = false;
   updatingArticle: boolean = false;
   updateSuccessMessage: boolean = false;
@@ -1463,7 +1522,7 @@ export class AddNewsComponent implements OnInit {
     if (tab === 'save' && this.savedArticles.length === 0) {
       this.loadMySave();
     }
-    if (tab === 'bozza' && this.savedArticles.length === 0) {
+    if (tab === 'bozza' && this.myBozze.length === 0) {
       this.loadMyBozza();
     }
     this.clearMessages();
@@ -1570,7 +1629,7 @@ export class AddNewsComponent implements OnInit {
         next: (response) => {
           console.log('✅ Articoli bozza caricati:', response);
           if (response.success) {
-            this.savedArticles = response.results.map(article => ({
+            this.myBozze = response.results.map(article => ({
               ...article,
               editing: false,
               expanded: false
@@ -1596,6 +1655,63 @@ export class AddNewsComponent implements OnInit {
     this.deleteSuccessMessage = false;
     this.deleteErrorMessage = '';
   }
+
+  async publishArticle(article: any): Promise<void> {
+    if (!this.isArticleValid(article)) {
+      this.updateErrorMessage = 'Il titolo è obbligatorio';
+      setTimeout(() => {
+        this.updateErrorMessage = '';
+      }, 5000);
+      return;
+    }
+
+    this.updatingArticle = true;
+    this.updateSuccessMessage = false;
+    this.updateErrorMessage = '';
+
+    try {
+      const token = await this.auth.getAccessTokenSilently().toPromise();
+      if (!token) {
+        throw new Error('Login required');
+      }
+
+      const response = await fetch(`${this.publishBozza}/${article.id}`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        // Rimuovi l'articolo dalla lista delle bozze
+        this.myBozze = this.myBozze.filter(a => a.id !== article.id);
+        this.updateSuccessMessage = true;
+        setTimeout(() => {
+          this.updateSuccessMessage = false;
+        }, 3000);
+        // Ricarica gli articoli pubblicati nella scheda "I Miei Articoli"
+        if (this.activeTab === 'manage') {
+          setTimeout(() => this.loadMyArticles(), 1000);
+        }
+      } else {
+        throw new Error(result.error || 'Errore durante la pubblicazione');
+      }
+    } catch (error) {
+      console.error('Errore durante la pubblicazione:', error);
+      this.updateErrorMessage = error instanceof Error ? error.message : 'Errore sconosciuto durante la pubblicazione';
+      setTimeout(() => {
+        this.updateErrorMessage = '';
+      }, 5000);
+      alert('⚠️ Devi fare login per continuare');
+      this.auth.loginWithRedirect();
+    } finally {
+      this.updatingArticle = false;
+    }
+  }
+
 
   cancelDelete(): void {
     this.showDeleteModal = false;
@@ -1626,6 +1742,7 @@ export class AddNewsComponent implements OnInit {
       if (response.ok && result.success) {
         this.savedArticles = this.savedArticles.filter(article => article.id !== this.articleToDelete.id);
         this.myArticles = this.myArticles.filter(article => article.id !== this.articleToDelete.id);
+        this.myBozze = this.myBozze.filter(article => article.id !== this.articleToDelete.id);
         this.deleteSuccessMessage = true;
         this.deleteErrorMessage = '';
         this.showDeleteModal = false;
@@ -1869,10 +1986,14 @@ export class AddNewsComponent implements OnInit {
       .substring(0, 100);
   }
 
-  async saveArticle(article: any, type: 'bozza' | 'notizia' = 'notizia'): Promise<void> {
+
+
+  async saveArticle(article: any): Promise<void> {
     if (!this.isArticleValid(article)) {
       this.updateErrorMessage = 'Il titolo è obbligatorio';
-      setTimeout(() => (this.updateErrorMessage = ''), 5000);
+      setTimeout(() => {
+        this.updateErrorMessage = '';
+      }, 5000);
       return;
     }
 
@@ -1882,32 +2003,29 @@ export class AddNewsComponent implements OnInit {
 
     try {
       const token = await this.auth.getAccessTokenSilently().toPromise();
-      if (!token) throw new Error('Login required');
+      if (!token) {
+        throw new Error('Login required');
+      }
 
-      const updateData: any = {
+      const updateData = {
         titolo: article.titolo?.trim(),
         sottotitolo: article.sottotitolo?.trim() || null,
         contenuto: article.contenuto?.trim(),
         link: article.link
       };
 
-      // Aggiornamento del blob se presente
-      if (article.link?.includes('blob.core.windows.net') && article.link.endsWith('.txt')) {
+      if (article.link && article.link.includes('blob.core.windows.net') && article.link.endsWith('.txt')) {
         try {
           const updatedBlobUrl = await this.updateBlobContent(article, token);
-          if (updatedBlobUrl) updateData.link = updatedBlobUrl;
+          if (updatedBlobUrl) {
+            updateData.link = updatedBlobUrl;
+          }
         } catch (blobError) {
-          console.warn('Errore aggiornamento blob, continuo con DB:', blobError);
+          console.warn('Errore nell\'aggiornamento del blob, continuo con l\'aggiornamento del database:', blobError);
         }
       }
 
-      // Differenzia bozze e notizie
-      const url =
-        type === 'notizia'
-          ? `${this.updateArticleUrl}/${article.id}`
-          : `${this.addBozza}/${article.id}`;
-
-      const response = await fetch(url, {
+      const response = await fetch(`${this.updateArticleUrl}/${article.id}`, {
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -1921,10 +2039,13 @@ export class AddNewsComponent implements OnInit {
       if (response.ok && result.success) {
         const index = this.myArticles.findIndex(a => a.id === article.id);
         if (index !== -1) {
-          this.myArticles[index] = { ...this.myArticles[index], ...updateData, editing: false, isBozza: type === 'bozza' };
+          this.myArticles[index] = { ...this.myArticles[index], ...updateData, editing: false };
         }
+
         this.updateSuccessMessage = true;
-        setTimeout(() => (this.updateSuccessMessage = false), 3000);
+        setTimeout(() => {
+          this.updateSuccessMessage = false;
+        }, 3000);
       } else {
         throw new Error(result.error || 'Errore durante l\'aggiornamento dell\'articolo');
       }
