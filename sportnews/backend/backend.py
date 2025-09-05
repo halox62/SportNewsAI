@@ -653,6 +653,34 @@ def get_my_articles_save(user_payload):
         session.close()
         return jsonify({"success": False, "error": str(e)}), 500
 
+@app.route("/api/v1/publish/<int:article_id>", methods=["PUT"])
+@requires_auth
+def publish(article_id, user_payload):
+    try:
+        auth0_id = user_payload.get("sub")
+        session = SessionLocal()
+
+        user = session.query(User).filter_by(auth0Id=auth0_id).first()
+        if not user:
+            session.close()
+            return jsonify({"success": False, "error": "Utente non trovato"}), 404
+
+        articolo = session.query(Articolo).filter_by(id=article_id, idUser=str(user.idUser)).first()
+        if not articolo:
+            session.close()
+            return jsonify({"success": False, "error": "Articolo non trovato"}), 404
+
+        articolo.bozza="false"
+
+        session.commit()
+        session.close()
+
+        return jsonify({"success": True, "message": "Articolo aggiornato con successo"}), 200
+
+    except Exception as e:
+        session.close()
+        return jsonify({"success": False, "error": str(e)}), 500
+
 @app.route("/api/v1/update-article/<int:article_id>", methods=["PUT"])
 @requires_auth
 def update_article(article_id, user_payload):
@@ -742,7 +770,6 @@ def update_blob_content(user_payload):
         if not article_id or not blob_url or not content:
             return jsonify({"success": False, "error": "Dati mancanti"}), 400
 
-        # Recupera l'utente dal token
         auth0_id = user_payload.get("sub")
         session: Session = SessionLocal()
         user = session.query(User).filter_by(auth0Id=auth0_id).first()
@@ -750,13 +777,11 @@ def update_blob_content(user_payload):
             session.close()
             return jsonify({"success": False, "error": "Utente non trovato"}), 404
 
-        # Recupera l'articolo
         articolo = session.query(Articolo).filter_by(id=article_id, idUser=str(user.idUser)).first()
         if not articolo:
             session.close()
             return jsonify({"success": False, "error": "Articolo non trovato"}), 404
 
-        # Aggiorna il contenuto del blob
         blob_client = blob_service_client.get_blob_client(container_name, blob_url.split("/")[-1])
         blob_client.upload_blob(content, overwrite=True)
 
