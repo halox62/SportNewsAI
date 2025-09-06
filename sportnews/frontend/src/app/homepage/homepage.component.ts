@@ -47,8 +47,7 @@ export class HomepageComponent implements OnInit {
   saveSuccessMessage: boolean = false;
   saveErrorMessage: string = '';
 
-  selectedLanguage: string = 'en'; // default Inglese
-
+  selectedLanguage: string = 'en';
   constructor(private http: HttpClient, private router: Router, public auth: AuthService,
     @Inject(PLATFORM_ID) private platformId: Object) {}
 
