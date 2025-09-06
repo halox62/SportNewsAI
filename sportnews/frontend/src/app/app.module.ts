@@ -9,6 +9,7 @@ import { HomepageComponent } from './homepage/homepage.component';
 import { AddNewsComponent } from './add-news/add-news.component';
 import { CommonModule } from '@angular/common';
 import { Nl2brPipe } from './nl2br.pipe';
+import { AuthGuard } from './auth.guard';
 
 
 
@@ -25,8 +26,8 @@ import { Nl2brPipe } from './nl2br.pipe';
     FormsModule,
     CommonModule,
     RouterModule.forRoot([
-        { path: '', component: HomepageComponent },
-        { path: 'addNews', component: AddNewsComponent }
+      { path: '', component: HomepageComponent },
+      { path: 'addNews', component: AddNewsComponent, canActivate: [AuthGuard] }
     ]),
     AuthModule.forRoot({
         domain: 'dev-crydqe7sub8m26h7.us.auth0.com',
