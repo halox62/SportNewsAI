@@ -17,6 +17,8 @@ export class AuthGuard implements CanActivate {
         if (isAuthenticated) {
           return true;
         } else {
+          alert('⚠️ Devi fare login per continuare');
+          this.auth.loginWithRedirect();
           return false;
         }
       })
