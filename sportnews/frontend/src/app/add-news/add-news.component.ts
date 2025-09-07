@@ -1440,7 +1440,7 @@ interface SavedArticle {
     .popup-body,
     .modal-body {
         flex: 1;
-        padding: 30px;
+        padding: 30px 35px;
         display: flex;
         flex-direction: column;
     }
@@ -1457,9 +1457,9 @@ interface SavedArticle {
 
     .popup-content {
         background: #f8f9fa;
-        padding: 25px;
+        padding: 40px;
         border-radius: 12px;
-        margin: 20px 0;
+        margin: 30px;
         flex: 1;
         overflow-y: auto;
         white-space: pre-wrap;
