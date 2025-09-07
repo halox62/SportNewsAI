@@ -123,19 +123,19 @@ interface SavedArticle {
         <button
           *ngIf="newsArticle.titolo && newsArticle.titolo.trim().length > 0"
           type="button"
-          class="btn-ai"
+          class="btn-ai-textarea"
           (click)="ai(newsArticle.titolo, 'titolo')"
           [disabled]="loadingAI"
           title="AI"
         >
-          🤖
-        </button>
         <ng-container *ngIf="!loadingAI; else loading">
           🤖 AI
         </ng-container>
         <ng-template #loading>
           ⏳ Caricamento...
         </ng-template>
+
+        </button>
       </div>
 
       <div class="field-info">
@@ -172,14 +172,14 @@ interface SavedArticle {
           [disabled]="loadingAI"
           title="AI"
         >
-          🤖
-        </button>
         <ng-container *ngIf="!loadingAI; else loading">
           🤖 AI
         </ng-container>
         <ng-template #loading>
           ⏳ Caricamento...
         </ng-template>
+        </button>
+
       </div>
 
       <div class="field-info">
@@ -716,11 +716,17 @@ interface SavedArticle {
         <button
           *ngIf="article.titolo && article.titolo.trim().length > 0"
           type="button"
-          class="btn-ai"
+          class="btn-ai-textare"
           (click)="ai(article.titolo, 'titolo')"
-          title="Genera con AI"
+          [disabled]="loadingAI"
+          title="AI"
         >
-          🤖
+        <ng-container *ngIf="!loadingAI; else loading">
+          🤖 AI
+        </ng-container>
+        <ng-template #loading>
+          ⏳ Caricamento...
+        </ng-template>
         </button>
       </div>
       <div class="field-info">
@@ -745,9 +751,14 @@ interface SavedArticle {
           type="button"
           class="btn-ai-textarea"
           (click)="ai(article.sottotitolo, 'paragrafo')"
-          title="Genera con AI"
+          title="AI"
         >
-          🤖
+        <ng-container *ngIf="!loadingAI; else loading">
+    🤖 AI
+  </ng-container>
+  <ng-template #loading>
+    ⏳ Caricamento...
+  </ng-template>
         </button>
       </div>
       <div class="field-info">
@@ -772,9 +783,14 @@ interface SavedArticle {
           type="button"
           class="btn-ai-textarea"
           (click)="ai(article.contenuto, 'contenuto')"
-          title="Genera con AI"
+          title="AI"
         >
-          🤖
+        <ng-container *ngIf="!loadingAI; else loading">
+    🤖 AI
+  </ng-container>
+  <ng-template #loading>
+    ⏳ Caricamento...
+  </ng-template>
         </button>
       </div>
       <div class="field-info">
@@ -1176,11 +1192,16 @@ interface SavedArticle {
                 <button
                   *ngIf="article.titolo && article.titolo.trim().length > 0"
                   type="button"
-                  class="btn-ai"
+                  class="btn-ai-textarea"
                   (click)="ai(article.titolo, 'titolo')"
-                  title="Genera con AI"
+                  title=" AI"
                 >
-                  🤖
+                <ng-container *ngIf="!loadingAI; else loading">
+    🤖 AI
+  </ng-container>
+  <ng-template #loading>
+    ⏳ Caricamento...
+  </ng-template>
                 </button>
               </div>
               <div class="field-info">
@@ -1205,9 +1226,14 @@ interface SavedArticle {
                   type="button"
                   class="btn-ai-textarea"
                   (click)="ai(article.sottotitolo, 'paragrafo')"
-                  title="Genera con AI"
+                  title="AI"
                 >
-                  🤖
+                <ng-container *ngIf="!loadingAI; else loading">
+    🤖 AI
+  </ng-container>
+  <ng-template #loading>
+    ⏳ Caricamento...
+  </ng-template>
                 </button>
               </div>
               <div class="field-info">
@@ -1232,9 +1258,14 @@ interface SavedArticle {
                   type="button"
                   class="btn-ai-textarea"
                   (click)="ai(article.contenuto, 'contenuto')"
-                  title="Genera con AI"
+                  title="AI"
                 >
-                  🤖
+                <ng-container *ngIf="!loadingAI; else loading">
+    🤖 AI
+  </ng-container>
+  <ng-template #loading>
+    ⏳ Caricamento...
+  </ng-template>
                 </button>
               </div>
               <div class="field-info">
