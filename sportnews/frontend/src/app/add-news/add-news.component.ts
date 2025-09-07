@@ -125,7 +125,8 @@ interface SavedArticle {
           type="button"
           class="btn-ai"
           (click)="ai(newsArticle.titolo, 'titolo')"
-          title="Genera con AI"
+          [disabled]="loadingAI"
+          title="AI"
         >
           🤖
         </button>
@@ -168,6 +169,7 @@ interface SavedArticle {
           type="button"
           class="btn-ai-textarea"
           (click)="ai(newsArticle.paragrafo, 'paragrafo')"
+          [disabled]="loadingAI"
           title="AI"
         >
           🤖
@@ -210,7 +212,7 @@ interface SavedArticle {
         class="btn-ai-textarea"
         (click)="ai(newsArticle.contenuto, 'contenuto')"
         [disabled]="loadingAI"
-        title="Genera con AI"
+        title="AI"
       >
         <ng-container *ngIf="!loadingAI; else loading">
           🤖 AI
@@ -720,12 +722,6 @@ interface SavedArticle {
         >
           🤖
         </button>
-        <ng-container *ngIf="!loadingAI; else loading">
-          🤖 AI
-        </ng-container>
-        <ng-template #loading>
-          ⏳ Caricamento...
-        </ng-template>
       </div>
       <div class="field-info">
         <small>Caratteri: {{ article.titolo?.length || 0 }}/200</small>
@@ -753,12 +749,6 @@ interface SavedArticle {
         >
           🤖
         </button>
-        <ng-container *ngIf="!loadingAI; else loading">
-          🤖 AI
-        </ng-container>
-        <ng-template #loading>
-          ⏳ Caricamento...
-        </ng-template>
       </div>
       <div class="field-info">
         <small>Caratteri: {{ article.sottotitolo?.length || 0 }}/500</small>
@@ -786,12 +776,6 @@ interface SavedArticle {
         >
           🤖
         </button>
-        <ng-container *ngIf="!loadingAI; else loading">
-          🤖 AI
-        </ng-container>
-        <ng-template #loading>
-          ⏳ Caricamento...
-        </ng-template>
       </div>
       <div class="field-info">
         <small>Caratteri: {{ article.contenuto?.length || 0 }}/2000</small>
@@ -1198,12 +1182,6 @@ interface SavedArticle {
                 >
                   🤖
                 </button>
-                <ng-container *ngIf="!loadingAI; else loading">
-                🤖 AI
-              </ng-container>
-              <ng-template #loading>
-                ⏳ Caricamento...
-              </ng-template>
               </div>
               <div class="field-info">
                 <small>Caratteri: {{ article.titolo?.length || 0 }}/200</small>
@@ -1231,12 +1209,6 @@ interface SavedArticle {
                 >
                   🤖
                 </button>
-                <ng-container *ngIf="!loadingAI; else loading">
-          🤖 AI
-        </ng-container>
-        <ng-template #loading>
-          ⏳ Caricamento...
-        </ng-template>
               </div>
               <div class="field-info">
                 <small>Caratteri: {{ article.sottotitolo?.length || 0 }}/500</small>
@@ -1264,12 +1236,6 @@ interface SavedArticle {
                 >
                   🤖
                 </button>
-                <ng-container *ngIf="!loadingAI; else loading">
-          🤖 AI
-        </ng-container>
-        <ng-template #loading>
-          ⏳ Caricamento...
-        </ng-template>
               </div>
               <div class="field-info">
                 <small>Caratteri: {{ article.contenuto?.length || 0 }}/2000</small>
