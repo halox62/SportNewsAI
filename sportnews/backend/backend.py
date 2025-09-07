@@ -426,31 +426,53 @@ def translate_text(user_payload):
 def ai(user_payload):
     data = request.get_json()
 
-    if not data or "text" not in data :
-        return jsonify({"error": "Missing 'text'"}), 400
+    if not data or "text" not in data or "type" not in data:
+        return jsonify({"error": "Missing 'text' or 'type'"}), 400
 
     text = data["text"]
+    type = data["type"].lower()
 
-    prompt = f"""
-    You are an expert sports journalist and text improvement assistant.
-    Your task is to take the provided text and produce a **well-written, professional, and engaging sports article**.
+    # Prompt dinamico in base al type
+    if type == "titolo":
+        prompt = f"""
+        You are an expert sports journalist.
+        Take the following text and produce a **correct, concise, and engaging title** for a sports news article.
+        Correct all spelling mistakes, grammar errors, and punctuation.
+        Keep the original language; do NOT translate.
+        Make it attention-grabbing and professional.
 
-    Requirements:
-    1. Correct all spelling mistakes, grammar errors, and punctuation issues.
-    2. Improve style, clarity, and fluency.
-    3. Slightly expand and enrich the content, adding context or logical connections implied by the original text.
-      Do NOT invent facts not present or implied by the input.
-    4. Keep the original language; do NOT translate.
-    5. Format the output in **full sentences and coherent paragraphs**, suitable for publication.
-    6. Maintain proper sports terminology (e.g., "Vuelta", "stage", "goal", "match") and capitalize names of athletes, teams, and events correctly.
-    7. For very short inputs (e.g., titles), expand them into a **short news snippet** while keeping accuracy.
+        Input: "{text}"
+        Output:
+        """
+    elif type == "paragrafo":
+        prompt = f"""
+        You are an expert sports journalist.
+        Take the following text and produce a **short, well-written paragraph** for a sports article.
+        Correct spelling, grammar, and punctuation.
+        Improve clarity and style.
+        Slightly expand the content to make it informative and coherent.
+        Keep the original language; do NOT translate.
 
-    Input: "{text}"
-    Output:
-    """
+        Input: "{text}"
+        Output:
+        """
+    elif type == "contenuto":
+        prompt = f"""
+        You are an expert sports journalist and text improvement assistant.
+        Take the following text and produce a **full, professional sports article**.
+        Correct all spelling mistakes, grammar errors, and punctuation issues.
+        Improve style, clarity, and fluency.
+        Expand and enrich the content logically, without inventing facts.
+        Keep the original language; do NOT translate.
+        Format in coherent paragraphs with proper sports terminology.
+
+        Input: "{text}"
+        Output:
+        """
+    else:
+        return jsonify({"error": "Invalid type. Must be 'titolo', 'paragrafo', or 'contenuto'."}), 400
 
     response = llm.invoke(prompt)
-
     article = response.content.strip()
 
     return jsonify({"article": article})

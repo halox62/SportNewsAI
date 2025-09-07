@@ -97,241 +97,168 @@ interface SavedArticle {
       </div>
 
       <!-- Form per aggiungere notizia -->
-      <div class="form-container">
-      <form class="news-form" #newsForm="ngForm" novalidate>
-        <!-- Titolo -->
-        <div class="form-group">
-  <label for="titolo" class="form-label required">📰 Titolo</label>
 
-  <!-- Container per input e bottone AI -->
-  <div class="input-container">
-    <input
-      type="text"
-      id="titolo"
-      name="titolo"
-      [(ngModel)]="newsArticle.titolo"
-      class="form-input"
-      placeholder="Inserisci il titolo della notizia..."
-      #titoloRef="ngModel"
-      required
-      maxlength="200"
-      (input)="onInputChange()"
-    />
+<div class="form-container">
+  <form class="news-form" #newsForm="ngForm" novalidate>
+    <!-- Titolo -->
+    <div class="form-group">
+      <label for="titolo" class="form-label required">📰 Titolo</label>
 
-    <!-- Bottone AI semplice -->
-    <button
-      *ngIf="newsArticle.titolo && newsArticle.titolo.trim().length > 0"
-      type="button"
-      class="btn-ai"
-      (click)="ai(newsArticle.titolo)"
-      title="Genera con AI"
-    >
-      🤖
-    </button>
-  </div>
+      <!-- Container per input e bottone AI -->
+      <div class="input-container">
+        <input
+          type="text"
+          id="titolo"
+          name="titolo"
+          [(ngModel)]="newsArticle.titolo"
+          class="form-input"
+          placeholder="Inserisci il titolo della notizia..."
+          #titoloRef="ngModel"
+          required
+          maxlength="200"
+          (input)="onInputChange()"
+        />
 
-  <div class="field-info">
-    <small>Caratteri: {{ getTitoloLength() }}/200</small>
-  </div>
+        <!-- Bottone AI semplice -->
+        <button
+          *ngIf="newsArticle.titolo && newsArticle.titolo.trim().length > 0"
+          type="button"
+          class="btn-ai"
+          (click)="ai(newsArticle.titolo, 'titolo')"
+          title="Genera con AI"
+        >
+          🤖
+        </button>
+      </div>
 
-  <div class="validation-error" *ngIf="titoloRef.invalid && titoloRef.touched">
-    <small>⚠️ Il titolo è obbligatorio</small>
-  </div>
+      <div class="field-info">
+        <small>Caratteri: {{ getTitoloLength() }}/200</small>
+      </div>
+
+      <div class="validation-error" *ngIf="titoloRef.invalid && titoloRef.touched">
+        <small>⚠️ Il titolo è obbligatorio</small>
+      </div>
+    </div>
+
+    <!-- Paragrafo -->
+    <div class="form-group">
+      <label for="paragrafo" class="form-label">📝 Paragrafo</label>
+
+      <!-- Container per textarea e bottone AI -->
+      <div class="textarea-container">
+        <textarea
+          id="paragrafo"
+          name="paragrafo"
+          [(ngModel)]="newsArticle.paragrafo"
+          class="form-textarea"
+          placeholder="Inserisci un breve paragrafo introduttivo..."
+          rows="3"
+          maxlength="500"
+          (input)="onInputChange()"
+        ></textarea>
+
+        <!-- Bottone AI per paragrafo -->
+        <button
+          *ngIf="newsArticle.paragrafo && newsArticle.paragrafo.trim().length > 0"
+          type="button"
+          class="btn-ai-textarea"
+          (click)="ai(newsArticle.paragrafo, 'paragrafo')"
+          title="Genera con AI"
+        >
+          🤖
+        </button>
+      </div>
+
+      <div class="field-info">
+        <small>Caratteri: {{ newsArticle.paragrafo?.length || 0 }}/500</small>
+      </div>
+    </div>
+
+    <!-- Contenuto -->
+    <div class="form-group">
+      <label for="contenuto" class="form-label required">📝 Contenuto</label>
+
+      <!-- Container per textarea e bottone AI -->
+      <div class="textarea-container">
+        <textarea
+          id="contenuto"
+          name="contenuto"
+          [(ngModel)]="newsArticle.contenuto"
+          class="form-textarea"
+          placeholder="Inserisci il contenuto della notizia..."
+          rows="6"
+          #contenutoRef="ngModel"
+          required
+          maxlength="1000"
+          (input)="onInputChange()"
+        ></textarea>
+
+        <!-- Bottone AI per contenuto -->
+        <button
+          *ngIf="newsArticle.contenuto && newsArticle.contenuto.trim().length > 0"
+          type="button"
+          class="btn-ai-textarea"
+          (click)="ai(newsArticle.contenuto, 'contenuto')"
+          title="Genera con AI"
+        >
+          🤖
+        </button>
+      </div>
+
+      <div class="field-info">
+        <small>Caratteri: {{ getContenutoLength() }}/1000</small>
+      </div>
+      <div class="validation-error" *ngIf="contenutoRef.invalid && contenutoRef.touched">
+        <small>⚠️ Il contenuto è obbligatorio</small>
+      </div>
+    </div>
+
+    <!-- Popup semplice -->
+    <div class="popup-overlay" *ngIf="showAiResult" (click)="closePopup()">
+      <div class="popup" (click)="$event.stopPropagation()">
+        <h4>🤖 Risultato AI</h4>
+        <div class="popup-content">
+          {{ aiResult }}
+        </div>
+        <div class="popup-buttons">
+          <button (click)="closePopup()">Chiudi</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Azioni -->
+    <div class="form-actions">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="resetForm()"
+        [disabled]="isSubmitting"
+      >
+        🔄 Reset
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        [disabled]="isSubmitting || !isFormValid()"
+        (click)="onSubmit('notizia')"
+      >
+        <span *ngIf="!isSubmitting">💾 Salva Notizia</span>
+        <span *ngIf="isSubmitting">⏳ Salvando...</span>
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-warning"
+        [disabled]="isSubmitting || !isFormValid()"
+        (click)="onSubmit('bozza')"
+      >
+        <span *ngIf="!isSubmitting">📝 Salva come Bozza</span>
+        <span *ngIf="isSubmitting">⏳ Salvando...</span>
+      </button>
+    </div>
+  </form>
 </div>
-
-<!-- Popup semplice -->
-<div class="popup-overlay" *ngIf="showAiResult" (click)="closePopup()">
-  <div class="popup" (click)="$event.stopPropagation()">
-    <h4>🤖 Risultato AI</h4>
-    <div class="popup-content">
-      {{ aiResult }}
-    </div>
-    <div class="popup-buttons">
-      <button (click)="closePopup()">Chiudi</button>
-    </div>
-  </div>
-</div>
-
-<style>
-.input-container {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.form-input {
-  width: 100%;
-  padding: 10px 50px 10px 15px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  font-size: 16px;
-}
-
-.form-input:focus {
-  outline: none;
-  border-color: #007bff;
-}
-
-.btn-ai {
-  position: absolute;
-  right: 10px;
-  background: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 5px 10px;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-.btn-ai:hover {
-  background: #0056b3;
-}
-
-.popup-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0,0,0,0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.popup {
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  max-width: 500px;
-  width: 90%;
-}
-
-.popup h4 {
-  margin: 0 0 15px 0;
-}
-
-.popup-content {
-  background: #f5f5f5;
-  padding: 15px;
-  border-radius: 5px;
-  margin: 15px 0;
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.popup-buttons {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-}
-
-.popup-buttons button {
-  padding: 8px 15px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.popup-buttons button:first-child {
-  background: #6c757d;
-  color: white;
-}
-
-.popup-buttons button:last-child {
-  background: #007bff;
-  color: white;
-}
-
-.popup-buttons button:hover {
-  opacity: 0.8;
-}
-
-.field-info, .validation-error {
-  margin-top: 5px;
-  font-size: 14px;
-}
-
-.validation-error small {
-  color: #dc3545;
-}
-</style>
-        <!-- Paragrafo -->
-        <div class="form-group">
-          <label for="paragrafo" class="form-label">📝 Paragrafo</label>
-          <textarea
-            id="paragrafo"
-            name="paragrafo"
-            [(ngModel)]="newsArticle.paragrafo"
-            class="form-textarea"
-            placeholder="Inserisci un breve paragrafo introduttivo..."
-            rows="3"
-            maxlength="500"
-            (input)="onInputChange()"
-          ></textarea>
-          <div class="field-info">
-            <small>Caratteri: {{ newsArticle.paragrafo?.length || 0 }}/500</small>
-          </div>
-        </div>
-
-        <!-- Contenuto -->
-        <div class="form-group">
-          <label for="contenuto" class="form-label required">📝 Contenuto</label>
-          <textarea
-            id="contenuto"
-            name="contenuto"
-            [(ngModel)]="newsArticle.contenuto"
-            class="form-textarea"
-            placeholder="Inserisci il contenuto della notizia..."
-            rows="6"
-            #contenutoRef="ngModel"
-            required
-            maxlength="1000"
-            (input)="onInputChange()"
-          ></textarea>
-          <div class="field-info">
-            <small>Caratteri: {{ getContenutoLength() }}/1000</small>
-          </div>
-          <div class="validation-error" *ngIf="contenutoRef.invalid && contenutoRef.touched">
-            <small>⚠️ Il contenuto è obbligatorio</small>
-          </div>
-        </div>
-
-        <!-- Azioni -->
-        <div class="form-actions">
-          <button
-            type="button"
-            class="btn btn-secondary"
-            (click)="resetForm()"
-            [disabled]="isSubmitting"
-          >
-            🔄 Reset
-          </button>
-
-          <button
-            type="button"
-            class="btn btn-primary"
-            [disabled]="isSubmitting || !isFormValid()"
-            (click)="onSubmit('notizia')"
-          >
-            <span *ngIf="!isSubmitting">💾 Salva Notizia</span>
-            <span *ngIf="isSubmitting">⏳ Salvando...</span>
-          </button>
-
-          <button
-            type="button"
-            class="btn btn-warning"
-            [disabled]="isSubmitting || !isFormValid()"
-            (click)="onSubmit('bozza')"
-          >
-            <span *ngIf="!isSubmitting">📝 Salva come Bozza</span>
-            <span *ngIf="isSubmitting">⏳ Salvando...</span>
-          </button>
-        </div>
-      </form>
-    </div>
 
       <!-- Lista notizie aggiunte -->
       <div class="recent-news-section" *ngIf="addedNews.length > 0">
@@ -937,6 +864,111 @@ interface SavedArticle {
   margin: 0 auto;
   padding: 20px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px 50px 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.btn-ai {
+  position: absolute;
+  right: 10px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.btn-ai:hover {
+  background: #0056b3;
+}
+
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.popup {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 500px;
+  width: 90%;
+}
+
+.popup h4 {
+  margin: 0 0 15px 0;
+}
+
+.popup-content {
+  background: #f5f5f5;
+  padding: 15px;
+  border-radius: 5px;
+  margin: 15px 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.popup-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.popup-buttons button {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.popup-buttons button:first-child {
+  background: #6c757d;
+  color: white;
+}
+
+.popup-buttons button:last-child {
+  background: #007bff;
+  color: white;
+}
+
+.popup-buttons button:hover {
+  opacity: 0.8;
+}
+
+.field-info, .validation-error {
+  margin-top: 5px;
+  font-size: 14px;
+}
+
+.validation-error small {
+  color: #dc3545;
 }
 
 .page-header {
@@ -1872,7 +1904,7 @@ export class AddNewsComponent implements OnInit {
   }
 
 
-  async ai(text: string): Promise<void> {
+  async ai(text: string,type: string): Promise<void> {
     console.log(text);
 
     try {
@@ -1884,7 +1916,8 @@ export class AddNewsComponent implements OnInit {
           Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
-          text: text
+          text: text,
+          type:type
         })
       });
 
