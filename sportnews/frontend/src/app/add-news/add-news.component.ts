@@ -101,26 +101,35 @@ interface SavedArticle {
       <form class="news-form" #newsForm="ngForm" novalidate>
         <!-- Titolo -->
         <div class="form-group">
-          <label for="titolo" class="form-label required">📰 Titolo</label>
-          <input
-            type="text"
-            id="titolo"
-            name="titolo"
-            [(ngModel)]="newsArticle.titolo"
-            class="form-input"
-            placeholder="Inserisci il titolo della notizia..."
-            #titoloRef="ngModel"
-            required
-            maxlength="200"
-            (input)="onInputChange()"
-          />
-          <div class="field-info">
-            <small>Caratteri: {{ getTitoloLength() }}/200</small>
-          </div>
-          <div class="validation-error" *ngIf="titoloRef.invalid && titoloRef.touched">
-            <small>⚠️ Il titolo è obbligatorio</small>
-          </div>
+        <label for="titolo" class="form-label required">📰 Titolo</label>
+        <input
+          type="text"
+          id="titolo"
+          name="titolo"
+          [(ngModel)]="newsArticle.titolo"
+          class="form-input"
+          placeholder="Inserisci il titolo della notizia..."
+          #titoloRef="ngModel"
+          required
+          maxlength="200"
+          (input)="onInputChange()"
+        />
+
+        <div class="field-info">
+          <small>Caratteri: {{ getTitoloLength() }}/200</small>
         </div>
+
+        <div class="validation-error" *ngIf="titoloRef.invalid && titoloRef.touched">
+          <small>⚠️ Il titolo è obbligatorio</small>
+        </div>
+
+        <!-- 👇 Bottone che appare solo se si scrive qualcosa -->
+        <button
+
+        >
+          ➕ Aggiungi Titolo
+        </button>
+      </div>
 
         <!-- Paragrafo -->
         <div class="form-group">
