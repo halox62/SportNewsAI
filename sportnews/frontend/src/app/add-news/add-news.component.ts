@@ -1757,7 +1757,7 @@ export class AddNewsComponent implements OnInit {
       });
       const data = await response.json();
       if (!data.article) {
-        throw new Error("⚠️ Nessun testo tradotto ricevuto dall'API");
+        throw new Error("⚠️ Errore nella generazione. Riprova.");
       }
       console.log(data.article)
     } catch (err) {

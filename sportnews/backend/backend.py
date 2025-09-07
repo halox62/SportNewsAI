@@ -37,7 +37,7 @@ CORS(app, origins="https://sport.event-fit.it")
 
 load_dotenv()
 
-llm = ChatOpenAI(model="gpt-4.1-mini", temperature=0)
+llm = ChatOpenAI(model="gpt-4.1-mini", temperature=0.3)
 
 API_KEY=os.getenv("API_KEY")
 
@@ -439,8 +439,7 @@ def ai(user_payload):
     If the text is too short, incomplete, or vague, slightly expand it to make it more natural and expressive,
     while preserving the original meaning and tone.
 
-    Always correct typos or wrong words. For example, if the input contains minor mistakes like 'vice' instead of 'vince', fix them.
-
+    Always correct typos or wrong words.
     Text to improve:
     {text}
     """
