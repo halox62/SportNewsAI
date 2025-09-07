@@ -1077,12 +1077,12 @@ interface SavedArticle {
 
     /* ===== TABS ===== */
     .tabs-container {
-        margin-top: 30px;
+    margin: 40px 20px 20px 20px;
     }
 
     .tabs-header {
         display: flex;
-        gap: 10px;
+        gap: 20px;
         margin-bottom: 30px;
         border-bottom: 2px solid #e9ecef;
     }
@@ -1112,6 +1112,7 @@ interface SavedArticle {
 
     .tab-content {
         min-height: 400px;
+        margin-top: 20px;
     }
 
     /* ===== FORM STYLES ===== */
