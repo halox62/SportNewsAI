@@ -433,15 +433,12 @@ def ai(user_payload):
 
     prompt = f"""
     You are a text improvement assistant.
-    Your task is to enhance the provided text by correcting any spelling mistakes, grammar errors, and stylistic issues.
-    Make the text clearer, more fluent, and professional, but do not translate it; keep it in the original language.
+    Correct **all spelling mistakes**, grammar errors, and style issues in the text below.
+    Do **NOT** translate the text or change its original language under any circumstances.
+    Always fix typos, even in very short texts. Keep the same words, tone, and language.
 
-    If the text is too short, incomplete, or vague, slightly expand it to make it more natural and expressive,
-    while preserving the original meaning and tone.
-
-    Always correct typos or wrong words.
-    Text to improve:
-    {text}
+    Input: "{text}"
+    Output:
     """
 
     response = llm.invoke(prompt)
