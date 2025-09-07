@@ -123,7 +123,7 @@ interface SavedArticle {
         <button
           *ngIf="newsArticle.titolo && newsArticle.titolo.trim().length > 0"
           type="button"
-          class="btn-ai-textarea"
+          class="btn-ai"
           (click)="ai(newsArticle.titolo, 'titolo')"
           [disabled]="loadingAI"
           title="AI"
@@ -1363,13 +1363,18 @@ interface SavedArticle {
 .btn-ai {
   position: absolute;
   right: 10px;
-  background: #007bff;
+  top: 50%;
+  transform: translateY(-50%);
+  background: linear-gradient(45deg, #667eea, #764ba2);
   color: white;
   border: none;
-  border-radius: 5px;
-  padding: 5px 10px;
+  border-radius: 8px;
+  padding: 6px 12px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
 }
 
 .btn-ai:hover {
