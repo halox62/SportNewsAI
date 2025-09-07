@@ -395,7 +395,6 @@ The article must be written in Italian.
 @app.route('/api/v1/translate', methods=['POST'])
 @requires_auth
 def translate_text(user_payload):
-    import json
     data = request.get_json()
 
     if not data or "text" not in data or "language" not in data:
@@ -425,7 +424,6 @@ def translate_text(user_payload):
 @app.route('/api/v1/ai', methods=['POST'])
 @requires_auth
 def ai(user_payload):
-    import json
     data = request.get_json()
 
     if not data or "text" not in data :
