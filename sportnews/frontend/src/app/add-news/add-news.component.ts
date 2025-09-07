@@ -1249,6 +1249,7 @@ interface SavedArticle {
 
     /* ===== BUTTONS ===== */
     .btn {
+        margin: 10px;
         padding: 15px 30px;
         border: none;
         border-radius: 10px;
