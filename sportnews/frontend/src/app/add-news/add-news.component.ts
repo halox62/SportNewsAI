@@ -260,7 +260,7 @@ interface SavedArticle {
                   <button class="btn-icon" (click)="openArticleContent(article)" title="Visualizza">
                     👁️
                   </button>
-                  <button class="btn-icon" (click)="to_bozza(article)" title="Posta nelle Bozze">
+                  <button class="btn-icon" (click)="publishArticle(article)" title="Sposta nelle Bozze">
                   📚
                   </button>
                   <button
@@ -469,7 +469,16 @@ interface SavedArticle {
                   title="Scarica"
                   [disabled]="downloadingArticle === article.id"
                 >
-                  <span *ngIf="downloadingArticle !== article.id">💾</span>
+                <button class="btn-icon" (click)="to_bozza(article)" title="Sposta nelle Bozze">
+                  📚
+                  </button>
+                <img
+                      *ngIf="downloadingArticle !== article.id"
+                      src="assets/images/download.png"
+                      alt="Salva"
+                      width="20"
+                      height="20"
+                    />
                   <span *ngIf="downloadingArticle === article.id">⏳</span>
                 </button>
                 <button
@@ -1510,15 +1519,9 @@ export class AddNewsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (this.activeTab === 'manage') {
       this.loadMyArticles();
-    }
-    if (this.activeTab === 'save') {
       this.loadMySave();
-    }
-    if (this.activeTab === 'bozza') {
       this.loadMyBozza();
-    }
   }
 
   // Tab Management
