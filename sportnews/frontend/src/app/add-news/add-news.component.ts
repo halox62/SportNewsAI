@@ -463,22 +463,22 @@ interface SavedArticle {
                 <button class="btn-icon" (click)="openArticleContent(article)" title="Visualizza">
                   👁️
                 </button>
+                <button class="btn-icon" (click)="to_bozza(article)" title="Sposta nelle Bozze">
+                  📚
+                  </button>
                 <button
                   class="btn-icon"
                   (click)="downloadArticle(article)"
                   title="Scarica"
                   [disabled]="downloadingArticle === article.id"
                 >
-                <button class="btn-icon" (click)="to_bozza(article)" title="Sposta nelle Bozze">
-                  📚
-                  </button>
                 <img
-                      *ngIf="downloadingArticle !== article.id"
-                      src="assets/images/download.png"
-                      alt="Salva"
-                      width="20"
-                      height="20"
-                    />
+                    *ngIf="downloadingArticle !== article.id"
+                    src="assets/images/download.png"
+                    alt="Salva"
+                    width="20"
+                    height="20"
+                  />
                   <span *ngIf="downloadingArticle === article.id">⏳</span>
                 </button>
                 <button
@@ -687,7 +687,13 @@ interface SavedArticle {
                     title="Scarica"
                     [disabled]="downloadingArticle === article.id"
                   >
-                    <span *ngIf="downloadingArticle !== article.id">💾</span>
+                  <img
+                      *ngIf="downloadingArticle !== article.id"
+                      src="assets/images/download.png"
+                      alt="Salva"
+                      width="20"
+                      height="20"
+                    />
                     <span *ngIf="downloadingArticle === article.id">⏳</span>
                   </button>
                   <button
