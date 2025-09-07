@@ -125,10 +125,10 @@ interface SavedArticle {
           type="button"
           class="btn-ai"
           (click)="ai(newsArticle.titolo, 'titolo')"
-          [disabled]="loadingAI"
+          [disabled]="loadingAIT"
           title="AI"
         >
-        <ng-container *ngIf="!loadingAI; else loading">
+        <ng-container *ngIf="!loadingAIT; else loading">
           🤖 AI
         </ng-container>
         <ng-template #loading>
@@ -169,10 +169,10 @@ interface SavedArticle {
           type="button"
           class="btn-ai"
           (click)="ai(newsArticle.paragrafo, 'paragrafo')"
-          [disabled]="loadingAI"
+          [disabled]="loadingAIP"
           title="AI"
         >
-        <ng-container *ngIf="!loadingAI; else loading">
+        <ng-container *ngIf="!loadingAIP; else loading">
           🤖 AI
         </ng-container>
         <ng-template #loading>
@@ -211,10 +211,10 @@ interface SavedArticle {
         type="button"
         class="btn-ai"
         (click)="ai(newsArticle.contenuto, 'contenuto')"
-        [disabled]="loadingAI"
+        [disabled]="loadingAIC"
         title="AI"
       >
-        <ng-container *ngIf="!loadingAI; else loading">
+        <ng-container *ngIf="!loadingAIC; else loading">
           🤖 AI
         </ng-container>
         <ng-template #loading>
@@ -1928,7 +1928,11 @@ export class AddNewsComponent implements OnInit {
   downloadSuccessMessage: boolean = false;
   downloadErrorMessage: string = '';
 
+  loadingAIT = false;
+  loadingAIP = false;
+  loadingAIC = false;
   loadingAI = false;
+
 
   submitType: 'notizia' | 'bozza' = 'notizia';
 
@@ -2156,7 +2160,18 @@ export class AddNewsComponent implements OnInit {
 
 
   async ai(text: string,type: string): Promise<void> {
-   this.loadingAI = true;
+   if(type=="titolo"){
+    this.loadingAIT = true;
+   }
+   if(type=="paragrafo"){
+    this.loadingAIP = true;
+   }
+   if(type=="contenuto"){
+    this.loadingAIC = true;
+   }
+
+
+
 
     try {
       const token = await this.auth.getAccessTokenSilently().toPromise();
@@ -2187,7 +2202,9 @@ export class AddNewsComponent implements OnInit {
     } catch (err) {
       alert("Errore nella generazione. Riprova.");
     }finally{
-      this.loadingAI=false;
+      this.loadingAIT=false;
+      this.loadingAIP=false;
+      this.loadingAIC=false;
     }
   }
 
