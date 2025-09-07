@@ -406,7 +406,7 @@ interface SavedArticle {
         <button
           *ngIf="article.titolo && article.titolo.trim().length > 0"
           type="button"
-          class="btn-ai-textare"
+          class="btn-ai"
           (click)="ai(article.titolo, 'titolo')"
           [disabled]="loadingAI"
           title="AI"
@@ -682,7 +682,7 @@ interface SavedArticle {
                 <button
                   *ngIf="article.titolo && article.titolo.trim().length > 0"
                   type="button"
-                  class="btn-ai-textarea"
+                  class="btn-ai"
                   (click)="ai(article.titolo, 'titolo')"
                   title=" AI"
                 >
@@ -1165,18 +1165,39 @@ interface SavedArticle {
         }
 
         .popup {
-            background: white;
-            padding: 0;
-            border-radius: 0;
-            width: 100%;
-            height: 100vh;
-            box-shadow: -5px 0 30px rgba(0,0,0,0.15);
-            border-left: 1px solid #e1e5e9;
-            overflow-y: auto;
-            pointer-events: all;
-            animation: slideInRight 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-            display: flex;
-            flex-direction: column;
+          height: 100vh;
+          max-height: 100vh;
+          width: 100%;
+          background: white;
+          border-left: 1px solid #e1e5e9;
+          box-shadow: -5px 0 30px rgba(0,0,0,0.15);
+          display: flex;
+          flex-direction: column;
+          animation: slideInRight 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .popup h4 {
+          padding: 20px;
+          margin: 0;
+          border-bottom: 1px solid #e1e5e9;
+        }
+
+        .popup-content {
+          flex: 1;
+          overflow-y: auto;
+          padding: 20px;
+          white-space: pre-wrap;
+          background: #f9f9f9;
+          border-radius: 5px;
+        }
+
+        .popup-buttons {
+          padding: 15px 20px;
+          border-top: 1px solid #e1e5e9;
+          display: flex;
+          justify-content: flex-end;
+          gap: 10px;
+          background: #fff;
         }
 
         @keyframes slideInRight {
@@ -1208,29 +1229,6 @@ interface SavedArticle {
             padding: 30px;
             display: flex;
             flex-direction: column;
-        }
-
-        .popup-content {
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 12px;
-            margin: 20px 0;
-            flex: 1;
-            overflow-y: auto;
-            white-space: pre-wrap;
-            font-family: 'Monaco', 'Menlo', monospace;
-            font-size: 14px;
-            line-height: 1.6;
-            border: 1px solid #e9ecef;
-        }
-
-        .popup-buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: flex-end;
-            padding-top: 20px;
-            border-top: 1px solid #e9ecef;
-            margin-top: 20px;
         }
 
         .popup-buttons button {
