@@ -422,6 +422,34 @@ def translate_text(user_payload):
 
     return jsonify({"article": article})
 
+@app.route('/api/v1/ai', methods=['POST'])
+@requires_auth
+def ai(user_payload):
+    import json
+    data = request.get_json()
+
+    if not data or "text" not in data :
+        return jsonify({"error": "Missing 'text'"}), 400
+
+    text = data["text"]
+
+    prompt = f"""
+    You are a text improvement assistant.
+    Your task is to enhance the provided text by fixing grammar, spelling, and style issues.
+    Make it clearer, more professional, and fluent, but do not translate or change its original language.
+    If the text is informal, keep the same tone but polish it.
+
+    Text to improve:
+    {text}
+    """
+
+    response = llm.invoke(prompt)
+
+    article = response.content.strip()
+
+    return jsonify({"article": article})
+
+
 
 
 @app.route("/api/v1/addNews", methods=["POST"])
