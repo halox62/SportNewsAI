@@ -441,6 +441,7 @@ interface SavedArticle {
           type="button"
           class="btn-ai"
           (click)="ai(article.sottotitolo, 'paragrafo')"
+          [disabled]="loadingAI"
           title="AI"
         >
         <ng-container *ngIf="!loadingAI; else loading">
@@ -473,6 +474,7 @@ interface SavedArticle {
           type="button"
           class="btn-ai"
           (click)="ai(article.contenuto, 'contenuto')"
+          [disabled]="loadingAI"
           title="AI"
         >
         <ng-container *ngIf="!loadingAI; else loading">
@@ -684,6 +686,7 @@ interface SavedArticle {
                   type="button"
                   class="btn-ai"
                   (click)="ai(article.titolo, 'titolo')"
+                  [disabled]="loadingAI"
                   title=" AI"
                 >
                 <ng-container *ngIf="!loadingAI; else loading">
@@ -716,6 +719,7 @@ interface SavedArticle {
                   type="button"
                   class="btn-ai"
                   (click)="ai(article.sottotitolo, 'paragrafo')"
+                  [disabled]="loadingAI"
                   title="AI"
                 >
                 <ng-container *ngIf="!loadingAI; else loading">
@@ -748,14 +752,15 @@ interface SavedArticle {
                   type="button"
                   class="btn-ai"
                   (click)="ai(article.contenuto, 'contenuto')"
+                  [disabled]="loadingAI"
                   title="AI"
                 >
                 <ng-container *ngIf="!loadingAI; else loading">
-    🤖 AI
-  </ng-container>
-  <ng-template #loading>
-    ⏳ Caricamento...
-  </ng-template>
+                🤖 AI
+              </ng-container>
+              <ng-template #loading>
+                ⏳ Caricamento...
+              </ng-template>
                 </button>
               </div>
               <div class="field-info">
