@@ -522,7 +522,7 @@ interface SavedArticle {
                   <button class="btn-icon" (click)="openArticleContent(article)" title="Visualizza">
                     👁️
                   </button>
-                  <button class="btn-icon" (click)="publishArticle(article)" title="Sposta nelle Bozze">
+                  <button class="btn-icon" (click)="to_bozza(article)" title="Sposta nelle Bozze">
                   📚
                   </button>
                   <button
