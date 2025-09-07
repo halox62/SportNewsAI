@@ -208,6 +208,7 @@ def search_news(user_payload):
     try:
         data = request.get_json()
         keyword = data.get("query", "").strip()
+        language = data.get("language", "it").strip()
 
         if not keyword:
             return jsonify({"success": False, "error": "Query mancante"}), 400
@@ -223,7 +224,7 @@ def search_news(user_payload):
           params_headlines = {
               'q': f'"{keyword}"',
               'category': 'sports',
-              'language': 'it',
+              'language': language,
               'pageSize': 20,
               'apiKey': API_KEY
           }
@@ -246,7 +247,7 @@ def search_news(user_payload):
               url_everything = 'https://newsapi.org/v2/everything'
               params_everything = {
                   'q': f'"{keyword}"',
-                  'language': 'it',
+                  'language': language,
                   'sources': 'ansa,it,la-gazzetta-dello-sport,it-sky-sport',
                   'sortBy': 'publishedAt',
                   'pageSize': 20,

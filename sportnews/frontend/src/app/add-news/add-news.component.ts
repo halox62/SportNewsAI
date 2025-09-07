@@ -285,6 +285,10 @@ interface SavedArticle {
   font-family: inherit;
 }
 
+.content-textarea {
+  min-height: 200px;
+}
+
 .form-input:focus,
 .form-textarea:focus {
   outline: none;
@@ -326,22 +330,37 @@ interface SavedArticle {
 .popup-overlay {
   position: fixed;
   top: 0;
-  left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0,0,0,0.5);
+  width: 400px;
+  background: transparent;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-start;
+  justify-content: flex-end;
   z-index: 1000;
+  pointer-events: none;
 }
 
 .popup {
   background: white;
   padding: 20px;
-  border-radius: 10px;
-  max-width: 500px;
-  width: 90%;
+  border-radius: 10px 0 0 10px;
+  width: 100%;
+  height: 100%;
+  box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+  border-left: 1px solid #ddd;
+  overflow-y: auto;
+  pointer-events: all;
+  animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 .popup h4 {
@@ -391,15 +410,6 @@ interface SavedArticle {
   text-align: right;
 }
 
-.validation-error {
-  margin-top: 5px;
-  font-size: 14px;
-}
-
-.validation-error small {
-  color: #dc3545;
-}
-
 .form-group {
   margin-bottom: 20px;
 }
@@ -410,12 +420,45 @@ interface SavedArticle {
   font-weight: bold;
 }
 
-.form-label.required::after {
-  content: " *";
-  color: #dc3545;
+.edit-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: #007bff;
+  color: white;
+}
+
+.btn-warning {
+  background: #ffc107;
+  color: #212529;
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.btn:hover:not(:disabled) {
+  opacity: 0.8;
 }
 </style>
-
       <!-- Lista notizie aggiunte -->
       <div class="recent-news-section" *ngIf="addedNews.length > 0">
         <div class="section-header">
@@ -774,7 +817,7 @@ interface SavedArticle {
                   *ngIf="article.sottotitolo && article.sottotitolo.trim().length > 0"
                   type="button"
                   class="btn-ai-textarea"
-                  (click)="ai(article.sottotitolo, 'sottotitolo')"
+                  (click)="ai(article.sottotitolo, 'paragrafo')"
                   title="Genera con AI"
                 >
                   🤖

@@ -55,6 +55,13 @@ export class HomepageComponent implements OnInit {
     this.router.navigate(['/addNews']);
   }
 
+  private getBrowserLanguage(): string {
+    const browserLang = navigator.language.substring(0, 2);
+    const supportedLanguages = ['it', 'en', 'es', 'fr', 'de', 'pt'];
+    console.log(supportedLanguages.includes(browserLang) ? browserLang : 'it')
+    return supportedLanguages.includes(browserLang) ? browserLang : 'it';
+  }
+
 
   async searchArticles(): Promise<void> {
     if (!this.searchTerm.trim()) return;
@@ -67,7 +74,7 @@ export class HomepageComponent implements OnInit {
 
       this.isLoading = true;
 
-      this.http.post<SearchResponse>(this.apiUrl, { query: this.searchTerm }, { headers })
+      this.http.post<SearchResponse>(this.apiUrl, { query: this.searchTerm,language:this.getBrowserLanguage() }, { headers })
         .subscribe({
           next: (response) => {
             this.searchResults = response.results.map(article => ({
