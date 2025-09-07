@@ -98,7 +98,7 @@ interface SavedArticle {
 
       <!-- Form per aggiungere notizia -->
 
-<div class="form-container">
+      <div class="form-container">
   <form class="news-form" #newsForm="ngForm" novalidate>
     <!-- Titolo -->
     <div class="form-group">
@@ -222,6 +222,7 @@ interface SavedArticle {
         </div>
         <div class="popup-buttons">
           <button (click)="closePopup()">Chiudi</button>
+          <button (click)="useResult()">Usa</button>
         </div>
       </div>
     </div>
@@ -259,6 +260,162 @@ interface SavedArticle {
     </div>
   </form>
 </div>
+
+<style>
+.input-container, .textarea-container {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px 50px 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.form-textarea {
+  width: 100%;
+  padding: 10px 50px 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.btn-ai {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.btn-ai-textarea {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.btn-ai:hover,
+.btn-ai-textarea:hover {
+  background: #0056b3;
+}
+
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.popup {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 500px;
+  width: 90%;
+}
+
+.popup h4 {
+  margin: 0 0 15px 0;
+}
+
+.popup-content {
+  background: #f5f5f5;
+  padding: 15px;
+  border-radius: 5px;
+  margin: 15px 0;
+  max-height: 300px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+}
+
+.popup-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.popup-buttons button {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.popup-buttons button:first-child {
+  background: #6c757d;
+  color: white;
+}
+
+.popup-buttons button:last-child {
+  background: #007bff;
+  color: white;
+}
+
+.popup-buttons button:hover {
+  opacity: 0.8;
+}
+
+.field-info {
+  margin-top: 5px;
+  font-size: 14px;
+  text-align: right;
+}
+
+.validation-error {
+  margin-top: 5px;
+  font-size: 14px;
+}
+
+.validation-error small {
+  color: #dc3545;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.form-label.required::after {
+  content: " *";
+  color: #dc3545;
+}
+</style>
 
       <!-- Lista notizie aggiunte -->
       <div class="recent-news-section" *ngIf="addedNews.length > 0">
@@ -1651,17 +1808,12 @@ export class AddNewsComponent implements OnInit {
     contenuto: ''
   };
 
-  showAiResult = false;
-  aiResult = '';
-
-  closePopup(): void {
-    this.showAiResult = false;
-  }
 
   // Stati del componente per aggiunta
   isSubmitting: boolean = false;
   showSuccessMessage: boolean = false;
   errorMessage: string = '';
+  currentField = '';
 
   showDeleteModal: boolean = false;
   articleToDelete: any = null;
@@ -1766,6 +1918,28 @@ export class AddNewsComponent implements OnInit {
       alert('⚠️ Devi fare login per continuare');
       this.auth.loginWithRedirect();
     }
+  }
+
+  showAiResult = false;
+  aiResult = '';
+
+  closePopup(): void {
+    this.showAiResult = false;
+  }
+
+  useResult(): void {
+    switch (this.currentField) {
+      case 'titolo':
+        this.newsArticle.titolo = this.aiResult;
+        break;
+      case 'paragrafo':
+        this.newsArticle.paragrafo = this.aiResult;
+        break;
+      case 'contenuto':
+        this.newsArticle.contenuto = this.aiResult;
+        break;
+    }
+    this.closePopup();
   }
 
   async loadMySave(): Promise<void> {
