@@ -1872,8 +1872,9 @@ export class AddNewsComponent implements OnInit {
   }
 
 
-  async ai(text: string) : Promise<void> {
-    console.log(text)
+  async ai(text: string): Promise<void> {
+    console.log(text);
+
     try {
       const token = await this.auth.getAccessTokenSilently().toPromise();
       const response = await fetch('https://sport.event-fit.it/api/v1/ai', {
@@ -1886,15 +1887,24 @@ export class AddNewsComponent implements OnInit {
           text: text
         })
       });
+
       const data = await response.json();
+
       if (!data.article) {
         throw new Error("⚠️ Errore nella generazione. Riprova.");
       }
-      console.log(data.article)
+
+      console.log(data.article);
+
+      // Mostra il risultato nel popup
+      this.aiResult = data.article;
+      this.showAiResult = true;
+
     } catch (err) {
       alert("Errore nella generazione. Riprova.");
     }
   }
+
 
 
   async to_bozza(article: any): Promise<void> {
