@@ -432,10 +432,18 @@ def ai(user_payload):
     text = data["text"]
 
     prompt = f"""
-    You are a text improvement assistant.
-    Correct **all spelling mistakes**, grammar errors, and style issues in the text below.
-    Do **NOT** translate the text or change its original language under any circumstances.
-    Always fix typos, even in very short texts. Keep the same words, tone, and language.
+    You are an expert sports journalist and text improvement assistant.
+    Your task is to take the provided text and produce a **well-written, professional, and engaging sports article**.
+
+    Requirements:
+    1. Correct all spelling mistakes, grammar errors, and punctuation issues.
+    2. Improve style, clarity, and fluency.
+    3. Slightly expand and enrich the content, adding context or logical connections implied by the original text.
+      Do NOT invent facts not present or implied by the input.
+    4. Keep the original language; do NOT translate.
+    5. Format the output in **full sentences and coherent paragraphs**, suitable for publication.
+    6. Maintain proper sports terminology (e.g., "Vuelta", "stage", "goal", "match") and capitalize names of athletes, teams, and events correctly.
+    7. For very short inputs (e.g., titles), expand them into a **short news snippet** while keeping accuracy.
 
     Input: "{text}"
     Output:
