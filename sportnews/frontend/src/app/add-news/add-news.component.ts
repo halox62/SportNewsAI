@@ -372,7 +372,7 @@ interface SavedArticle {
   padding: 15px;
   border-radius: 5px;
   margin: 15px 0;
-  max-height: 300px;
+  max-height: 800px;
   overflow-y: auto;
   white-space: pre-wrap;
 }
