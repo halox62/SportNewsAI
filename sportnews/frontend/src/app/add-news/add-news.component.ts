@@ -278,316 +278,6 @@ interface SavedArticle {
   </form>
 </div>
 
-<style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
-            min-height: calc(100vh - 40px);
-        }
-
-        .header {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            font-weight: 300;
-        }
-
-        .header p {
-            opacity: 0.9;
-            font-size: 1.1em;
-        }
-
-        .form-container {
-            padding: 40px;
-            min-height: calc(100vh - 200px);
-        }
-
-        .input-container, .textarea-container {
-            position: relative;
-            display: flex;
-            align-items: flex-start;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 15px 60px 15px 20px;
-            border: 2px solid #e1e5e9;
-            border-radius: 10px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            background: #fafbfc;
-        }
-
-        .form-textarea {
-            width: 100%;
-            padding: 20px 60px 20px 20px;
-            border: 2px solid #e1e5e9;
-            border-radius: 10px;
-            font-size: 16px;
-            resize: vertical;
-            font-family: inherit;
-            transition: all 0.3s ease;
-            background: #fafbfc;
-        }
-
-        .content-textarea {
-            min-height: 300px;
-        }
-
-        .form-input:focus,
-        .form-textarea:focus {
-            outline: none;
-            border-color: #667eea;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .btn-ai {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 8px 15px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
-        }
-
-        .btn-ai-textarea {
-            position: absolute;
-            right: 15px;
-            top: 15px;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 8px 15px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
-        }
-
-        .btn-ai:hover,
-        .btn-ai-textarea:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        .popup-overlay {
-            position: fixed;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            width: 500px;
-            background: transparent;
-            display: flex;
-            align-items: flex-start;
-            justify-content: flex-end;
-            z-index: 1000;
-            pointer-events: none;
-        }
-
-        .popup {
-            background: white;
-            padding: 0;
-            border-radius: 0;
-            width: 100%;
-            height: 100vh;
-            box-shadow: -5px 0 30px rgba(0,0,0,0.15);
-            border-left: 1px solid #e1e5e9;
-            overflow-y: auto;
-            pointer-events: all;
-            animation: slideInRight 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-            display: flex;
-            flex-direction: column;
-        }
-
-        @keyframes slideInRight {
-            from {
-                transform: translateX(100%);
-            }
-            to {
-                transform: translateX(0);
-            }
-        }
-
-        .popup-header {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            padding: 25px 30px;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        .popup-header h4 {
-            margin: 0;
-            font-size: 1.5em;
-            font-weight: 300;
-        }
-
-        .popup-body {
-            flex: 1;
-            padding: 30px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .popup-content {
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 12px;
-            margin: 20px 0;
-            flex: 1;
-            overflow-y: auto;
-            white-space: pre-wrap;
-            font-family: 'Monaco', 'Menlo', monospace;
-            font-size: 14px;
-            line-height: 1.6;
-            border: 1px solid #e9ecef;
-        }
-
-        .popup-buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: flex-end;
-            padding-top: 20px;
-            border-top: 1px solid #e9ecef;
-            margin-top: 20px;
-        }
-
-        .popup-buttons button {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .popup-buttons button:first-child {
-            background: #6c757d;
-            color: white;
-        }
-
-        .popup-buttons button:last-child {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-        }
-
-        .popup-buttons button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-
-        .field-info {
-            margin-top: 8px;
-            font-size: 13px;
-            text-align: right;
-            color: #6c757d;
-        }
-
-        .form-group {
-            margin-bottom: 30px;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 12px;
-            font-weight: 600;
-            color: #495057;
-            font-size: 15px;
-        }
-
-        .edit-actions {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            margin-top: 40px;
-            padding-top: 30px;
-            border-top: 1px solid #e9ecef;
-        }
-
-        .btn {
-            padding: 15px 30px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .btn-primary {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-        }
-
-        .btn-warning {
-            background: linear-gradient(45deg, #ffc107, #ff8c00);
-            color: white;
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-
-        .btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-        }
-
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid #ffffff40;
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-    </style>
       <!-- Lista notizie aggiunte -->
       <div class="recent-news-section" *ngIf="addedNews.length > 0">
         <div class="section-header">
@@ -828,206 +518,6 @@ interface SavedArticle {
   </div>
 </div>
 
-<style>
-.input-container, .textarea-container {
-  position: relative;
-  display: flex;
-  align-items: flex-start;
-}
-
-.form-input {
-  width: 100%;
-  padding: 10px 50px 10px 15px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  font-size: 16px;
-}
-
-.form-textarea {
-  width: 100%;
-  padding: 10px 50px 10px 15px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  font-size: 16px;
-  resize: vertical;
-  font-family: inherit;
-}
-
-.content-textarea {
-  min-height: 200px;
-}
-
-.form-input:focus,
-.form-textarea:focus {
-  outline: none;
-  border-color: #007bff;
-}
-
-.btn-ai {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 5px 10px;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-.btn-ai-textarea {
-  position: absolute;
-  right: 10px;
-  top: 10px;
-  background: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 5px 10px;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-.btn-ai:hover,
-.btn-ai-textarea:hover {
-  background: #0056b3;
-}
-
-.popup-overlay {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 400px;
-  background: transparent;
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-end;
-  z-index: 1000;
-  pointer-events: none;
-}
-
-.popup {
-  background: white;
-  padding: 20px;
-  border-radius: 10px 0 0 10px;
-  width: 100%;
-  height: 100%;
-  box-shadow: -2px 0 10px rgba(0,0,0,0.1);
-  border-left: 1px solid #ddd;
-  overflow-y: auto;
-  pointer-events: all;
-  animation: slideInRight 0.3s ease-out;
-}
-
-@keyframes slideInRight {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
-}
-
-.popup h4 {
-  margin: 0 0 15px 0;
-}
-
-.popup-content {
-  background: #f5f5f5;
-  padding: 15px;
-  border-radius: 5px;
-  margin: 15px 0;
-  max-height: 500px;
-  min-height: 200px;
-  overflow-y: auto;
-  white-space: pre-wrap;
-}
-
-.popup-buttons {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-}
-
-.popup-buttons button {
-  padding: 8px 15px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.popup-buttons button:first-child {
-  background: #6c757d;
-  color: white;
-}
-
-.popup-buttons button:last-child {
-  background: #007bff;
-  color: white;
-}
-
-.popup-buttons button:hover {
-  opacity: 0.8;
-}
-
-.field-info {
-  margin-top: 5px;
-  font-size: 14px;
-  text-align: right;
-}
-
-.form-group {
-  margin-bottom: 20px;
-}
-
-.form-label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: bold;
-}
-
-.edit-actions {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-  margin-top: 20px;
-}
-
-.btn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn-primary {
-  background: #007bff;
-  color: white;
-}
-
-.btn-warning {
-  background: #ffc107;
-  color: #212529;
-}
-
-.btn-secondary {
-  background: #6c757d;
-  color: white;
-}
-
-.btn:hover:not(:disabled) {
-  opacity: 0.8;
-}
-</style>
           </div>
         </div>
       </div>
@@ -1311,205 +801,7 @@ interface SavedArticle {
           </div>
         </div>
 
-        <style>
-        .input-container, .textarea-container {
-          position: relative;
-          display: flex;
-          align-items: flex-start;
-        }
 
-        .form-input {
-          width: 100%;
-          padding: 10px 50px 10px 15px;
-          border: 1px solid #ddd;
-          border-radius: 5px;
-          font-size: 16px;
-        }
-
-        .form-textarea {
-          width: 100%;
-          padding: 10px 50px 10px 15px;
-          border: 1px solid #ddd;
-          border-radius: 5px;
-          font-size: 16px;
-          resize: vertical;
-          font-family: inherit;
-        }
-
-        .content-textarea {
-          min-height: 200px;
-        }
-
-        .form-input:focus,
-        .form-textarea:focus {
-          outline: none;
-          border-color: #007bff;
-        }
-
-        .btn-ai {
-          position: absolute;
-          right: 10px;
-          top: 50%;
-          transform: translateY(-50%);
-          background: #007bff;
-          color: white;
-          border: none;
-          border-radius: 5px;
-          padding: 5px 10px;
-          cursor: pointer;
-          font-size: 16px;
-        }
-
-        .btn-ai-textarea {
-          position: absolute;
-          right: 10px;
-          top: 10px;
-          background: #007bff;
-          color: white;
-          border: none;
-          border-radius: 5px;
-          padding: 5px 10px;
-          cursor: pointer;
-          font-size: 16px;
-        }
-
-        .btn-ai:hover,
-        .btn-ai-textarea:hover {
-          background: #0056b3;
-        }
-
-        .popup-overlay {
-          position: fixed;
-          top: 0;
-          right: 0;
-          bottom: 0;
-          width: 400px;
-          background: transparent;
-          display: flex;
-          align-items: flex-start;
-          justify-content: flex-end;
-          z-index: 1000;
-          pointer-events: none;
-        }
-
-        .popup {
-          background: white;
-          padding: 20px;
-          border-radius: 10px 0 0 10px;
-          width: 100%;
-          height: 100%;
-          box-shadow: -2px 0 10px rgba(0,0,0,0.1);
-          border-left: 1px solid #ddd;
-          overflow-y: auto;
-          pointer-events: all;
-          animation: slideInRight 0.3s ease-out;
-        }
-
-        @keyframes slideInRight {
-          from {
-            transform: translateX(100%);
-          }
-          to {
-            transform: translateX(0);
-          }
-        }
-
-        .popup h4 {
-          margin: 0 0 15px 0;
-        }
-
-        .popup-content {
-          background: #f5f5f5;
-          padding: 15px;
-          border-radius: 5px;
-          margin: 15px 0;
-          max-height: 300px;
-          overflow-y: auto;
-          white-space: pre-wrap;
-        }
-
-        .popup-buttons {
-          display: flex;
-          gap: 10px;
-          justify-content: flex-end;
-        }
-
-        .popup-buttons button {
-          padding: 8px 15px;
-          border: none;
-          border-radius: 5px;
-          cursor: pointer;
-        }
-
-        .popup-buttons button:first-child {
-          background: #6c757d;
-          color: white;
-        }
-
-        .popup-buttons button:last-child {
-          background: #007bff;
-          color: white;
-        }
-
-        .popup-buttons button:hover {
-          opacity: 0.8;
-        }
-
-        .field-info {
-          margin-top: 5px;
-          font-size: 14px;
-          text-align: right;
-        }
-
-        .form-group {
-          margin-bottom: 20px;
-        }
-
-        .form-label {
-          display: block;
-          margin-bottom: 8px;
-          font-weight: bold;
-        }
-
-        .edit-actions {
-          display: flex;
-          gap: 10px;
-          justify-content: flex-end;
-          margin-top: 20px;
-        }
-
-        .btn {
-          padding: 10px 20px;
-          border: none;
-          border-radius: 5px;
-          cursor: pointer;
-          font-weight: bold;
-        }
-
-        .btn:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
-
-        .btn-primary {
-          background: #007bff;
-          color: white;
-        }
-
-        .btn-warning {
-          background: #ffc107;
-          color: #212529;
-        }
-
-        .btn-secondary {
-          background: #6c757d;
-          color: white;
-        }
-
-        .btn:hover:not(:disabled) {
-          opacity: 0.8;
-        }
-        </style>
         </div>
       </div>
     </div>
@@ -1733,6 +1025,315 @@ interface SavedArticle {
 </div>
   `,
   styles: [`
+
+* {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            min-height: calc(100vh - 40px);
+        }
+
+        .header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .form-container {
+            padding: 40px;
+            min-height: calc(100vh - 200px);
+        }
+
+        .input-container, .textarea-container {
+            position: relative;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 15px 60px 15px 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #fafbfc;
+        }
+
+        .form-textarea {
+            width: 100%;
+            padding: 20px 60px 20px 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            resize: vertical;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: #fafbfc;
+        }
+
+        .content-textarea {
+            min-height: 300px;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-ai {
+          position: absolute;
+          right: 15px;
+          top: 50%;
+          transform: translateY(-50%);
+          background: linear-gradient(45deg, #667eea, #764ba2);
+          color: white;
+          border: none;
+          border-radius: 8px;
+          padding: 8px 15px;
+          cursor: pointer;
+          font-size: 14px;
+          font-weight: 600;
+          transition: all 0.3s ease;
+          box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-ai-textarea {
+          position: absolute;
+          right: 15px;
+          bottom: 15px; /* 👈 più naturale in basso a destra */
+          background: linear-gradient(45deg, #667eea, #764ba2);
+          color: white;
+          border: none;
+          border-radius: 8px;
+          padding: 8px 15px;
+          cursor: pointer;
+          font-size: 14px;
+          font-weight: 600;
+          transition: all 0.3s ease;
+          box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+        }
+        .btn-ai:hover,
+        .btn-ai-textarea:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 500px;
+            background: transparent;
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-end;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .popup {
+            background: white;
+            padding: 0;
+            border-radius: 0;
+            width: 100%;
+            height: 100vh;
+            box-shadow: -5px 0 30px rgba(0,0,0,0.15);
+            border-left: 1px solid #e1e5e9;
+            overflow-y: auto;
+            pointer-events: all;
+            animation: slideInRight 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        .popup-header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 25px 30px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .popup-header h4 {
+            margin: 0;
+            font-size: 1.5em;
+            font-weight: 300;
+        }
+
+        .popup-body {
+            flex: 1;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .popup-content {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            margin: 20px 0;
+            flex: 1;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            border: 1px solid #e9ecef;
+        }
+
+        .popup-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+            margin-top: 20px;
+        }
+
+        .popup-buttons button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .popup-buttons button:first-child {
+            background: #6c757d;
+            color: white;
+        }
+
+        .popup-buttons button:last-child {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .popup-buttons button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .field-info {
+            margin-top: 8px;
+            font-size: 13px;
+            text-align: right;
+            color: #6c757d;
+        }
+
+        .form-group {
+            margin-bottom: 30px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 12px;
+            font-weight: 600;
+            color: #495057;
+            font-size: 15px;
+        }
+
+        .edit-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(45deg, #ffc107, #ff8c00);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ffffff40;
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
     .container {
   max-width: 900px;
   margin: 0 auto;
