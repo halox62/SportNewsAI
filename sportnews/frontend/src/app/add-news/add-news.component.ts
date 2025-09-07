@@ -129,6 +129,12 @@ interface SavedArticle {
         >
           🤖
         </button>
+        <ng-container *ngIf="!loadingAI; else loading">
+          🤖 AI
+        </ng-container>
+        <ng-template #loading>
+          ⏳ Caricamento...
+        </ng-template>
       </div>
 
       <div class="field-info">
@@ -157,16 +163,21 @@ interface SavedArticle {
           (input)="onInputChange()"
         ></textarea>
 
-        <!-- Bottone AI per paragrafo -->
         <button
           *ngIf="newsArticle.paragrafo && newsArticle.paragrafo.trim().length > 0"
           type="button"
           class="btn-ai-textarea"
           (click)="ai(newsArticle.paragrafo, 'paragrafo')"
-          title="Genera con AI"
+          title="AI"
         >
           🤖
         </button>
+        <ng-container *ngIf="!loadingAI; else loading">
+          🤖 AI
+        </ng-container>
+        <ng-template #loading>
+          ⏳ Caricamento...
+        </ng-template>
       </div>
 
       <div class="field-info">
@@ -193,7 +204,6 @@ interface SavedArticle {
           (input)="onInputChange()"
         ></textarea>
 
-        <!-- Bottone AI per contenuto -->
         <button
         *ngIf="newsArticle.contenuto && newsArticle.contenuto.trim().length > 0"
         type="button"
@@ -203,7 +213,7 @@ interface SavedArticle {
         title="Genera con AI"
       >
         <ng-container *ngIf="!loadingAI; else loading">
-          🤖 Genera con AI
+          🤖 AI
         </ng-container>
         <ng-template #loading>
           ⏳ Caricamento...
@@ -710,6 +720,12 @@ interface SavedArticle {
         >
           🤖
         </button>
+        <ng-container *ngIf="!loadingAI; else loading">
+          🤖 AI
+        </ng-container>
+        <ng-template #loading>
+          ⏳ Caricamento...
+        </ng-template>
       </div>
       <div class="field-info">
         <small>Caratteri: {{ article.titolo?.length || 0 }}/200</small>
@@ -737,6 +753,12 @@ interface SavedArticle {
         >
           🤖
         </button>
+        <ng-container *ngIf="!loadingAI; else loading">
+          🤖 AI
+        </ng-container>
+        <ng-template #loading>
+          ⏳ Caricamento...
+        </ng-template>
       </div>
       <div class="field-info">
         <small>Caratteri: {{ article.sottotitolo?.length || 0 }}/500</small>
@@ -764,6 +786,12 @@ interface SavedArticle {
         >
           🤖
         </button>
+        <ng-container *ngIf="!loadingAI; else loading">
+          🤖 AI
+        </ng-container>
+        <ng-template #loading>
+          ⏳ Caricamento...
+        </ng-template>
       </div>
       <div class="field-info">
         <small>Caratteri: {{ article.contenuto?.length || 0 }}/2000</small>
@@ -1170,6 +1198,12 @@ interface SavedArticle {
                 >
                   🤖
                 </button>
+                <ng-container *ngIf="!loadingAI; else loading">
+                🤖 AI
+              </ng-container>
+              <ng-template #loading>
+                ⏳ Caricamento...
+              </ng-template>
               </div>
               <div class="field-info">
                 <small>Caratteri: {{ article.titolo?.length || 0 }}/200</small>
@@ -1197,6 +1231,12 @@ interface SavedArticle {
                 >
                   🤖
                 </button>
+                <ng-container *ngIf="!loadingAI; else loading">
+          🤖 AI
+        </ng-container>
+        <ng-template #loading>
+          ⏳ Caricamento...
+        </ng-template>
               </div>
               <div class="field-info">
                 <small>Caratteri: {{ article.sottotitolo?.length || 0 }}/500</small>
@@ -1224,6 +1264,12 @@ interface SavedArticle {
                 >
                   🤖
                 </button>
+                <ng-container *ngIf="!loadingAI; else loading">
+          🤖 AI
+        </ng-container>
+        <ng-template #loading>
+          ⏳ Caricamento...
+        </ng-template>
               </div>
               <div class="field-info">
                 <small>Caratteri: {{ article.contenuto?.length || 0 }}/2000</small>
