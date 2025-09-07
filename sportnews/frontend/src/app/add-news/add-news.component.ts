@@ -195,14 +195,20 @@ interface SavedArticle {
 
         <!-- Bottone AI per contenuto -->
         <button
-          *ngIf="newsArticle.contenuto && newsArticle.contenuto.trim().length > 0"
-          type="button"
-          class="btn-ai-textarea"
-          (click)="ai(newsArticle.contenuto, 'contenuto')"
-          title="Genera con AI"
-        >
-          🤖
-        </button>
+        *ngIf="newsArticle.contenuto && newsArticle.contenuto.trim().length > 0"
+        type="button"
+        class="btn-ai-textarea"
+        (click)="ai(newsArticle.contenuto, 'contenuto')"
+        [disabled]="loadingAI"
+        title="Genera con AI"
+      >
+        <ng-container *ngIf="!loadingAI; else loading">
+          🤖 Genera con AI
+        </ng-container>
+        <ng-template #loading>
+          ⏳ Caricamento...
+        </ng-template>
+      </button>
       </div>
 
       <div class="field-info">
@@ -2507,6 +2513,8 @@ export class AddNewsComponent implements OnInit {
   downloadSuccessMessage: boolean = false;
   downloadErrorMessage: string = '';
 
+  loadingAI = false;
+
   submitType: 'notizia' | 'bozza' = 'notizia';
 
 
@@ -2733,7 +2741,7 @@ export class AddNewsComponent implements OnInit {
 
 
   async ai(text: string,type: string): Promise<void> {
-    console.log(text);
+   this.loadingAI = true;
 
     try {
       const token = await this.auth.getAccessTokenSilently().toPromise();
@@ -2763,6 +2771,8 @@ export class AddNewsComponent implements OnInit {
 
     } catch (err) {
       alert("Errore nella generazione. Riprova.");
+    }finally{
+      this.loadingAI=false;
     }
   }
 
