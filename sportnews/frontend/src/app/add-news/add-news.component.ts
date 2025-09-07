@@ -234,7 +234,6 @@ interface SavedArticle {
     <!-- Popup semplice -->
     <div class="popup-overlay" *ngIf="showAiResult" (click)="closePopup()">
       <div class="popup" (click)="$event.stopPropagation()">
-        <h4>🤖 Risultato AI</h4>
         <div class="popup-content">
           {{ aiResult }}
         </div>
@@ -509,7 +508,6 @@ interface SavedArticle {
   <!-- Popup AI per la modifica -->
   <div class="popup-overlay" *ngIf="showAiResult" (click)="closePopup()">
     <div class="popup" (click)="$event.stopPropagation()">
-      <h4>🤖 Risultato AI</h4>
       <div class="popup-content">
         {{ aiResult }}
       </div>
@@ -795,7 +793,6 @@ interface SavedArticle {
           <!-- Popup AI per la modifica -->
           <div class="popup-overlay" *ngIf="showAiResult" (click)="closePopup()">
             <div class="popup" (click)="$event.stopPropagation()">
-              <h4>🤖 Risultato AI</h4>
               <div class="popup-content">
                 {{ aiResult }}
               </div>
@@ -1493,8 +1490,13 @@ interface SavedArticle {
     }
 
     .popup-buttons button:first-child {
-        background: #6c757d;
-        color: white;
+      margin: 0 10px 0 0; /* 10px a destra per separarlo dal bottone successivo */
+      background: #6c757d;
+      color: white;
+    }
+
+    .popup-buttons {
+        padding: 25px 30px; /* più spazio dal bordo della popup */
     }
 
     .popup-buttons button:last-child {
