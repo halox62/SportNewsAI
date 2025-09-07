@@ -1786,25 +1786,32 @@ interface SavedArticle {
     /* ===== RESPONSIVE ===== */
     @media (max-width: 768px) {
         body {
-            padding: 15px;
+            padding: 20px;
         }
 
         .container {
-            min-height: calc(100vh - 30px);
+            min-height: calc(100vh - 40px);
         }
 
         .form-container {
-            padding: 20px;
+            margin: 20px;
+            padding: 30px;
+        }
+
+        .tabs-container {
+            margin: 20px;
         }
 
         .tabs-header {
             flex-direction: column;
             gap: 5px;
+            margin-bottom: 30px;
         }
 
         .tab-button {
             width: 100%;
             text-align: left;
+            padding: 12px 20px;
         }
 
         .form-actions,
@@ -1818,11 +1825,22 @@ interface SavedArticle {
             justify-content: center;
         }
 
+        .articles-container,
+        .recent-news-section {
+            margin: 0 20px 30px 20px;
+        }
+
         .articles-header,
         .section-header {
             flex-direction: column;
             gap: 15px;
             align-items: stretch;
+            padding: 20px;
+        }
+
+        .article-item,
+        .recent-news-item {
+            padding: 20px;
         }
 
         .article-header,
@@ -1834,6 +1852,10 @@ interface SavedArticle {
 
         .article-actions {
             justify-content: flex-end;
+        }
+
+        .status-messages {
+            margin: 20px;
         }
 
         .popup-overlay {
