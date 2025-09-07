@@ -434,8 +434,11 @@ def ai(user_payload):
     prompt = f"""
     You are a text improvement assistant.
     Your task is to enhance the provided text by fixing grammar, spelling, and style issues.
-    Make it clearer, more professional, and fluent, but do not translate or change its original language.
-    If the text is informal, keep the same tone but polish it.
+    Make it clearer, more fluent, and more polished, but do not translate or change its original language.
+
+    If the text is too short, incomplete, or vague, expand it slightly to make it more natural and expressive,
+    while preserving the original meaning and tone.
+    Keep the response concise and in the same language of the input.
 
     Text to improve:
     {text}
