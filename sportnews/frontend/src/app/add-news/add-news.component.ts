@@ -125,7 +125,10 @@ interface SavedArticle {
 
         <!-- 👇 Bottone che appare solo se si scrive qualcosa -->
         <button
-
+          *ngIf="newsArticle.titolo && newsArticle.titolo.trim().length > 0"
+          type="button"
+          class="btn-action"
+          (click)="ai(newsArticle.titolo)"
         >
           ➕ Aggiungi Titolo
         </button>
@@ -1734,6 +1737,31 @@ export class AddNewsComponent implements OnInit {
       this.auth.loginWithRedirect();
     } finally {
       this.updatingArticle = false;
+    }
+  }
+
+
+  async ai(text: string) : Promise<void> {
+    console.log(text)
+    try {
+      const token = await this.auth.getAccessTokenSilently().toPromise();
+      const response = await fetch('https://sport.event-fit.it/api/v1/ai', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          text: text
+        })
+      });
+      const data = await response.json();
+      if (!data.article) {
+        throw new Error("⚠️ Nessun testo tradotto ricevuto dall'API");
+      }
+      console.log(data.article)
+    } catch (err) {
+      alert("Errore nella generazione. Riprova.");
     }
   }
 
