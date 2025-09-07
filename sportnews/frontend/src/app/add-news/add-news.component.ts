@@ -222,7 +222,6 @@ interface SavedArticle {
         </div>
         <div class="popup-buttons">
           <button (click)="closePopup()">Chiudi</button>
-          <button (click)="useResult()">Usa</button>
         </div>
       </div>
     </div>
@@ -730,9 +729,12 @@ interface SavedArticle {
 
           <!-- Modalità modifica -->
           <div class="article-edit-content" *ngIf="article.editing">
-            <div class="edit-form">
-              <div class="form-group">
-                <label class="form-label">📰 Titolo</label>
+          <div class="edit-form">
+
+            <!-- Titolo -->
+            <div class="form-group">
+              <label class="form-label">📰 Titolo</label>
+              <div class="input-container">
                 <input
                   type="text"
                   class="form-input"
@@ -740,12 +742,26 @@ interface SavedArticle {
                   maxlength="200"
                   placeholder="Titolo dell'articolo..."
                 />
-                <div class="field-info">
-                  <small>Caratteri: {{ article.titolo?.length || 0 }}/200</small>
-                </div>
+                <!-- Bottone AI per titolo -->
+                <button
+                  *ngIf="article.titolo && article.titolo.trim().length > 0"
+                  type="button"
+                  class="btn-ai"
+                  (click)="ai(article.titolo, 'titolo')"
+                  title="Genera con AI"
+                >
+                  🤖
+                </button>
               </div>
-              <div class="form-group">
-                <label class="form-label">📝 Sottotitolo</label>
+              <div class="field-info">
+                <small>Caratteri: {{ article.titolo?.length || 0 }}/200</small>
+              </div>
+            </div>
+
+            <!-- Sottotitolo -->
+            <div class="form-group">
+              <label class="form-label">📝 Sottotitolo</label>
+              <div class="textarea-container">
                 <textarea
                   class="form-textarea"
                   [(ngModel)]="article.sottotitolo"
@@ -753,12 +769,26 @@ interface SavedArticle {
                   maxlength="500"
                   placeholder="Breve descrizione o sottotitolo..."
                 ></textarea>
-                <div class="field-info">
-                  <small>Caratteri: {{ article.sottotitolo?.length || 0 }}/500</small>
-                </div>
+                <!-- Bottone AI per sottotitolo -->
+                <button
+                  *ngIf="article.sottotitolo && article.sottotitolo.trim().length > 0"
+                  type="button"
+                  class="btn-ai-textarea"
+                  (click)="ai(article.sottotitolo, 'sottotitolo')"
+                  title="Genera con AI"
+                >
+                  🤖
+                </button>
               </div>
-              <div class="form-group">
-                <label class="form-label">📄 Contenuto</label>
+              <div class="field-info">
+                <small>Caratteri: {{ article.sottotitolo?.length || 0 }}/500</small>
+              </div>
+            </div>
+
+            <!-- Contenuto -->
+            <div class="form-group">
+              <label class="form-label">📄 Contenuto</label>
+              <div class="textarea-container">
                 <textarea
                   class="form-textarea content-textarea"
                   [(ngModel)]="article.contenuto"
@@ -766,33 +796,259 @@ interface SavedArticle {
                   maxlength="2000"
                   placeholder="Contenuto completo dell'articolo..."
                 ></textarea>
-                <div class="field-info">
-                  <small>Caratteri: {{ article.contenuto?.length || 0 }}/2000</small>
-                </div>
+                <!-- Bottone AI per contenuto -->
+                <button
+                  *ngIf="article.contenuto && article.contenuto.trim().length > 0"
+                  type="button"
+                  class="btn-ai-textarea"
+                  (click)="ai(article.contenuto, 'contenuto')"
+                  title="Genera con AI"
+                >
+                  🤖
+                </button>
               </div>
-              <div class="edit-actions">
-                <button class="btn btn-secondary" (click)="cancelEditing(article)">
-                  ❌ Annulla
-                </button>
-                <button
-                  class="btn btn-warning"
-                  (click)="saveArticle(article)"
-                  [disabled]="updatingArticle || !isArticleValid(article)"
-                >
-                  <span *ngIf="!updatingArticle">📝 Salva Bozza</span>
-                  <span *ngIf="updatingArticle">⏳ Salvando...</span>
-                </button>
-                <button
-                  class="btn btn-primary"
-                  (click)="publishArticle(article)"
-                  [disabled]="updatingArticle || !isArticleValid(article)"
-                >
-                  <span *ngIf="!updatingArticle">🚀 Pubblica</span>
-                  <span *ngIf="updatingArticle">⏳ Pubblicando...</span>
-                </button>
+              <div class="field-info">
+                <small>Caratteri: {{ article.contenuto?.length || 0 }}/2000</small>
+              </div>
+            </div>
+
+            <!-- Azioni -->
+            <div class="edit-actions">
+              <button class="btn btn-secondary" (click)="cancelEditing(article)">
+                ❌ Annulla
+              </button>
+              <button
+                class="btn btn-warning"
+                (click)="saveArticle(article)"
+                [disabled]="updatingArticle || !isArticleValid(article)"
+              >
+                <span *ngIf="!updatingArticle">📝 Salva Bozza</span>
+                <span *ngIf="updatingArticle">⏳ Salvando...</span>
+              </button>
+              <button
+                class="btn btn-primary"
+                (click)="publishArticle(article)"
+                [disabled]="updatingArticle || !isArticleValid(article)"
+              >
+                <span *ngIf="!updatingArticle">🚀 Pubblica</span>
+                <span *ngIf="updatingArticle">⏳ Pubblicando...</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Popup AI per la modifica -->
+          <div class="popup-overlay" *ngIf="showAiResult" (click)="closePopup()">
+            <div class="popup" (click)="$event.stopPropagation()">
+              <h4>🤖 Risultato AI</h4>
+              <div class="popup-content">
+                {{ aiResult }}
+              </div>
+              <div class="popup-buttons">
+                <button (click)="closePopup()">Chiudi</button>
               </div>
             </div>
           </div>
+        </div>
+
+        <style>
+        .input-container, .textarea-container {
+          position: relative;
+          display: flex;
+          align-items: flex-start;
+        }
+
+        .form-input {
+          width: 100%;
+          padding: 10px 50px 10px 15px;
+          border: 1px solid #ddd;
+          border-radius: 5px;
+          font-size: 16px;
+        }
+
+        .form-textarea {
+          width: 100%;
+          padding: 10px 50px 10px 15px;
+          border: 1px solid #ddd;
+          border-radius: 5px;
+          font-size: 16px;
+          resize: vertical;
+          font-family: inherit;
+        }
+
+        .content-textarea {
+          min-height: 200px;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus {
+          outline: none;
+          border-color: #007bff;
+        }
+
+        .btn-ai {
+          position: absolute;
+          right: 10px;
+          top: 50%;
+          transform: translateY(-50%);
+          background: #007bff;
+          color: white;
+          border: none;
+          border-radius: 5px;
+          padding: 5px 10px;
+          cursor: pointer;
+          font-size: 16px;
+        }
+
+        .btn-ai-textarea {
+          position: absolute;
+          right: 10px;
+          top: 10px;
+          background: #007bff;
+          color: white;
+          border: none;
+          border-radius: 5px;
+          padding: 5px 10px;
+          cursor: pointer;
+          font-size: 16px;
+        }
+
+        .btn-ai:hover,
+        .btn-ai-textarea:hover {
+          background: #0056b3;
+        }
+
+        .popup-overlay {
+          position: fixed;
+          top: 0;
+          right: 0;
+          bottom: 0;
+          width: 400px;
+          background: transparent;
+          display: flex;
+          align-items: flex-start;
+          justify-content: flex-end;
+          z-index: 1000;
+          pointer-events: none;
+        }
+
+        .popup {
+          background: white;
+          padding: 20px;
+          border-radius: 10px 0 0 10px;
+          width: 100%;
+          height: 100%;
+          box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+          border-left: 1px solid #ddd;
+          overflow-y: auto;
+          pointer-events: all;
+          animation: slideInRight 0.3s ease-out;
+        }
+
+        @keyframes slideInRight {
+          from {
+            transform: translateX(100%);
+          }
+          to {
+            transform: translateX(0);
+          }
+        }
+
+        .popup h4 {
+          margin: 0 0 15px 0;
+        }
+
+        .popup-content {
+          background: #f5f5f5;
+          padding: 15px;
+          border-radius: 5px;
+          margin: 15px 0;
+          max-height: 300px;
+          overflow-y: auto;
+          white-space: pre-wrap;
+        }
+
+        .popup-buttons {
+          display: flex;
+          gap: 10px;
+          justify-content: flex-end;
+        }
+
+        .popup-buttons button {
+          padding: 8px 15px;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+        }
+
+        .popup-buttons button:first-child {
+          background: #6c757d;
+          color: white;
+        }
+
+        .popup-buttons button:last-child {
+          background: #007bff;
+          color: white;
+        }
+
+        .popup-buttons button:hover {
+          opacity: 0.8;
+        }
+
+        .field-info {
+          margin-top: 5px;
+          font-size: 14px;
+          text-align: right;
+        }
+
+        .form-group {
+          margin-bottom: 20px;
+        }
+
+        .form-label {
+          display: block;
+          margin-bottom: 8px;
+          font-weight: bold;
+        }
+
+        .edit-actions {
+          display: flex;
+          gap: 10px;
+          justify-content: flex-end;
+          margin-top: 20px;
+        }
+
+        .btn {
+          padding: 10px 20px;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          font-weight: bold;
+        }
+
+        .btn:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        .btn-primary {
+          background: #007bff;
+          color: white;
+        }
+
+        .btn-warning {
+          background: #ffc107;
+          color: #212529;
+        }
+
+        .btn-secondary {
+          background: #6c757d;
+          color: white;
+        }
+
+        .btn:hover:not(:disabled) {
+          opacity: 0.8;
+        }
+        </style>
         </div>
       </div>
     </div>
@@ -1927,20 +2183,6 @@ export class AddNewsComponent implements OnInit {
     this.showAiResult = false;
   }
 
-  useResult(): void {
-    switch (this.currentField) {
-      case 'titolo':
-        this.newsArticle.titolo = this.aiResult;
-        break;
-      case 'paragrafo':
-        this.newsArticle.paragrafo = this.aiResult;
-        break;
-      case 'contenuto':
-        this.newsArticle.contenuto = this.aiResult;
-        break;
-    }
-    this.closePopup();
-  }
 
   async loadMySave(): Promise<void> {
     this.loadingArticles = true;
