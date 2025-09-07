@@ -101,39 +101,163 @@ interface SavedArticle {
       <form class="news-form" #newsForm="ngForm" novalidate>
         <!-- Titolo -->
         <div class="form-group">
-        <label for="titolo" class="form-label required">📰 Titolo</label>
-        <input
-          type="text"
-          id="titolo"
-          name="titolo"
-          [(ngModel)]="newsArticle.titolo"
-          class="form-input"
-          placeholder="Inserisci il titolo della notizia..."
-          #titoloRef="ngModel"
-          required
-          maxlength="200"
-          (input)="onInputChange()"
-        />
+  <label for="titolo" class="form-label required">📰 Titolo</label>
 
-        <div class="field-info">
-          <small>Caratteri: {{ getTitoloLength() }}/200</small>
-        </div>
+  <!-- Container per input e bottone AI -->
+  <div class="input-container">
+    <input
+      type="text"
+      id="titolo"
+      name="titolo"
+      [(ngModel)]="newsArticle.titolo"
+      class="form-input"
+      placeholder="Inserisci il titolo della notizia..."
+      #titoloRef="ngModel"
+      required
+      maxlength="200"
+      (input)="onInputChange()"
+    />
 
-        <div class="validation-error" *ngIf="titoloRef.invalid && titoloRef.touched">
-          <small>⚠️ Il titolo è obbligatorio</small>
-        </div>
+    <!-- Bottone AI semplice -->
+    <button
+      *ngIf="newsArticle.titolo && newsArticle.titolo.trim().length > 0"
+      type="button"
+      class="btn-ai"
+      (click)="ai(newsArticle.titolo)"
+      title="Genera con AI"
+    >
+      🤖
+    </button>
+  </div>
 
-        <!-- 👇 Bottone che appare solo se si scrive qualcosa -->
-        <button
-          *ngIf="newsArticle.titolo && newsArticle.titolo.trim().length > 0"
-          type="button"
-          class="btn-action"
-          (click)="ai(newsArticle.titolo)"
-        >
-          ➕ Aggiungi Titolo
-        </button>
-      </div>
+  <div class="field-info">
+    <small>Caratteri: {{ getTitoloLength() }}/200</small>
+  </div>
 
+  <div class="validation-error" *ngIf="titoloRef.invalid && titoloRef.touched">
+    <small>⚠️ Il titolo è obbligatorio</small>
+  </div>
+</div>
+
+<!-- Popup semplice -->
+<div class="popup-overlay" *ngIf="showAiResult" (click)="closePopup()">
+  <div class="popup" (click)="$event.stopPropagation()">
+    <h4>🤖 Risultato AI</h4>
+    <div class="popup-content">
+      {{ aiResult }}
+    </div>
+    <div class="popup-buttons">
+      <button (click)="closePopup()">Chiudi</button>
+    </div>
+  </div>
+</div>
+
+<style>
+.input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px 50px 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.btn-ai {
+  position: absolute;
+  right: 10px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.btn-ai:hover {
+  background: #0056b3;
+}
+
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.popup {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 500px;
+  width: 90%;
+}
+
+.popup h4 {
+  margin: 0 0 15px 0;
+}
+
+.popup-content {
+  background: #f5f5f5;
+  padding: 15px;
+  border-radius: 5px;
+  margin: 15px 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.popup-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.popup-buttons button {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.popup-buttons button:first-child {
+  background: #6c757d;
+  color: white;
+}
+
+.popup-buttons button:last-child {
+  background: #007bff;
+  color: white;
+}
+
+.popup-buttons button:hover {
+  opacity: 0.8;
+}
+
+.field-info, .validation-error {
+  margin-top: 5px;
+  font-size: 14px;
+}
+
+.validation-error small {
+  color: #dc3545;
+}
+</style>
         <!-- Paragrafo -->
         <div class="form-group">
           <label for="paragrafo" class="form-label">📝 Paragrafo</label>
@@ -1494,6 +1618,13 @@ export class AddNewsComponent implements OnInit {
     paragrafo: '',
     contenuto: ''
   };
+
+  showAiResult = false;
+  aiResult = '';
+
+  closePopup(): void {
+    this.showAiResult = false;
+  }
 
   // Stati del componente per aggiunta
   isSubmitting: boolean = false;
