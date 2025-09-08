@@ -471,10 +471,10 @@ interface SavedArticle {
           type="button"
           class="btn-ai"
           (click)="ai(article.contenuto, 'contenuto', article)"
-          [disabled]="loadingAIP"
+          [disabled]="loadingAIC"
           title="AI"
         >
-        <ng-container *ngIf="!loadingAIP; else loading">
+        <ng-container *ngIf="!loadingAIC; else loading">
     🤖 AI
   </ng-container>
   <ng-template #loading>
