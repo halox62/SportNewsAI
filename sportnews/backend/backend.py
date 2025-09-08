@@ -433,7 +433,6 @@ def ai(user_payload):
     text = data["text"]
     type = data["type"].lower()
 
-    # Prompt dinamico in base al type
     if type == "titolo":
         prompt = f"""
         You are an expert sports journalist.
@@ -555,11 +554,9 @@ def save(user_payload):
             saved="true",
             bozza="false"
         )
-        print(articolo)
         session.add(articolo)
         session.commit()
         session.close()
-        print("ok")
 
         return jsonify({"success": True, "message": "Articolo salvato con successo", "blob_url": blob_url}), 201
 

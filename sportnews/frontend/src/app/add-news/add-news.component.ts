@@ -231,7 +231,6 @@ interface SavedArticle {
       </div>
     </div>
 
-    <!-- Popup semplice -->
     <div class="popup-overlay" *ngIf="showAiResult" (click)="closePopup()">
       <div class="popup" (click)="$event.stopPropagation()">
         <div class="popup-content">
@@ -239,11 +238,11 @@ interface SavedArticle {
         </div>
         <div class="popup-buttons">
           <button (click)="closePopup()">Chiudi</button>
+          <button (click)="Applica()">Applica</button>
         </div>
       </div>
     </div>
 
-    <!-- Azioni -->
     <div class="form-actions">
       <button
         type="button"
@@ -1958,6 +1957,7 @@ export class AddNewsComponent implements OnInit {
   loadingAIP = false;
   loadingAIC = false;
   loadingAI = false;
+  aiType="";
 
 
   submitType: 'notizia' | 'bozza' = 'notizia';
@@ -2183,9 +2183,34 @@ export class AddNewsComponent implements OnInit {
       this.updatingArticle = false;
     }
   }
+  Applica(): void {
+    if (!this.newsArticle || !this.aiResult) {
+      return;
+    }
+
+    // 🔹 In base al "tipo" di AI richiesta aggiorno il campo corretto
+    switch (this.aiType) {
+      case 'titolo':
+        this.newsArticle.titolo = this.aiResult;
+        break;
+      case 'paragrafo':
+        this.newsArticle.paragrafo = this.aiResult;
+        break;
+      case 'contenuto':
+        this.newsArticle.contenuto = this.aiResult;
+        break;
+      default:
+        console.warn('Tipo AI non riconosciuto');
+    }
+
+    // 🔹 Chiudo il popup
+    this.showAiResult = false;
+    this.aiResult = '';
+  }
 
 
   async ai(text: string,type: string): Promise<void> {
+   this.aiType = type;
    if(type=="titolo"){
     this.loadingAIT = true;
    }
@@ -2195,10 +2220,6 @@ export class AddNewsComponent implements OnInit {
    if(type=="contenuto"){
     this.loadingAIC = true;
    }
-
-
-
-
     try {
       const token = await this.auth.getAccessTokenSilently().toPromise();
       const response = await fetch('https://sport.event-fit.it/api/v1/ai', {
