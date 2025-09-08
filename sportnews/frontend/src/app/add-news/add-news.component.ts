@@ -202,7 +202,7 @@ interface SavedArticle {
           rows="6"
           #contenutoRef="ngModel"
           required
-          maxlength="1000"
+          maxlength="2000"
           (input)="onInputChange()"
         ></textarea>
 
@@ -224,7 +224,7 @@ interface SavedArticle {
       </div>
 
       <div class="field-info">
-        <small>Caratteri: {{ getContenutoLength() }}/1000</small>
+        <small>Caratteri: {{ getContenutoLength() }}/2000</small>
       </div>
       <div class="validation-error" *ngIf="contenutoRef.invalid && contenutoRef.touched">
         <small>⚠️ Il contenuto è obbligatorio</small>
@@ -406,10 +406,10 @@ interface SavedArticle {
           type="button"
           class="btn-ai"
           (click)="ai(article.titolo, 'titolo')"
-          [disabled]="loadingAI"
+          [disabled]="loadingAIT"
           title="AI"
         >
-        <ng-container *ngIf="!loadingAI; else loading">
+        <ng-container *ngIf="!loadingAIT; else loading">
           🤖 AI
         </ng-container>
         <ng-template #loading>
@@ -439,10 +439,10 @@ interface SavedArticle {
           type="button"
           class="btn-ai"
           (click)="ai(article.sottotitolo, 'paragrafo')"
-          [disabled]="loadingAI"
+          [disabled]="loadingAIP"
           title="AI"
         >
-        <ng-container *ngIf="!loadingAI; else loading">
+        <ng-container *ngIf="!loadingAIP; else loading">
     🤖 AI
   </ng-container>
   <ng-template #loading>
@@ -472,10 +472,10 @@ interface SavedArticle {
           type="button"
           class="btn-ai"
           (click)="ai(article.contenuto, 'contenuto')"
-          [disabled]="loadingAI"
+          [disabled]="loadingAIP"
           title="AI"
         >
-        <ng-container *ngIf="!loadingAI; else loading">
+        <ng-container *ngIf="!loadingAIP; else loading">
     🤖 AI
   </ng-container>
   <ng-template #loading>
@@ -683,10 +683,10 @@ interface SavedArticle {
                   type="button"
                   class="btn-ai"
                   (click)="ai(article.titolo, 'titolo')"
-                  [disabled]="loadingAI"
+                  [disabled]="loadingAIT"
                   title=" AI"
                 >
-                <ng-container *ngIf="!loadingAI; else loading">
+                <ng-container *ngIf="!loadingAIT; else loading">
                   🤖 AI
                 </ng-container>
                 <ng-template #loading>
@@ -716,10 +716,10 @@ interface SavedArticle {
                   type="button"
                   class="btn-ai"
                   (click)="ai(article.sottotitolo, 'paragrafo')"
-                  [disabled]="loadingAI"
+                  [disabled]="loadingAIP"
                   title="AI"
                 >
-                <ng-container *ngIf="!loadingAI; else loading">
+                <ng-container *ngIf="!loadingAIP; else loading">
     🤖 AI
   </ng-container>
   <ng-template #loading>
@@ -749,10 +749,10 @@ interface SavedArticle {
                   type="button"
                   class="btn-ai"
                   (click)="ai(article.contenuto, 'contenuto')"
-                  [disabled]="loadingAI"
+                  [disabled]="loadingAIC"
                   title="AI"
                 >
-                <ng-container *ngIf="!loadingAI; else loading">
+                <ng-container *ngIf="!loadingAIC; else loading">
                 🤖 AI
               </ng-container>
               <ng-template #loading>

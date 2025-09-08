@@ -440,6 +440,7 @@ def ai(user_payload):
         Correct all spelling mistakes, grammar errors, and punctuation.
         Keep the original language; do NOT translate.
         Make it attention-grabbing and professional.
+        The title must be no longer than 200 characters.
 
         Input: "{text}"
         Output:
@@ -452,6 +453,7 @@ def ai(user_payload):
         Improve clarity and style.
         Slightly expand the content to make it informative and coherent.
         Keep the original language; do NOT translate.
+        The paragraph must be no longer than 500 characters.
 
         Input: "{text}"
         Output:
@@ -465,6 +467,7 @@ def ai(user_payload):
         Expand and enrich the content logically, without inventing facts.
         Keep the original language; do NOT translate.
         Format in coherent paragraphs with proper sports terminology.
+        The content must be no longer than 2000 characters.
 
         Input: "{text}"
         Output:
