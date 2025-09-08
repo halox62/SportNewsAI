@@ -2682,6 +2682,7 @@ export class AddNewsComponent implements OnInit {
       this.auth.loginWithRedirect();
     } finally {
       this.updatingArticle = false;
+      article.editing = false;
     }
   }
 
