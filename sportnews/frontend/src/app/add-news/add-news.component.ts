@@ -119,7 +119,6 @@ interface SavedArticle {
           (input)="onInputChange()"
         />
 
-        <!-- Bottone AI semplice -->
         <button
           *ngIf="newsArticle.titolo && newsArticle.titolo.trim().length > 0"
           type="button"
@@ -716,7 +715,7 @@ interface SavedArticle {
                   *ngIf="article.sottotitolo && article.sottotitolo.trim().length > 0"
                   type="button"
                   class="btn-ai"
-                  (click)="ai(article.sottotitolo, 'paragrafo',article)"
+                  (click)="ai(article.sottotitolo, 'paragrafo', article)"
                   [disabled]="loadingAIP"
                   title="AI"
                 >
@@ -749,7 +748,7 @@ interface SavedArticle {
                   *ngIf="article.contenuto && article.contenuto.trim().length > 0"
                   type="button"
                   class="btn-ai"
-                  (click)="ai(article.contenuto, 'contenuto',article)"
+                  (click)="ai(article.contenuto, 'contenuto', article)"
                   [disabled]="loadingAIC"
                   title="AI"
                 >
@@ -2161,13 +2160,11 @@ export class AddNewsComponent implements OnInit {
       const result = await response.json();
 
       if (response.ok && result.success) {
-        // Rimuovi l'articolo dalla lista delle bozze
         this.myBozze = this.myBozze.filter(a => a.id !== article.id);
         this.updateSuccessMessage = true;
         setTimeout(() => {
           this.updateSuccessMessage = false;
         }, 3000);
-        // Ricarica gli articoli pubblicati nella scheda "I Miei Articoli"
         if (this.activeTab === 'manage') {
           setTimeout(() => this.loadMyArticles(), 1000);
         }
@@ -2193,13 +2190,12 @@ export class AddNewsComponent implements OnInit {
       return;
     }
 
-    // 🔹 In base al "tipo" di AI richiesta aggiorno il campo corretto
     switch (this.aiType) {
       case 'titolo':
         this.newsArticle.titolo = this.aiResult;
         break;
       case 'paragrafo':
-        this.newsArticle.paragrafo = this.aiResult;
+        this.newsArticle.contenuto = this.aiResult;
         break;
       case 'contenuto':
         this.newsArticle.contenuto = this.aiResult;
@@ -2217,7 +2213,6 @@ export class AddNewsComponent implements OnInit {
       return;
     }
 
-    // 🔹 In base al "tipo" di AI richiesta aggiorno il campo corretto
     switch (this.aiType) {
       case 'titolo':
         this.currentArticle.titolo = this.aiResult;
@@ -2240,7 +2235,6 @@ export class AddNewsComponent implements OnInit {
   async ai(text: string,type: string,article?:any): Promise<void> {
    this.aiType = type;
    this.currentArticle = article;
-   this.showAiResult = true;
    if(type=="titolo"){
     this.loadingAIT = true;
    }
@@ -2270,9 +2264,6 @@ export class AddNewsComponent implements OnInit {
         throw new Error("⚠️ Errore nella generazione. Riprova.");
       }
 
-      console.log(data.article);
-
-      // Mostra il risultato nel popup
       this.aiResult = data.article;
       this.showAiResult = true;
 
