@@ -512,6 +512,7 @@ interface SavedArticle {
       </div>
       <div class="popup-buttons">
         <button (click)="closePopup()">Chiudi</button>
+        <button (click)="Applica()">Applica</button>
       </div>
     </div>
   </div>
@@ -797,6 +798,7 @@ interface SavedArticle {
               </div>
               <div class="popup-buttons">
                 <button (click)="closePopup()">Chiudi</button>
+                <button (click)="Applica()">Applica</button>
               </div>
             </div>
           </div>
