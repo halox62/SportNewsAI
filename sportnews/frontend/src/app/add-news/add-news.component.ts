@@ -405,7 +405,7 @@ interface SavedArticle {
           *ngIf="article.titolo && article.titolo.trim().length > 0"
           type="button"
           class="btn-ai"
-          (click)="ai(article.titolo, 'titolo')"
+          (click)="ai(article.titolo, 'titolo', article)"
           [disabled]="loadingAIT"
           title="AI"
         >
@@ -438,7 +438,7 @@ interface SavedArticle {
           *ngIf="article.sottotitolo && article.sottotitolo.trim().length > 0"
           type="button"
           class="btn-ai"
-          (click)="ai(article.sottotitolo, 'paragrafo')"
+          (click)="ai(article.sottotitolo, 'paragrafo', article)"
           [disabled]="loadingAIP"
           title="AI"
         >
@@ -471,7 +471,7 @@ interface SavedArticle {
           *ngIf="article.contenuto && article.contenuto.trim().length > 0"
           type="button"
           class="btn-ai"
-          (click)="ai(article.contenuto, 'contenuto')"
+          (click)="ai(article.contenuto, 'contenuto', article)"
           [disabled]="loadingAIP"
           title="AI"
         >
@@ -512,7 +512,7 @@ interface SavedArticle {
       </div>
       <div class="popup-buttons">
         <button (click)="closePopup()">Chiudi</button>
-        <button (click)="Applica()">Applica</button>
+        <button (click)="Applica3()">Applica</button>
       </div>
     </div>
   </div>
@@ -683,7 +683,7 @@ interface SavedArticle {
                   *ngIf="article.titolo && article.titolo.trim().length > 0"
                   type="button"
                   class="btn-ai"
-                  (click)="ai(article.titolo, 'titolo')"
+                  (click)="ai(article.titolo, 'titolo', article)"
                   [disabled]="loadingAIT"
                   title=" AI"
                 >
@@ -716,7 +716,7 @@ interface SavedArticle {
                   *ngIf="article.sottotitolo && article.sottotitolo.trim().length > 0"
                   type="button"
                   class="btn-ai"
-                  (click)="ai(article.sottotitolo, 'paragrafo')"
+                  (click)="ai(article.sottotitolo, 'paragrafo',article)"
                   [disabled]="loadingAIP"
                   title="AI"
                 >
@@ -749,7 +749,7 @@ interface SavedArticle {
                   *ngIf="article.contenuto && article.contenuto.trim().length > 0"
                   type="button"
                   class="btn-ai"
-                  (click)="ai(article.contenuto, 'contenuto')"
+                  (click)="ai(article.contenuto, 'contenuto',article)"
                   [disabled]="loadingAIC"
                   title="AI"
                 >
@@ -798,7 +798,7 @@ interface SavedArticle {
               </div>
               <div class="popup-buttons">
                 <button (click)="closePopup()">Chiudi</button>
-                <button (click)="Applica()">Applica</button>
+                <button (click)="Applica3()">Applica</button>
               </div>
             </div>
           </div>
@@ -1960,6 +1960,7 @@ export class AddNewsComponent implements OnInit {
   loadingAIC = false;
   loadingAI = false;
   aiType="";
+  currentArticle: any = null;
 
 
   submitType: 'notizia' | 'bozza' = 'notizia';
@@ -2185,6 +2186,8 @@ export class AddNewsComponent implements OnInit {
       this.updatingArticle = false;
     }
   }
+
+
   Applica(): void {
     if (!this.newsArticle || !this.aiResult) {
       return;
@@ -2205,14 +2208,39 @@ export class AddNewsComponent implements OnInit {
         console.warn('Tipo AI non riconosciuto');
     }
 
-    // 🔹 Chiudo il popup
+    this.showAiResult = false;
+    this.aiResult = '';
+  }
+
+  Applica3(): void {
+    if (!this.currentArticle || !this.aiResult) {
+      return;
+    }
+
+    // 🔹 In base al "tipo" di AI richiesta aggiorno il campo corretto
+    switch (this.aiType) {
+      case 'titolo':
+        this.currentArticle.titolo = this.aiResult;
+        break;
+      case 'paragrafo':
+        this.currentArticle.paragrafo = this.aiResult;
+        break;
+      case 'contenuto':
+        this.currentArticle.contenuto = this.aiResult;
+        break;
+      default:
+        console.warn('Tipo AI non riconosciuto');
+    }
+
     this.showAiResult = false;
     this.aiResult = '';
   }
 
 
-  async ai(text: string,type: string): Promise<void> {
+  async ai(text: string,type: string,article?:any): Promise<void> {
    this.aiType = type;
+   this.currentArticle = article;
+   this.showAiResult = true;
    if(type=="titolo"){
     this.loadingAIT = true;
    }
