@@ -2218,7 +2218,7 @@ export class AddNewsComponent implements OnInit {
         this.currentArticle.titolo = this.aiResult;
         break;
       case 'paragrafo':
-        this.currentArticle.paragrafo = this.aiResult;
+        this.currentArticle.sottotitolo = this.aiResult;
         break;
       case 'contenuto':
         this.currentArticle.contenuto = this.aiResult;
