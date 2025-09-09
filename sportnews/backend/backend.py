@@ -771,6 +771,35 @@ def to_bozza(article_id, user_payload):
         return jsonify({"success": False, "error": str(e)}), 500
 
 
+@app.route("/api/v1/publish/<int:article_id>", methods=["PUT"])
+@requires_auth
+def publish(article_id, user_payload):
+    try:
+        auth0_id = user_payload.get("sub")
+        session = SessionLocal()
+
+        user = session.query(User).filter_by(auth0Id=auth0_id).first()
+        if not user:
+            session.close()
+            return jsonify({"success": False, "error": "Utente non trovato"}), 404
+
+        articolo = session.query(Articolo).filter_by(id=article_id, idUser=str(user.idUser)).first()
+        if not articolo:
+            session.close()
+            return jsonify({"success": False, "error": "Articolo non trovato"}), 404
+
+        articolo.bozza="false"
+
+        session.commit()
+        session.close()
+
+        return jsonify({"success": True, "message": "Articolo aggiornato con successo"}), 200
+
+    except Exception as e:
+        session.close()
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
 @app.route("/api/v1/update-article/<int:article_id>", methods=["PUT"])
 @requires_auth
 def update_article(article_id, user_payload):

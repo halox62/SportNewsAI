@@ -1910,6 +1910,7 @@ export class AddNewsComponent implements OnInit {
   private readonly updateArticleUrl = 'https://sport.event-fit.it/api/v1/update-article';
   private readonly publishBozza = 'https://sport.event-fit.it/api/v1/publish';
   private readonly to_bozzaUrl = 'https://sport.event-fit.it/api/v1/to_bozza';
+  private readonly publishUrl = 'https://sport.event-fit.it/api/v1/publish';
   private readonly deleteArticleUrl = 'https://sport.event-fit.it/api/v1/delete-article';
   private readonly updateBlob = 'https://sport.event-fit.it/api/v1/update-blob-content';
 
@@ -2275,6 +2276,70 @@ export class AddNewsComponent implements OnInit {
       this.loadingAIC=false;
     }
   }
+
+
+  async publish(article: any): Promise<void> {
+    if (!this.isArticleValid(article)) {
+      this.updateErrorMessage = 'Il titolo è obbligatorio';
+      setTimeout(() => {
+        this.updateErrorMessage = '';
+      }, 5000);
+      return;
+    }
+
+    this.updatingArticle = true;
+    this.updateSuccessMessage = false;
+    this.updateErrorMessage = '';
+
+    try {
+      const token = await this.auth.getAccessTokenSilently().toPromise();
+      if (!token) {
+        throw new Error('Login required');
+      }
+
+      const response = await fetch(`${this.publishUrl}/${article.id}`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        this.myArticles = this.myArticles.filter(a => a.id !== article.id);
+        // Lo aggiungo alle bozze
+        this.myArticles.unshift({
+          ...article,
+          editing: false
+        });
+
+        this.updateSuccessMessage = true;
+        setTimeout(() => {
+          this.updateSuccessMessage = false;
+        }, 3000);
+
+        if (this.activeTab === 'manage') {
+          setTimeout(() => this.loadMyArticles(), 1000);
+        }
+
+      } else {
+        throw new Error(result.error || 'Errore durante lo spostamento in bozza');
+      }
+    } catch (error) {
+      console.error('Errore durante lo spostamento in bozza:', error);
+      this.updateErrorMessage = error instanceof Error ? error.message : 'Errore sconosciuto';
+      setTimeout(() => {
+        this.updateErrorMessage = '';
+      }, 5000);
+      alert('⚠️ Devi fare login per continuare');
+      this.auth.loginWithRedirect();
+    } finally {
+      this.updatingArticle = false;
+    }
+  }
+
 
 
 
