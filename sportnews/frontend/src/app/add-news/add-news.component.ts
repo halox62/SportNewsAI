@@ -2809,7 +2809,7 @@ export class AddNewsComponent implements OnInit {
             });
             this.resetForm();
             setTimeout(() => this.loadMyArticles(), 1000);
-            setTimeout(() => this.loadMyBozza, 1000);
+            setTimeout(() => this.loadMyBozza(), 1000);
             setTimeout(() => this.showSuccessMessage = false, 5000);
           } else {
             this.errorMessage = response.message || 'Errore durante il salvataggio';
