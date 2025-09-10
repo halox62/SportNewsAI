@@ -2808,9 +2808,8 @@ export class AddNewsComponent implements OnInit {
               dataCreazione: new Date()
             });
             this.resetForm();
-            if (this.activeTab === 'manage') {
-              setTimeout(() => this.loadMyArticles(), 1000);
-            }
+            setTimeout(() => this.loadMyArticles(), 1000);
+            setTimeout(() => this.loadMyBozza, 1000);
             setTimeout(() => this.showSuccessMessage = false, 5000);
           } else {
             this.errorMessage = response.message || 'Errore durante il salvataggio';
